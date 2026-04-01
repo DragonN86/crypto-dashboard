@@ -5,18 +5,68 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vo Will - Fear & Greed</title>
   <style>
-    html, body { height: 100%; }
-    body { margin: 0; background: #0d1117; color: #c9d1d9; font-family: sans-serif; }
-    .wrap { height: 100%; background:#161b22; padding:15px; border-radius:12px; box-sizing:border-box; }
-    .wrap img { width:100%; border-radius:8px; display:block; }
-    .note { margin-top:10px; text-align:left; font-size:13px; border-left:3px solid #58a6ff; padding-left:10px; }
+    /* Reset và căn chỉnh nền */
+    html, body { 
+      height: 100%; 
+      margin: 0; 
+      background: #0d1117; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Khung bao ngoài */
+    .wrap { 
+      width: 95%;
+      max-width: 500px; /* Giới hạn độ rộng tối đa để không bị vỡ hình */
+      background: #161b22; 
+      padding: 20px; 
+      border-radius: 16px; 
+      box-sizing: border-box; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      border: 1px solid #30363d;
+    }
+
+    /* Tối ưu hình ảnh hiển thị */
+    .wrap img { 
+      width: 100%; 
+      height: auto;
+      border-radius: 8px; 
+      display: block; 
+      transition: transform 0.3s ease;
+    }
+
+    /* Hiệu ứng khi di chuột qua ảnh */
+    .wrap img:hover {
+      transform: scale(1.02);
+    }
+
+    /* Phần ghi chú */
+    .note { 
+      margin-top: 15px; 
+      text-align: left; 
+      font-size: 14px; 
+      line-height: 1.5;
+      color: #c9d1d9;
+      border-left: 4px solid #58a6ff; 
+      padding-left: 12px; 
+      background: rgba(88, 166, 255, 0.05);
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+
+    .note strong {
+      color: #58a6ff;
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
     <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Fear and Greed Index">
     <div class="note">
-      <strong>💡 Cách xem:</strong> &gt; 80 là vùng rủi ro cao. Kim sát 100 là lúc phải "thoát hàng".
+      <strong>💡 Cách xem:</strong><br>
+      Chỉ số > 80 là vùng rủi ro cao (Tham lam tột độ). <br>
+      Khi kim sát mốc 100 là lúc nên cân nhắc "thoát hàng".
     </div>
   </div>
 </body>
