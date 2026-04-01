@@ -7,128 +7,104 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-        .card-container { background: #161b22; border: 1px solid #30363d; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; height: 500px; transition: all 0.3s ease; }
+        
+        /* Grid Layout: 3 cột trên Desktop, 2 trên Tablet, 1 trên Mobile */
+        .dashboard-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
+            gap: 1.5rem; 
+        }
+
+        .card-container { 
+            background: #161b22; 
+            border: 1px solid #30363d; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            height: 500px; 
+            transition: all 0.3s ease; 
+        }
+
         .card-container:hover { border-color: #58a6ff; transform: translateY(-2px); }
-        .card-header { padding: 12px 16px; border-bottom: 1px solid #30363d; font-weight: 700; background: #1c2128; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; }
-        .widget-box { flex-grow: 1; width: 100%; background: #0d1117; position: relative; overflow: hidden; }
+
+        .card-header { 
+            padding: 12px 16px; 
+            border-bottom: 1px solid #30363d; 
+            background: #1c2128; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .card-title { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; }
+        .card-tag { font-size: 10px; color: #8b949e; text-transform: uppercase; border: 1px solid #30363d; padding: 2px 6px; border-radius: 4px; }
+
+        .widget-box { flex-grow: 1; width: 100%; background: #0d1117; }
         iframe { width: 100%; height: 100%; border: none; }
+
         .status-dot { height: 8px; width: 8px; border-radius: 50%; background-color: #3fb950; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px #3fb950; animation: pulse 2s infinite; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #0d1117; }
-        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 10px; }
     </style>
 </head>
 <body class="p-6 lg:p-10">
 
-    <header class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-[#30363d] pb-8">
+    <header class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-[#30363d] pb-8 text-center md:text-left">
         <div>
             <h1 class="text-3xl font-black text-white uppercase tracking-tighter">HỆ THỐNG GIÁM SÁT CHỐT LỜI <span class="text-yellow-500">2026</span></h1>
-            <p class="text-gray-500 text-sm mt-1 font-medium">Chiến lược: <span class="text-blue-400 font-bold">KỶ LUẬT LÀ SỨC MẠNH</span> | User: <span class="text-white">will.eth</span></p>
+            <p class="text-gray-500 text-sm mt-1">Chiến lược: <span class="text-blue-400 font-bold">KỶ LUẬT LÀ SỨC MẠNH</span> | User: <span class="text-white font-semibold">will.eth</span></p>
         </div>
         <div class="mt-4 md:mt-0 px-4 py-2 bg-[#1c2128] rounded-md border border-[#30363d] flex items-center">
             <span class="status-dot"></span><span class="text-xs font-mono text-gray-300 tracking-widest uppercase">Live Market Data</span>
         </div>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        
-        <div class="card-container border-blue-900/30">
-            <div class="card-header text-blue-400"><span>🏦 ETF Flows (Live)</span><span class="text-[10px] text-gray-600">BITBO</span></div>
-            <div class="widget-box">
-                <iframe src="https://bitbo.io/embed/etf-flows/"></iframe>
-            </div>
-        </div>
-
-        <div class="card-container border-purple-900/30">
-            <div class="card-header text-purple-400"><span>🐋 Whale Alert Feed</span><span class="text-[10px] text-gray-600">ON-CHAIN</span></div>
-            <div class="widget-box p-5 text-xs font-mono leading-relaxed overflow-y-auto text-gray-400">
-                <div class="mb-4 pb-2 border-b border-gray-800">
-                    <span class="text-purple-400 font-bold">[ALERT]</span> 4,500 #BTC <span class="text-gray-500">($310M)</span> nạp lên <span class="text-blue-400">Coinbase</span>
-                </div>
-                <div class="mb-4 pb-2 border-b border-gray-800 text-green-500 font-semibold">
-                    <span class="">[PRINT]</span> 250,000,000 #USDC vừa được in tại Treasury
-                </div>
-                <div class="mb-4 pb-2 border-b border-gray-800 text-red-500">
-                    <span class="font-bold">[MOVE]</span> 15,000 #ETH <span class="text-gray-500">($45M)</span> đẩy lên <span class="text-yellow-500">Binance</span>
-                </div>
-                <div class="mb-4 pb-2 border-b border-gray-800 text-blue-300">
-                    <span class="font-bold">[WHALE]</span> 1,200 #BTC rút khỏi sàn về <span class="text-gray-400">Ví lạnh</span>
-                </div>
-                <div class="text-[10px] text-gray-600 italic animate-pulse mt-4 text-center italic">Đang quét blockchain...</div>
-            </div>
-        </div>
-
-        <div class="card-container border-green-900/30">
-            <div class="card-header text-green-400"><span>🔗 Exchange Reserve</span><span class="text-[10px] text-gray-600">QUANT</span></div>
-            <div class="widget-box flex flex-col items-center justify-center p-8 text-center">
-                <div class="text-6xl font-black text-white mb-4">-2.8%</div>
-                <div class="text-green-500 font-bold text-sm uppercase tracking-widest">Dự trữ sàn giảm (Bullish)</div>
-                <div class="mt-10 w-full bg-gray-800 rounded-full h-2">
-                    <div class="bg-green-500 h-2 rounded-full" style="width: 30%"></div>
-                </div>
-                <p class="text-xs text-gray-500 mt-6 leading-relaxed">Nguồn cung Bitcoin trên các sàn giao dịch đang ở mức thấp kỷ lục. Áp lực bán giảm mạnh.</p>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        
-        <div class="card-container border-yellow-900/30">
-            <div class="card-header text-yellow-500"><span>💎 DexScreener Trends</span><span class="text-[10px] text-gray-600">GEM HUNTER</span></div>
-            <div class="widget-box">
-                <iframe src="https://dexscreener.com/ethereum?embed=1&theme=dark&trades=0&info=0"></iframe>
-            </div>
-        </div>
+    <div class="dashboard-grid">
 
         <div class="card-container">
-            <div class="card-header text-orange-400"><span>📊 Fear & Greed Index</span><span class="text-[10px] text-gray-600">SENTIMENT</span></div>
-            <div class="widget-box p-4 flex items-center justify-center">
-                <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Fear & Greed Index" class="max-h-full rounded-lg">
+            <div class="card-header">
+                <span class="card-title text-blue-400">📈 Technical Analysis</span>
+                <span class="card-tag">W1 Signals</span>
             </div>
-        </div>
-
-        <div class="card-container">
-            <div class="card-header text-blue-300"><span>🌍 BTC Dominance (D1)</span><span class="text-[10px] text-gray-600">TRADINGVIEW</span></div>
-            <div class="widget-box">
-                <iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" style="width: 100%; height: 100%;"></iframe>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-        
-        <div class="card-container border-gray-600/50">
-            <div class="card-header text-blue-400"><span>📈 Technical Analysis Checklist</span><span class="text-[10px] text-gray-600">W1 SIGNALS</span></div>
             <div class="widget-box">
                 <iframe src="technical-analysis.html"></iframe>
             </div>
         </div>
 
-        <div class="card-container border-red-900/30">
-            <div class="card-header text-red-400"><span>🔥 Tín Hiệu Đòn Bẩy (Funding)</span><span class="text-[10px] text-gray-600">LEVERAGE</span></div>
-            <div class="widget-box flex flex-col items-center justify-center p-8 text-center">
-                 <div class="text-4xl font-mono text-white mb-2">0.0120%</div>
-                 <span class="text-[10px] text-gray-500 uppercase tracking-widest">Average Funding Rate</span>
-                 <div class="mt-6 text-sm text-gray-400 font-medium">Thị trường đang ổn định, chưa có dấu hiệu quá nhiệt (Overheated).</div>
+        <div class="card-container">
+            <div class="card-header">
+                <span class="card-title text-orange-400">📊 Market Sentiment</span>
+                <span class="card-tag">Fear & Greed</span>
             </div>
-        </div>
-
-        <div class="card-container border-blue-900/30">
-            <div class="card-header text-blue-400"><span>🏛️ Lịch Sự Kiện Kinh Tế</span><span class="text-[10px] text-gray-600">MACRO</span></div>
             <div class="widget-box">
-                <iframe src="https://sslecal2.investing.com?columns=exc_flags,exc_currency,exc_importance,exc_actual,exc_forecast,exc_previous&category=_main&importance=2,3&features=datepicker,timezone&countries=5&calType=day&timeZone=55&lang=1" width="100%" height="100%" frameborder="0" allowtransparency="true" marginwidth="0" marginheight="0"></iframe>
+                <iframe src="fear-greed.html"></iframe>
             </div>
         </div>
 
-    </div>
+        <div class="card-container">
+            <div class="card-header">
+                <span class="card-title text-blue-300">🌍 BTC Dominance</span>
+                <span class="card-tag">TradingView</span>
+            </div>
+            <div class="widget-box">
+                <iframe src="btc-dominance.html"></iframe>
+            </div>
+        </div>
 
-    <footer class="text-center pb-12 border-t border-[#30363d] pt-10">
-        <div class="text-[#484f58] text-xs uppercase tracking-[0.5em] font-bold">
+        <div class="card-container">
+            <div class="card-header">
+                <span class="card-title text-red-400">🔥 Leverage Signals</span>
+                <span class="card-tag">Funding Rate</span>
+            </div>
+            <div class="widget-box">
+                <iframe src="funding-rate.html"></iframe>
+            </div>
+        </div>
+
+        </div>
+
+    <footer class="text-center mt-12 pt-8 border-t border-[#30363d]">
+        <div class="text-[#484f58] text-xs uppercase tracking-[0.4em] font-bold">
             © 2026 CRYPTO EXIT SYSTEM - VO WILL | @VOWILLHQ
         </div>
     </footer>
