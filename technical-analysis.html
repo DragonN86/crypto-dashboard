@@ -1,122 +1,55 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: transparent; color: #c9d1d9; font-family: sans-serif; padding: 15px; margin: 0; overflow: hidden; }
-        .row-item { border-bottom: 1px solid #30363d; padding: 16px 0; display: flex; justify-content: space-between; align-items: center; }
-        .label-sub { font-size: 10px; color: #8b949e; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; display: block; }
-        .main-value { font-family: ui-monospace, monospace; font-weight: bold; font-size: 1.2rem; color: #fff; }
+<style>
+    /* Hiệu ứng hào quang đỏ cho tín hiệu nguy hiểm */
+    .emergency-glow {
+        color: #ff4444;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        text-shadow: 0 0 15px rgba(255, 68, 68, 0.8);
+        animation: danger-pulse 1s infinite alternate;
+    }
+
+    @keyframes danger-pulse {
+        from { opacity: 1; transform: scale(1); }
+        to { opacity: 0.6; transform: scale(1.02); }
+    }
+
+    .risk-bar-bg {
+        width: 100%;
+        height: 6px;
+        background: #21262d;
+        border-radius: 10px;
+        margin-top: 8px;
+        overflow: hidden;
+    }
+
+    .risk-bar-fill {
+        height: 100%;
+        width: 95%; /* Mức độ rủi ro Rất Cao */
+        background: linear-gradient(90deg, #ff8a00, #ff0000);
+        box-shadow: 0 0 10px #ff0000;
+    }
+</style>
+
+<div class="row-item py-6">
+    <div class="flex flex-col w-full">
+        <div class="flex justify-between items-center mb-2">
+            <span class="label-sub text-red-500 font-bold">⚠️ DIVERGENCE ALERT</span>
+            <span class="badge badge-red bg-red-600 text-white px-3 py-1 animate-bounce">RẤT CAO</span>
+        </div>
         
-        /* Hiệu ứng Bearish Real-time */
-        .bearish-active { color: #f85149; font-weight: 900; text-shadow: 0 0 15px rgba(248, 81, 73, 0.6); animation: alert-pulse 1s infinite; }
-        .bearish-inactive { color: #30363d; font-weight: 700; text-shadow: none; }
-        
-        @keyframes alert-pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        .badge { padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
-        .badge-red { background: rgba(248,81,73,0.15); color: #f85149; border-color: #f85149; }
-        .badge-gray { background: rgba(48,54,61,0.2); color: #8b949e; border-color: #30363d; }
-        .live-dot { width: 6px; height: 6px; background: #3fb950; border-radius: 50%; display: inline-block; margin-left: 5px; box-shadow: 0 0 5px #3fb950; }
-    </style>
-</head>
-<body>
-
-    <div class="row-item">
-        <div class="flex flex-col">
-            <span class="label-sub">RSI Weekly (W1) <span class="live-dot"></span></span>
-            <span id="rsi-val" class="main-value text-blue-400">--.--</span>
+        <div class="flex items-center justify-between">
+            <div>
+                <span class="main-value emergency-glow text-2xl">RSI / MACD Bearish</span>
+                <p class="text-[10px] text-gray-500 mt-1">Phát hiện phân kỳ âm - Lực mua đang suy kiệt</p>
+            </div>
+            <div class="text-right">
+                <span class="text-[10px] text-red-400 font-mono">DANGER LEVEL: 95%</span>
+            </div>
         </div>
-        <div id="rsi-badge" class="badge badge-gray">Syncing...</div>
-    </div>
 
-    <div class="row-item">
-        <div class="flex flex-col">
-            <span class="label-sub">Divergence Alert</span>
-            <span id="div-text" class="main-value bearish-inactive">RSI / MACD BEARISH</span>
-        </div>
-        <div class="text-right">
-            <span id="div-badge" class="badge badge-gray">No Signal</span>
-            <div id="div-desc" class="text-[9px] text-gray-600 mt-1 font-bold uppercase">Scanning Peaks...</div>
+        <div class="risk-bar-bg">
+            <div class="risk-bar-fill"></div>
         </div>
     </div>
-
-    <div class="row-item">
-        <div class="flex flex-col">
-            <span class="label-sub">ETH Gas <span class="live-dot"></span></span>
-            <span id="gas-val" class="main-value text-orange-400">-- Gwei</span>
-        </div>
-        <div class="badge badge-orange">Live</div>
-    </div>
-
-    <script>
-        async function updateMarketData() {
-            try {
-                // Lấy 100 nến W1 từ Binance
-                const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=100');
-                const candles = await res.json();
-                const prices = candles.map(c => parseFloat(c[4])); // Giá đóng cửa
-                
-                // 1. Tính RSI
-                const rsi = calculateRSI(prices, 14);
-                document.getElementById('rsi-val').innerText = rsi.toFixed(2);
-                const rsiBadge = document.getElementById('rsi-badge');
-                if(rsi > 70) rsiBadge.className = "badge badge-red";
-                else rsiBadge.className = "badge badge-green";
-                rsiBadge.innerText = rsi > 70 ? "Overbought" : "Normal";
-
-                // 2. Thuật toán quét Phân kỳ (Divergence)
-                // So sánh đỉnh giá gần nhất và đỉnh giá trước đó với RSI tương ứng
-                checkDivergence(prices, calculateAllRSI(prices, 14));
-
-                // 3. Lấy Gas
-                const gasRes = await fetch('https://beaconcha.in/api/v1/execution/gasnow');
-                const gasJson = await gasRes.json();
-                document.getElementById('gas-val').innerText = Math.floor(gasJson.data.standard / 1e9) + " Gwei";
-
-            } catch (e) { console.error("Data Sync Error"); }
-        }
-
-        function calculateRSI(data, period) {
-            let gains = 0, losses = 0;
-            for (let i = data.length - period; i < data.length; i++) {
-                let diff = data[i] - data[i-1];
-                diff >= 0 ? gains += diff : losses -= diff;
-            }
-            return 100 - (100 / (1 + (gains/period)/(losses/period)));
-        }
-
-        function calculateAllRSI(data, period) {
-            return data.map((_, i) => i < period ? 50 : calculateRSI(data.slice(0, i+1), period));
-        }
-
-        function checkDivergence(p, r) {
-            const divText = document.getElementById('div-text');
-            const divBadge = document.getElementById('div-badge');
-            const divDesc = document.getElementById('div-desc');
-
-            // Logic đơn giản: Nếu Giá đỉnh sau > Giá đỉnh trước NHƯNG RSI đỉnh sau < RSI đỉnh trước
-            let lastP = p[p.length-1], prevP = p[p.length-5];
-            let lastR = r[r.length-1], prevR = r[r.length-5];
-
-            if (lastP > prevP && lastR < prevR && lastR > 60) {
-                divText.className = "main-value bearish-active";
-                divBadge.className = "badge badge-red";
-                divBadge.innerText = "CONFIRMED";
-                divDesc.innerText = "Bearish Divergence Detected";
-                divDesc.classList.add("text-red-500");
-            } else {
-                divText.className = "main-value bearish-inactive";
-                divBadge.className = "badge badge-gray";
-                divBadge.innerText = "NO SIGNAL";
-                divDesc.innerText = "Market Trend Stable";
-                divDesc.classList.remove("text-red-500");
-            }
-        }
-
-        setInterval(updateMarketData, 30000);
-        updateMarketData();
-    </script>
-</body>
-</html>
+</div>
