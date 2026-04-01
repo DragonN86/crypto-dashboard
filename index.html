@@ -5,58 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vo Will - Crypto Exit System 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .strategy-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #1c2128; border-radius: 8px; overflow: hidden; }
-.strategy-table th { background: #21262d; color: #58a6ff; padding: 12px; text-align: left; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid #30363d; }
-.strategy-table td { padding: 14px 12px; border-bottom: 1px solid #30363d; font-size: 13px; }
-.strategy-table tr:last-child td { border-bottom: none; }
-.phase-tag { background: rgba(56, 139, 253, 0.1); color: #58a6ff; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
-        
-        /* Grid Layout: 3 cột trên Desktop, 2 trên Tablet, 1 trên Mobile */
-        .dashboard-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
-            gap: 1.5rem; 
-        }
-
-        .card-container { 
-            background: #161b22; 
-            border: 1px solid #30363d; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            display: flex; 
-            flex-direction: column; 
-            height: 500px; 
-            transition: all 0.3s ease; 
-        }
-
-        .card-container:hover { border-color: #58a6ff; transform: translateY(-2px); }
-
-        .card-header { 
-            padding: 12px 16px; 
-            border-bottom: 1px solid #30363d; 
-            background: #1c2128; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-        }
-
-        .card-title { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; }
-        .card-tag { font-size: 10px; color: #8b949e; text-transform: uppercase; border: 1px solid #30363d; padding: 2px 6px; border-radius: 4px; }
-
-        .widget-box { flex-grow: 1; width: 100%; background: #0d1117; }
-        iframe { width: 100%; height: 100%; border: none; }
-
-        .status-dot { height: 8px; width: 8px; border-radius: 50%; background-color: #3fb950; display: inline-block; margin-right: 8px; box-shadow: 0 0 8px #3fb950; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body class="p-6 lg:p-10">
 
     <header class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-[#30363d] pb-8 text-center md:text-left">
         <div>
             <h1 class="text-3xl font-black text-white uppercase tracking-tighter">HỆ THỐNG GIÁM SÁT CHỐT LỜI <span class="text-yellow-500">2026</span></h1>
-            <p class="text-gray-500 text-sm mt-1">Chiến lược: <span class="text-blue-400 font-bold">KỶ LUẬT LÀ SỨC MẠNH</span> | User: <span class="text-white font-semibold">will.eth</span></p>
+            <p class="text-gray-500 text-sm mt-1 font-medium">Chiến lược: <span class="text-blue-400 font-bold">KỶ LUẬT LÀ SỨC MẠNH</span> | User: <span class="text-white font-semibold">will.eth</span></p>
         </div>
         <div class="mt-4 md:mt-0 px-4 py-2 bg-[#1c2128] rounded-md border border-[#30363d] flex items-center">
             <span class="status-dot"></span><span class="text-xs font-mono text-gray-300 tracking-widest uppercase">Live Market Data</span>
@@ -70,9 +26,7 @@
                 <span class="card-title text-blue-400">📈 Technical Analysis</span>
                 <span class="card-tag">W1 Signals</span>
             </div>
-            <div class="widget-box">
-                <iframe src="technical-analysis.html"></iframe>
-            </div>
+            <div class="widget-box"><iframe src="technical-analysis.html"></iframe></div>
         </div>
 
         <div class="card-container">
@@ -80,19 +34,15 @@
                 <span class="card-title text-orange-400">📊 Market Sentiment</span>
                 <span class="card-tag">Fear & Greed</span>
             </div>
-            <div class="widget-box">
-                <iframe src="fear-greed.html"></iframe>
-            </div>
+            <div class="widget-box"><iframe src="fear-greed.html"></iframe></div>
         </div>
 
         <div class="card-container">
             <div class="card-header">
                 <span class="card-title text-blue-300">🌍 BTC Dominance</span>
-                <span class="card-tag">BTC Dominance</span>
+                <span class="card-tag">Dominance</span>
             </div>
-            <div class="widget-box">
-                <iframe src="btc-dominance.html"></iframe>
-            </div>
+            <div class="widget-box"><iframe src="btc-dominance.html"></iframe></div>
         </div>
 
         <div class="card-container">
@@ -100,52 +50,51 @@
                 <span class="card-title text-red-400">🔥 Leverage Signals</span>
                 <span class="card-tag">Funding Rate</span>
             </div>
-            <div class="widget-box">
-                <iframe src="funding-rate.html"></iframe>
-            </div>
+            <div class="widget-box"><iframe src="funding-rate.html"></iframe></div>
         </div>
 
-        </div>
+    </div>
 
-    <footer class="text-center mt-12 pt-8 border-t border-[#30363d]">
-        <div class="text-[#484f58] text-xs uppercase tracking-[0.4em] font-bold">
-            © 2026 CRYPTO EXIT SYSTEM - VO WILL | @VOWILLHQ
-        </div>
-        <div class="mt-12 mb-8 border-t border-[#30363d] pt-8">
-        <div class="flex items-center mb-4">
-            <span class="w-2 h-6 bg-yellow-500 mr-3 rounded-full"></span>
-            <h2 class="text-xl font-bold text-white uppercase tracking-tight">Kế Hoạch Hành Động & Mục Tiêu</h2>
+    <div class="mt-12 mb-8 border-t border-[#30363d] pt-8">
+        <div class="flex items-center mb-6">
+            <span class="w-1.5 h-6 bg-yellow-500 mr-3 rounded-full"></span>
+            <h2 class="text-xl font-bold text-white uppercase tracking-tight">Kế Hoạch Hành Động & Mục Tiêu Chiến Lược</h2>
         </div>
         
-        <div class="card-container h-auto min-h-0 p-1">
+        <div class="card-container h-auto min-h-0 border-none">
             <table class="strategy-table">
                 <thead>
                     <tr>
                         <th>Giai đoạn</th>
                         <th>Hành động</th>
-                        <th>Mục tiêu</th>
+                        <th>Mục tiêu & Tâm thế</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><span class="phase-tag">Giai đoạn 1</span></td>
-                        <td class="text-white font-semibold">Chốt 20 - 30%</td>
-                        <td class="text-gray-400">Thu hồi vốn gốc để tâm lý thoải mái.</td>
+                        <td class="text-white font-bold">Chốt 20 - 30%</td>
+                        <td class="text-gray-400 font-medium">Thu hồi vốn gốc để tâm lý thoải mái, không còn áp lực.</td>
                     </tr>
                     <tr>
                         <td><span class="phase-tag">Giai đoạn 2</span></td>
-                        <td class="text-white font-semibold">Chốt 30 - 50%</td>
-                        <td class="text-gray-400">Chốt lời khi đạt target kỳ vọng (x2, x3...).</td>
+                        <td class="text-white font-bold">Chốt 30 - 50%</td>
+                        <td class="text-gray-400 font-medium">Chốt lời khi đạt target kỳ vọng (x2, x3...). Hiện thực hóa lợi nhuận.</td>
                     </tr>
                     <tr>
                         <td><span class="phase-tag">Giai đoạn 3</span></td>
-                        <td class="text-white font-semibold">Gồng lãi phần còn lại</td>
-                        <td class="text-gray-400">Dịch Stop-loss lên cao dần để tối ưu lợi nhuận.</td>
+                        <td class="text-white font-bold">Gồng lãi phần còn lại</td>
+                        <td class="text-gray-400 font-medium">Dịch Stop-loss lên cao dần (Trailing Stop) để tối ưu lợi nhuận.</td>
                     </tr>
                 </tbody>
             </table>
         </div>
     </div>
+
+    <footer class="text-center mt-12 pt-8 border-t border-[#30363d]">
+        <div class="text-[#484f58] text-[10px] uppercase tracking-[0.4em] font-bold">
+            © 2026 CRYPTO EXIT SYSTEM BY VO WILL - KỶ LUẬT LÀ SỨC MẠNH
+        </div>
     </footer>
 
 </body>
