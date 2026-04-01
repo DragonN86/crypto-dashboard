@@ -1,4 +1,3 @@
-/* --- BIẾN MÀU SẮC (Dễ dàng thay đổi giao diện tại đây) --- */
 :root {
     --bg-main: #0d1117;
     --bg-card: #161b22;
@@ -7,27 +6,26 @@
     --text-main: #c9d1d9;
     --text-muted: #8b949e;
     --blue-accent: #58a6ff;
-    --yellow-accent: #d29922;
+    --yellow-accent: #f2cc60;
     --red-accent: #f85149;
-    --orange-accent: #fb923c;
     --green-accent: #3fb950;
 }
 
-/* --- CẤU HÌNH CHUNG --- */
 body { 
     background-color: var(--bg-main); 
     color: var(--text-main); 
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    margin: 0;
 }
 
-/* --- BỐ CỤC DASHBOARD --- */
+/* Dashboard Layout */
 .dashboard-grid { 
     display: grid; 
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); 
     gap: 1.5rem; 
 }
 
-/* --- THIẾT KẾ CARD --- */
+/* Card Design */
 .card-container { 
     background: var(--bg-card); 
     border: 1px solid var(--border-color); 
@@ -36,12 +34,13 @@ body {
     display: flex; 
     flex-direction: column; 
     height: 500px; 
-    transition: all 0.3s ease; 
+    transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
 .card-container:hover { 
     border-color: var(--blue-accent); 
-    transform: translateY(-2px); 
+    transform: translateY(-4px); 
 }
 
 .card-header { 
@@ -53,20 +52,17 @@ body {
     align-items: center; 
 }
 
-.card-title { font-weight: 700; font-size: 0.9rem; display: flex; align-items: center; }
+.card-title { font-weight: 700; font-size: 0.85rem; color: var(--text-main); }
 .card-tag { 
-    font-size: 10px; 
-    color: var(--text-muted); 
-    text-transform: uppercase; 
-    border: 1px solid var(--border-color); 
-    padding: 2px 6px; 
-    border-radius: 4px; 
+    font-size: 10px; color: var(--text-muted); 
+    text-transform: uppercase; border: 1px solid var(--border-color); 
+    padding: 2px 6px; border-radius: 4px; 
 }
 
-.widget-box { flex-grow: 1; width: 100%; background: var(--bg-main); }
+.widget-box { flex-grow: 1; width: 100%; background: #000; }
 iframe { width: 100%; height: 100%; border: none; }
 
-/* --- HIỆU ỨNG TRẠNG THÁI --- */
+/* Status Animation */
 .status-dot { 
     height: 8px; width: 8px; border-radius: 50%; 
     background-color: var(--green-accent); 
@@ -75,23 +71,15 @@ iframe { width: 100%; height: 100%; border: none; }
     animation: pulse 2s infinite; 
 }
 
-@keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
 
-/* --- BẢNG CHIẾN LƯỢC --- */
-.strategy-table { width: 100%; border-collapse: collapse; background: var(--bg-header); overflow: hidden; }
-.strategy-table th { 
-    background: #21262d; color: var(--blue-accent); 
-    padding: 12px; text-align: left; font-size: 12px; 
-    text-transform: uppercase; border-bottom: 1px solid var(--border-color); 
-}
-.strategy-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
-.strategy-table tr:last-child td { border-bottom: none; }
-.phase-tag { 
-    background: rgba(56, 139, 253, 0.1); color: var(--blue-accent); 
-    padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; 
-}
+/* Strategy Table */
+.strategy-section { border-top: 1px solid var(--border-color); padding-top: 2rem; margin-top: 3rem; }
+.strategy-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); }
+.strategy-table th { background: var(--bg-header); color: var(--blue-accent); padding: 15px; text-align: left; font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
+.strategy-table td { padding: 18px 15px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+.phase-tag { background: rgba(56, 139, 253, 0.1); color: var(--blue-accent); border: 1px solid rgba(56, 139, 253, 0.3); padding: 4px 10px; border-radius: 6px; font-weight: bold; }
 
-/* --- CUSTOM SCROLLBAR --- */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: var(--bg-main); }
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
