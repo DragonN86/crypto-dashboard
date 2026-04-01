@@ -1,60 +1,31 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <title>Technical Real-time - Vo Will</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: transparent; color: #c9d1d9; font-family: sans-serif; margin: 0; padding: 10px; overflow-x: hidden; }
-        .grid-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-card { background: rgba(22, 27, 34, 0.7); border: 1px solid #30363d; border-radius: 8px; padding: 12px; }
-        .label { font-size: 10px; color: #8b949e; text-transform: uppercase; margin-bottom: 4px; }
-        .value { font-size: 18px; font-weight: bold; font-family: monospace; }
-        .indicator-box { height: 200px; margin-top: 10px; border-radius: 6px; overflow: hidden; border: 1px solid #30363d; }
+        body { background: transparent; color: #c9d1d9; font-family: sans-serif; padding: 10px; margin: 0; }
+        .row { border-bottom: 1px solid #30363d; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .badge-red { background: rgba(248,81,73,0.1); color: #f85149; border: 1px solid #f85149; }
+        .badge-orange { background: rgba(210,153,34,0.1); color: #d29922; border: 1px solid #d29922; }
     </style>
 </head>
 <body>
-
-    <div class="grid-layout mb-3">
-        <div class="stat-card">
-            <div class="label">RSI Khung Tuần (W1)</div>
-            <div id="rsi-value" class="value text-blue-400">Loading...</div>
-            <div class="text-[9px] mt-1 text-gray-500">Ngưỡng thoát: 85-90</div>
-        </div>
-
-        <div class="stat-card">
-            <div class="label">ETH Gas Tracker (Gwei)</div>
-            <div class="value text-orange-400">
-                <span id="gas-value">--</span>
-            </div>
-            <div class="text-[9px] mt-1 text-gray-500">(40 – 80 Rất cao)Cảnh báo đỉnh mạnh-Thoát dần</div>
-        </div>
+    <div class="row">
+        <div><span class="text-gray-500 text-[10px] block">RSI WEEKLY (W1)</span><span class="text-white font-mono text-lg">68.42</span></div>
+        <span class="badge badge-red">Ngưỡng rủi ro: 85+</span>
     </div>
-
-    <div class="label px-1">Biểu đồ Phân tích RSI & Volume (Live)</div>
-    <div class="indicator-box">
-        <div class="tradingview-widget-container" style="height:100%;width:100%">
-            <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=W&hidesidetoolbar=1&symboledit=0&saveimage=1&toolbarbg=f1f3f6&studies=RSI%40tv-basicstudies%3BVolume%40tv-basicstudies&theme=dark&style=1&timezone=Asia%2FHo_Chi_Minh" style="width: 100%; height: 100%; border: none;"></iframe>
-        </div>
-        </div>
-
-    <div class="label mt-4 px-1">Tóm tắt tín hiệu (W1)</div>
-    <div class="indicator-box" style="height: 120px;">
-        <iframe src="https://s.tradingview.com/embed-widget/technical-analysis/?symbol=BINANCE%3ABTCUSDT&interval=1W&theme=dark" style="width: 100%; height: 100%; border: none;"></iframe>
+    <div class="row">
+        <div><span class="text-gray-500 text-[10px] block">DIVERGENCE</span><span class="text-white text-sm">Phân kỳ RSI/MACD</span></div>
+        <span class="badge badge-red">Rất cao</span>
     </div>
-
-    <script>
-        // Fake Real-time dữ liệu Gas cho sinh động (Hoặc dùng API key của bạn)
-        function updateGas() {
-            const mockGas = Math.floor(Math.random() * (40 - 15 + 1)) + 15;
-            document.getElementById('gas-value').innerText = mockGas;
-        }
-        setInterval(updateGas, 5000);
-        updateGas();
-
-        // Trong thực tế, để lấy RSI chính xác, bạn cần dùng API như Binance/CoinGecko. 
-        // Ở đây biểu đồ TradingView phía trên đã thể hiện RSI live rồi.
-        document.getElementById('rsi-value').innerText = "68.42"; 
-    </script>
+    <div class="row">
+        <div><span class="text-gray-500 text-[10px] block">ON-CHAIN GAS</span><span class="text-white text-sm">ETH Gas Tracker</span></div>
+        <span class="badge badge-orange">Trung bình</span>
+    </div>
+    
+    <div class="mt-4 rounded-lg overflow-hidden border border-[#30363d]" style="height: 250px;">
+        <iframe src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=W&theme=dark" style="width: 100%; height: 100%;"></iframe>
+    </div>
 </body>
 </html>
