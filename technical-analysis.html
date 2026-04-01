@@ -1,41 +1,73 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vo Will - Technical Analysis (W1)</title>
-  <style>
-    html, body { height: 100%; margin: 0; overflow: hidden; background: #0d1117; }
-    .tradingview-widget-container { height: 100%; width: 100%; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Analysis Checklist - Vo Will</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 0; padding: 15px; }
+        .table-container { background: #161b22; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { background: #1c2128; color: #8b949e; padding: 12px 16px; border-bottom: 1px solid #30363d; text-transform: uppercase; font-size: 11px; letter-spacing: 0.1em; }
+        td { padding: 14px 16px; border-bottom: 1px solid #21262d; line-height: 1.5; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background: #1c2128; }
+        
+        /* Badge Styles */
+        .badge { padding: 3px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .badge-extreme { background: rgba(248, 81, 73, 0.1); color: #f85149; border: 1px solid #f85149; }
+        .badge-high { background: rgba(210, 153, 34, 0.1); color: #d29922; border: 1px solid #d29922; }
+        .badge-medium { background: rgba(56, 139, 253, 0.1); color: #58a6ff; border: 1px solid #58a6ff; }
+        
+        .source-link { color: #58a6ff; text-decoration: none; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 11px; }
+        .source-link:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-  <div class="tradingview-widget-container">
-    <div id="tradingview_btc_chart" style="height: 100%;"></div>
-    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-    <script type="text/javascript">
-      new TradingView.widget({
-        "autosize": true,
-        "symbol": "BINANCE:BTCUSDT",
-        "interval": "W",
-        "timezone": "Etc/UTC",
-        "theme": "dark",
-        "style": "1",
-        "locale": "vi",
-        "toolbar_bg": "#f1f3f6",
-        "enable_publishing": false,
-        "hide_side_toolbar": false, // Hiện thanh công cụ bên trái để bạn vẽ vời
-        "allow_symbol_change": true,
-        "details": true,
-        "hotlist": true,
-        "calendar": true,
-        "studies": [
-          "RSI@tv-basicstudies", // Thêm chỉ số RSI
-          "MASimple@tv-basicstudies" // Thêm đường MA nếu muốn
-        ],
-        "container_id": "tradingview_btc_chart"
-      });
-    </script>
-  </div>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Chỉ báo</th>
+                    <th>Nội dung phân tích</th>
+                    <th>Trạng thái</th>
+                    <th>Nguồn / Công cụ</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="font-bold text-gray-400">Kỹ thuật</td>
+                    <td>RSI khung tuần (W1) vượt ngưỡng <strong class="text-red-500 font-mono">85-90</strong></td>
+                    <td><span class="badge badge-extreme">Rất Cao</span></td>
+                    <td><span class="text-gray-500">TradingView (BTCUSDT)</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold text-gray-400">Kỹ thuật</td>
+                    <td>Phân kỳ âm (Giá tăng nhưng RSI/MACD giảm)</td>
+                    <td><span class="badge badge-extreme">Rất Cao</span></td>
+                    <td><span class="text-gray-500">TradingView (Chỉ báo RSI/MACD)</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold text-gray-400">Kỹ thuật</td>
+                    <td>Giá tăng nhưng khối lượng giao dịch (Volume) giảm</td>
+                    <td><span class="badge badge-high">Trung bình</span></td>
+                    <td><span class="text-gray-500">TradingView (Chỉ báo Volume)</span></td>
+                </tr>
+                <tr>
+                    <td class="font-bold text-gray-400">Kỹ thuật</td>
+                    <td>Phí Gas (ETH/SOL) cao kỷ lục trong nhiều ngày</td>
+                    <td><span class="badge badge-medium">Trung bình</span></td>
+                    <td><a href="https://etherscan.io/gastracker" target="_blank" class="source-link">etherscan.io/gastracker</a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-4 text-[10px] text-gray-600 text-right font-mono uppercase">
+        Signal ID: TECH-CHECK-2026
+    </div>
+
 </body>
 </html>
