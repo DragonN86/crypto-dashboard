@@ -3,123 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vo Will - Fear & Greed Index</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <title>Fear & Greed Index</title>
   <style>
-    :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #30363d;
-      --text: #c9d1d9;
-      --accent: #58a6ff;
-      --header-title: #7dd3fc;
-      --note-bg: rgba(31, 111, 235, 0.1);
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
+    /* 1. Thiết lập nền tối đồng bộ với Dashboard */
+    body, html {
       margin: 0;
-      padding: 8px; /* Giảm padding để tiết kiệm không gian */
-      background: var(--bg);
-      font-family: "Inter", sans-serif;
-      color: var(--text);
-      display: flex;
-      justify-content: center;
-      overflow: hidden; /* Chống cuộn thừa */
-    }
-
-    .wrap {
+      padding: 0;
+      height: 100%;
       width: 100%;
-      max-width: 400px; /* Thu nhỏ để vừa 1 cột dashboard */
-      background: var(--surface);
-      border-radius: 12px;
-      border: 1px solid var(--border);
+      background-color: #0d1117; /* Màu nền GitHub Dark */
       display: flex;
       flex-direction: column;
-    }
-
-    .section-head {
-      display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 10px 14px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(28, 33, 40, 0.95);
-    }
-
-    .section-head h1 {
-      margin: 0;
-      font-size: 0.85rem;
-      font-weight: 700;
-      color: var(--header-title);
-    }
-
-    .badge {
-      font-size: 0.6rem;
-      padding: 2px 6px;
-      border-radius: 4px;
-      background: rgba(139, 148, 158, 0.1);
-      border: 1px solid rgba(139, 148, 158, 0.2);
-      color: var(--text);
-    }
-
-    /* Fix lỗi ảnh to: Khống chế ảnh nằm gọn trong khung */
-    .card {
-      padding: 10px;
-      display: flex;
       justify-content: center;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    /* 2. Container khống chế kích thước */
+    .container {
+      width: 95%;
+      height: 95%;
+      display: flex;
+      flex-direction: column;
       align-items: center;
-      min-height: 200px;
+      justify-content: center;
+      background: #161b22;
+      border-radius: 12px;
     }
 
-    .card img {
+    /* 3. Ép ảnh tự co giãn, không bao giờ to quá khổ */
+    img {
       max-width: 100%;
-      height: auto;
-      max-height: 180px; /* Ép chiều cao tối đa */
-      display: block;
+      max-height: 75%; /* Dành chỗ cho phần text bên dưới */
+      object-fit: contain;
       border-radius: 8px;
-      filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
     }
 
+    /* 4. Phần ghi chú nhỏ gọn bên dưới */
     .note {
-      margin: 0 12px 12px;
-      font-size: 0.75rem;
-      line-height: 1.5;
-      border-left: 3px solid var(--accent);
-      padding: 10px;
-      background: var(--note-bg);
-      border-radius: 0 8px 8px 0;
+      margin-top: 10px;
+      color: #8b949e;
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.4;
+      padding: 0 10px;
     }
 
-    .note strong {
-      display: block;
-      color: var(--accent);
-      margin-bottom: 4px;
+    .highlight {
+        color: #58a6ff;
+        font-weight: bold;
     }
-
-    .note p { margin: 2px 0; color: #adbac7; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <header class="section-head">
-      <h1>📊 Tâm Lý Thị Trường</h1>
-      <span class="badge">SENTIMENT</span>
-    </header>
+  <div class="container">
+    <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Fear & Greed Index">
     
-    <div class="card">
-      <img
-        src="https://alternative.me/crypto/fear-and-greed-index.png"
-        alt="Fear and Greed Index">
-    </div>
-
     <div class="note">
-      <strong>💡 Quy tắc Chốt lời:</strong>
-      <p>• Chỉ số > 80: Vùng tham lam tột độ.</p>
-      <p>• Sát mốc 100: <strong>Phải thoát hàng.</strong></p>
+        <span class="highlight">CÁCH XEM:</span> <br>
+        Dưới 20: Sợ hãi tột độ (Cơ hội mua) <br>
+        Trên 80: Tham lam tột độ (Cần <span style="color: #f85149;">THOÁT HÀNG</span>)
     </div>
   </div>
 </body>
