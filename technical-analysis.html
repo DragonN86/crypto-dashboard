@@ -5,20 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vo Will - Technical Analysis (W1)</title>
   <style>
-    html, body { height: 100%; }
-    body { margin: 0; background: #0d1117; color: #c9d1d9; font-family: sans-serif; }
-    .wrap { height: 100%; padding: 0; }
-    iframe { width: 100%; height: 100%; border: 0; display: block; }
+    html, body { height: 100%; margin: 0; overflow: hidden; background: #0d1117; }
+    .tradingview-widget-container { height: 100%; width: 100%; }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <iframe
-      src="https://s.tradingview.com/widgetembed/?symbol=BINANCE%3ABTCUSDT&interval=W&theme=dark&studies=%5B%22RSI%40tv-basicstudies%22%2C%22Volume%40tv-basicstudies%22%5D"
-      frameborder="0"
-      loading="lazy"
-      referrerpolicy="no-referrer">
-    </iframe>
+  <div class="tradingview-widget-container">
+    <div id="tradingview_btc_chart" style="height: 100%;"></div>
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+    <script type="text/javascript">
+      new TradingView.widget({
+        "autosize": true,
+        "symbol": "BINANCE:BTCUSDT",
+        "interval": "W",
+        "timezone": "Etc/UTC",
+        "theme": "dark",
+        "style": "1",
+        "locale": "vi",
+        "toolbar_bg": "#f1f3f6",
+        "enable_publishing": false,
+        "hide_side_toolbar": false, // Hiện thanh công cụ bên trái để bạn vẽ vời
+        "allow_symbol_change": true,
+        "details": true,
+        "hotlist": true,
+        "calendar": true,
+        "studies": [
+          "RSI@tv-basicstudies", // Thêm chỉ số RSI
+          "MASimple@tv-basicstudies" // Thêm đường MA nếu muốn
+        ],
+        "container_id": "tradingview_btc_chart"
+      });
+    </script>
   </div>
 </body>
 </html>
