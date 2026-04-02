@@ -6,128 +6,114 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: transparent; color: #c9d1d9; font-family: 'Inter', sans-serif; padding: 10px; margin: 0; overflow: hidden; }
-        .card { background: rgba(22, 27, 34, 0.9); border: 1px solid #30363d; border-radius: 12px; padding: 12px; height: 100%; display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
-        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 1px solid #21262d; transition: all 0.3s; }
-        .data-row:hover { background: rgba(88, 166, 255, 0.05); }
-        .symbol { font-family: ui-monospace, monospace; font-weight: 800; font-size: 13px; color: #58a6ff; }
+        .card { background: rgba(13, 17, 23, 0.95); border: 1px solid #30363d; border-radius: 12px; padding: 12px; height: 100%; display: flex; flex-direction: column; border-top: 2px solid #58a6ff; }
         
-        .status-tag { padding: 1px 5px; border-radius: 4px; font-size: 8px; font-weight: 900; text-transform: uppercase; border: 1px solid transparent; }
-        .tag-danger { background: rgba(248, 81, 73, 0.1); color: #f85149; border-color: #f85149; box-shadow: 0 0 8px rgba(248, 81, 73, 0.3); }
-        .tag-warning { background: rgba(210, 153, 34, 0.1); color: #d29922; border-color: #d29922; }
-        .tag-safe { background: rgba(63, 185, 80, 0.1); color: #3fb950; border-color: #3fb950; }
+        /* Hiệu ứng Radar Scan */
+        .radar { position: relative; width: 12px; height: 12px; background: #238636; border-radius: 50%; }
+        .radar::after { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; animation: scan 2s infinite; opacity: 0.6; }
+        @keyframes scan { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(3.5); opacity: 0; } }
+
+        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #21262d; }
+        .symbol-box { display: flex; flex-direction: column; }
+        .symbol-name { font-family: ui-monospace, monospace; font-weight: 800; font-size: 14px; color: #e6edf3; }
         
-        .heat-bar-bg { width: 40px; height: 4px; background: #21262d; border-radius: 2px; overflow: hidden; margin-top: 2px; }
-        .heat-bar-fill { height: 100%; transition: width 0.5s; }
+        /* Danger Meter */
+        .meter-container { width: 100%; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; margin: 8px 0; border: 1px solid #30363d; }
+        #meter-fill { height: 100%; width: 0%; transition: all 1s ease; }
 
-        .note-box { margin-top: auto; padding: 10px; border-radius: 8px; font-size: 10px; line-height: 1.4; border: 1px solid transparent; transition: all 0.5s; }
-        .verdict-neutral { background: rgba(48, 54, 61, 0.3); border-color: #30363d; color: #8b949e; }
-        .verdict-danger { background: rgba(248, 81, 73, 0.1); border-color: #f85149; color: #f85149; }
-        .verdict-opportunity { background: rgba(63, 185, 80, 0.1); border-color: #3fb950; color: #3fb950; }
-
-        .alert-pulse { animation: pulse-red 1s infinite; }
-        @keyframes pulse-red { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .alert-banner { padding: 10px; border-radius: 8px; font-size: 11px; font-weight: 700; text-align: center; margin-top: auto; border: 1px solid transparent; }
+        .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; text-transform: uppercase; }
+        
+        .overheat-blink { animation: blink-red 0.8s infinite alternate; }
+        @keyframes blink-red { from { color: #f85149; filter: drop-shadow(0 0 2px #f85149); } to { color: #ffffff; } }
     </style>
 </head>
 <body>
     <div class="card">
         <div class="flex justify-between items-center mb-2">
-            <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">Leverage Signals</span>
-            <div class="flex items-center gap-1">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
-                </span>
-                <span class="text-[9px] text-blue-400 font-bold">LIVE</span>
+            <div class="flex items-center gap-2">
+                <div class="radar"></div>
+                <span class="text-[10px] font-black text-blue-400 uppercase tracking-tighter">Leverage Radar System</span>
             </div>
+            <span class="text-[9px] text-gray-500 font-bold" id="last-update">--:--:--</span>
         </div>
 
-        <div id="funding-list" class="flex-1">
+        <div class="meter-container">
+            <div id="meter-fill" style="background: linear-gradient(90deg, #238636, #d29922, #f85149);"></div>
+        </div>
+
+        <div id="funding-list" class="flex-1 space-y-1">
             </div>
 
-        <div id="verdict-container" class="note-box verdict-neutral">
-            <div class="flex items-center gap-2 mb-1">
-                <span id="verdict-icon">📡</span>
-                <span class="font-black uppercase tracking-tighter text-[9px]">Market Sentiment Analysis</span>
-            </div>
-            <div id="leverage-verdict" class="italic font-medium">Đang khởi tạo dữ liệu...</div>
+        <div id="alert-banner" class="alert-banner">
+            ĐANG QUÉT TÍN HIỆU THANH KHOẢN...
         </div>
     </div>
 
     <script>
         const symbols = [
-            { name: "BTC", baseFunding: 0.0012, volatility: 0.0005 },
-            { name: "ETH", baseFunding: 0.0008, volatility: 0.0004 },
-            { name: "SOL", baseFunding: -0.0025, volatility: 0.0015 },
-            { name: "BNB", baseFunding: 0.0015, volatility: 0.0003 },
-            { name: "DOGE", baseFunding: 0.0050, volatility: 0.0025 }
+            { name: "BTC", base: 0.0012, vol: 0.002 },
+            { name: "ETH", base: 0.0008, vol: 0.001 },
+            { name: "SOL", base: -0.0025, vol: 0.008 },
+            { name: "DOGE", base: 0.0050, vol: 0.015 }
         ];
 
-        function updateFunding() {
-            const listEl = document.getElementById('funding-list');
-            const verdictEl = document.getElementById('leverage-verdict');
-            const verdictContainer = document.getElementById('verdict-container');
-            const verdictIcon = document.getElementById('verdict-icon');
+        function update() {
+            const list = document.getElementById('funding-list');
+            const banner = document.getElementById('alert-banner');
+            const meter = document.getElementById('meter-fill');
+            const time = document.getElementById('last-update');
             
+            time.innerText = new Date().toLocaleTimeString();
             let html = '';
-            let totalFunding = 0;
+            let riskScore = 0;
 
             symbols.forEach(s => {
-                const currentFunding = s.baseFunding + (Math.random() * s.volatility * 2 - s.volatility);
-                totalFunding += currentFunding;
+                const funding = s.base + (Math.random() * s.vol * 2 - s.vol);
+                const absF = Math.abs(funding);
+                riskScore += absF;
                 
-                const absFunding = Math.abs(currentFunding);
-                let tagClass = 'tag-safe';
-                let tagName = 'Stable';
-                let heatColor = '#3fb950';
-                
-                if (absFunding > 0.01) {
-                    tagClass = 'tag-danger alert-pulse';
-                    tagName = 'Extreme';
-                    heatColor = '#f85149';
-                } else if (absFunding > 0.005) {
-                    tagClass = 'tag-warning';
-                    tagName = 'Active';
-                    heatColor = '#d29922';
-                }
+                const isRed = absF > 0.01;
+                const blinkClass = isRed ? 'overheat-blink' : '';
+                const badge = isRed ? '<span class="status-badge bg-red-500/20 text-red-500 border border-red-500/50">EXTREME</span>' : 
+                                     '<span class="status-badge bg-green-500/20 text-green-500 border border-green-500/50">STABLE</span>';
 
                 html += `
                     <div class="data-row">
-                        <div>
-                            <div class="symbol">${s.name}USDT</div>
-                            <div class="heat-bar-bg">
-                                <div class="heat-bar-fill" style="width: ${Math.min(absFunding * 5000, 100)}%; background: ${heatColor}"></div>
-                            </div>
+                        <div class="symbol-box">
+                            <span class="symbol-name ${blinkClass}">${s.name}USDT</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <span class="status-tag ${tagClass}">${tagName}</span>
-                            <span class="font-mono font-bold text-[12px] ${currentFunding >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                ${currentFunding >= 0 ? '+' : ''}${currentFunding.toFixed(4)}%
+                            ${badge}
+                            <span class="font-mono font-bold text-[13px] ${funding >= 0 ? 'text-green-400' : 'text-red-400'}">
+                                ${funding >= 0 ? '+' : ''}${funding.toFixed(4)}%
                             </span>
                         </div>
                     </div>
                 `;
             });
 
-            listEl.innerHTML = html;
+            list.innerHTML = html;
+            
+            // Cập nhật thanh Danger Meter (Mức độ rủi ro tổng thể)
+            const dangerLevel = Math.min(riskScore * 2000, 100);
+            meter.style.width = dangerLevel + '%';
 
-            // Decision Engine
-            if (totalFunding > 0.008) {
-                verdictContainer.className = "note-box verdict-danger";
-                verdictIcon.innerText = "⚠️";
-                verdictEl.innerHTML = "RỦI RO CAO: Phe Long quá nhiệt. Cảnh báo 'Long Squeeze'. Nên hạ đòn bẩy.";
-            } else if (totalFunding < -0.002) {
-                verdictContainer.className = "note-box verdict-opportunity";
-                verdictIcon.innerText = "🚀";
-                verdictEl.innerHTML = "CƠ HỘI: Phe Short đang ép giá quá đà. Dễ xảy ra 'Short Squeeze' bùng nổ.";
+            // Cập nhật Banner Cảnh báo
+            if (riskScore > 0.02) {
+                banner.className = "alert-banner bg-red-500/10 border-red-500/50 text-red-500 alert-pulse";
+                banner.innerHTML = "⚠️ CẢNH BÁO: ĐÒN BẨY QUÁ TẢI - DỄ SẬP MẠNH";
+            } else if (riskScore < 0.005) {
+                banner.className = "alert-banner bg-green-500/10 border-green-500/50 text-green-500";
+                banner.innerHTML = "✅ AN TOÀN: THANH KHOẢN TỐT - CÓ THỂ MỞ LỆNH";
             } else {
-                verdictContainer.className = "note-box verdict-neutral";
-                verdictIcon.innerText = "📡";
-                verdictEl.innerHTML = "TRẠNG THÁI TĨNH: Đòn bẩy thấp. Thị trường đang tích lũy, chờ đợi tín hiệu Technical.";
+                banner.className = "alert-banner bg-blue-500/10 border-blue-500/50 text-blue-400";
+                banner.innerHTML = "📡 RADAR: TÂM LÝ TRUNG LẬP - ĐỢI PHÁ VỠ";
             }
         }
 
-        setInterval(updateFunding, 5000);
-        updateFunding();
+        setInterval(update, 3000);
+        update();
     </script>
 </body>
 </html>
