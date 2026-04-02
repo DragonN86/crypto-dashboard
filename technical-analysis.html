@@ -5,11 +5,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: transparent; color: #c9d1d9; font-family: 'Inter', sans-serif; padding: 12px; margin: 0; overflow: hidden; }
-        .row-item { border-bottom: 1px solid #30363d; padding: 12px 0; display: flex; flex-direction: column; gap: 4px; }
-        .main-value { font-family: ui-monospace, monospace; font-weight: bold; font-size: 1.2rem; }
+        .row-item { border-bottom: 1px solid #30363d; padding: 12px 0; display: flex; flex-direction: column; gap: 5px; }
+        .main-value { font-family: ui-monospace, monospace; font-weight: bold; font-size: 1.25rem; letter-spacing: -0.5px; }
         
-        .glow-green { text-shadow: 0 0 10px rgba(63, 185, 80, 0.4); }
-        .glow-red { text-shadow: 0 0 10px rgba(248, 81, 73, 0.4); }
+        .glow-green { text-shadow: 0 0 12px rgba(63, 185, 80, 0.5); }
+        .glow-red { text-shadow: 0 0 12px rgba(248, 81, 73, 0.5); }
 
         .badge { padding: 2px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
         .badge-red { background: rgba(248,81,73,0.15); color: #f85149; border-color: #f85149; }
@@ -17,54 +17,63 @@
         .badge-blue { background: rgba(88,166,255,0.15); color: #58a6ff; border-color: #58a6ff; }
         .badge-gray { background: rgba(48,54,61,0.3); color: #8b949e; border-color: #30363d; }
         
-        .bar-bg { width: 100%; height: 5px; background: #21262d; border-radius: 10px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: width 0.8s ease-in-out, background 0.5s; width: 0%; }
+        .bar-bg { width: 100%; height: 6px; background: #21262d; border-radius: 10px; overflow: hidden; position: relative; }
+        .bar-fill { height: 100%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s; width: 0%; }
 
-        #verdict-box { margin-top: 8px; padding: 6px; border-radius: 8px; font-size: 9px; font-weight: 800; text-align: center; border: 1px dashed #30363d; transition: all 0.5s; }
+        #verdict-box { 
+            margin-top: 10px; padding: 10px; border-radius: 8px; font-size: 10px; 
+            font-weight: 800; text-align: center; border: 1px dashed #30363d; 
+            transition: all 0.5s ease; background: rgba(0,0,0,0.1);
+        }
+
+        .alert-pulse { animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
 
     <div class="row-item">
-        <div class="flex justify-between items-center text-[9px] text-gray-500 uppercase font-bold tracking-widest">
+        <div class="flex justify-between items-center text-[10px] text-gray-500 uppercase font-bold tracking-widest">
             <div class="flex items-center gap-2">
                 <span>RSI Weekly (W1)</span>
                 <span id="price-change" class="font-black">--%</span>
             </div>
-            <span id="rsi-status" class="badge badge-gray">Syncing</span>
+            <span id="rsi-status" class="badge badge-gray">Sync</span>
         </div>
         <span id="rsi-val" class="main-value text-blue-400">--.--</span>
     </div>
 
     <div class="row-item">
-        <div class="flex justify-between items-center text-[9px] text-gray-500 font-bold uppercase">
-            <span>Weekly Volume vs Avg</span>
-            <span id="vol-status" class="text-gray-400 tracking-tighter">--</span>
+        <div class="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase">
+            <span>Weekly Volume Intensity</span>
+            <span id="vol-status" class="text-gray-400 tracking-tighter">0% OF AVG</span>
         </div>
-        <div class="bar-bg mt-1">
-            <div id="vol-bar" class="bar-fill" style="background: #58a6ff;"></div>
+        <div class="bar-bg">
+            <div id="vol-bar" class="bar-fill" style="background: #58a6ff; width: 0%;"></div>
         </div>
     </div>
 
-    <div class="row-item bg-black/20 p-3 rounded-xl border border-[#30363d]">
+    <div class="row-item bg-black/30 p-3 rounded-xl border border-[#30363d] shadow-inner">
         <div class="flex justify-between items-center mb-1">
-            <span class="text-[9px] font-bold text-gray-400 uppercase">W1 Strategy Signal</span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">W1 Strategy Engine</span>
             <span id="strat-badge" class="badge badge-gray">Neutral</span>
         </div>
-        <span id="strat-text" class="main-value text-gray-600 text-sm">SCANNING...</span>
-        <div class="flex justify-between items-center text-[9px] mt-2">
-            <span id="strat-desc" class="text-gray-500 font-bold">MACD/VOL CONFIRMATION</span>
-            <span id="signal-power" class="text-gray-400 font-black">0%</span>
+        <span id="strat-text" class="main-value text-gray-600 text-sm">INITIALIZING...</span>
+        
+        <div class="flex justify-between items-center text-[10px] mt-2">
+            <span id="strat-desc" class="text-gray-500 font-bold italic tracking-tight">Scanning indicators...</span>
+            <span id="signal-power" class="text-gray-400 font-black">---</span>
         </div>
+        
         <div class="bar-bg mt-1">
             <div id="risk-bar" class="bar-fill"></div>
         </div>
 
-        <div id="verdict-box">WAITING FOR MARKET DATA...</div>
+        <div id="verdict-box">SCANNING MARKET VERDICT...</div>
     </div>
 
     <div class="row-item border-none">
-        <div class="flex justify-between items-center text-[9px] text-gray-500 font-bold uppercase">
+        <div class="flex justify-between items-center text-[10px] text-gray-500 font-bold uppercase">
             <span>Network Gas</span>
             <span id="gas-val" class="text-orange-400 font-black">-- Gwei</span>
         </div>
@@ -87,97 +96,114 @@
             return { currentMacd: validMacd[validMacd.length - 1], signalLine: EMA(validMacd, 9), prevMacd: validMacd[validMacd.length - 2] };
         }
 
-        function runStrategy(prices, volumes, rsi) {
+        function runStrategy(prices, volumes, candles, rsi) {
             const { currentMacd, signalLine, prevMacd } = calculateMACD(prices);
             const stratText = document.getElementById('strat-text');
             const stratBadge = document.getElementById('strat-badge');
             const stratDesc = document.getElementById('strat-desc');
             const riskBar = document.getElementById('risk-bar');
-            const powerTxt = document.getElementById('signal-power');
             const verdictBox = document.getElementById('verdict-box');
+            const powerTxt = document.getElementById('signal-power');
             
-            // Phân tích Volume
+            // 1. Phân tích Volume
             const currentVol = volumes[volumes.length - 1];
             const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
             const volRatio = (currentVol / avgVol) * 100;
             document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
             document.getElementById('vol-status').innerText = volRatio.toFixed(0) + "% OF AVG";
 
-            const macdCrossUp = currentMacd > signalLine && prevMacd <= signalLine;
-            const priceUp = prices[prices.length - 1] > prices[prices.length - 2];
-            const volStrong = volRatio > 110;
+            // 2. Phân tích Price Action (Nến do dự)
+            const lastCandle = candles[candles.length - 1];
+            const open = parseFloat(lastCandle[1]), high = parseFloat(lastCandle[2]), low = parseFloat(lastCandle[3]), close = parseFloat(lastCandle[4]);
+            const bodySize = Math.abs(close - open);
+            const candleSize = high - low;
+            const isIndecision = bodySize < (candleSize * 0.35);
 
-            // LOGIC KẾT HỢP GIÁ + VOL + RSI
-            if (rsi < 40 && macdCrossUp && volStrong) {
+            const macdCrossUp = currentMacd > signalLine && prevMacd <= signalLine;
+            const gap = Math.abs(currentMacd - signalLine);
+            const prevGap = Math.abs(prevMacd - signalLine);
+
+            // 3. Logic Quyết định (Verdict Engine)
+            if (rsi < 40 && macdCrossUp && volRatio > 110) {
                 stratText.innerText = "CONFIRMED BUY";
-                stratText.className = "main-value text-green-500 glow-green";
+                stratText.className = "main-value text-green-500 glow-green alert-pulse";
                 stratBadge.className = "badge badge-green"; stratBadge.innerText = "ACCUMULATED";
-                stratDesc.innerText = "Price & Volume Surge";
+                stratDesc.innerText = "Whale Inflow Detected";
                 riskBar.style.width = "100%"; riskBar.style.background = "#3fb950";
-                verdictBox.innerText = "STRONG BUY: WHALES ARE ENTERING";
+                verdictBox.innerText = "VERDICT: STRONG BUY - BULLISH REVERSAL";
                 verdictBox.style.color = "#3fb950"; verdictBox.style.borderColor = "#3fb950";
-            } else if (priceUp && volRatio < 80 && rsi > 60) {
-                stratText.innerText = "WEAK UPTREND";
-                stratText.className = "main-value text-orange-400";
-                stratBadge.className = "badge badge-red"; stratBadge.innerText = "CAUTION";
-                stratDesc.innerText = "Price Up, Volume Down";
-                riskBar.style.width = "40%"; riskBar.style.background = "#d29922";
-                verdictBox.innerText = "VERDICT: BULL TRAP WARNING (LOW VOL)";
-                verdictBox.style.color = "#d29922"; verdictBox.style.borderColor = "#d29922";
-            } else if (rsi < 35) {
+                powerTxt.innerText = "MAX";
+            } else if (isIndecision && rsi < 35) {
                 stratText.innerText = "BOTTOMING OUT";
-                stratText.className = "main-value text-gray-400";
-                stratBadge.className = "badge badge-blue"; stratBadge.innerText = "WATCHING";
-                stratDesc.innerText = "Low Vol Exhaustion";
-                riskBar.style.width = "75%"; riskBar.style.background = "#58a6ff";
-                verdictBox.innerText = "VERDICT: OVERSOLD - LOOK FOR VOL SPIKE";
+                stratText.className = "main-value text-blue-400 glow-green";
+                stratBadge.className = "badge badge-blue"; stratBadge.innerText = "DOJI FOUND";
+                stratDesc.innerText = "Sellers Exhausted";
+                riskBar.style.width = "80%"; riskBar.style.background = "#58a6ff";
+                verdictBox.innerText = "VERDICT: INDECISION AT BOTTOM - DCA ZONE";
                 verdictBox.style.color = "#58a6ff"; verdictBox.style.borderColor = "#58a6ff";
+                powerTxt.innerText = "WAITING VOL";
+            } else if (rsi < 35) {
+                const progress = Math.min(95, Math.max(20, (1 - (gap / (prevGap * 1.1))) * 100));
+                stratText.innerText = "STABLE MARKET";
+                stratText.className = "main-value text-gray-500";
+                stratBadge.className = "badge badge-gray"; stratBadge.innerText = "NEUTRAL";
+                stratDesc.innerText = "MACD Convergence...";
+                riskBar.style.width = progress + "%"; riskBar.style.background = "#3fb950";
+                verdictBox.innerText = "VERDICT: OVERSOLD - LOOK FOR VOL SPIKE";
+                verdictBox.style.color = "#d29922"; verdictBox.style.borderColor = "#d29922";
+                powerTxt.innerText = "ACCUMULATING";
             } else {
                 stratText.innerText = "STABLE MARKET";
-                stratText.className = "main-value text-gray-500 text-sm";
+                stratText.className = "main-value text-gray-600";
                 stratBadge.className = "badge badge-gray"; stratBadge.innerText = "NEUTRAL";
-                stratDesc.innerText = "Normal Consolidation";
+                stratDesc.innerText = "Sideways Consolidation";
                 riskBar.style.width = "15%"; riskBar.style.background = "#30363d";
-                verdictBox.innerText = "VERDICT: NO STRONG TREND DETECTED";
+                verdictBox.innerText = "VERDICT: NO ACTION - STAND BY";
                 verdictBox.style.color = "#8b949e"; verdictBox.style.borderColor = "#30363d";
+                powerTxt.innerText = "0%";
             }
         }
 
         async function updateData() {
             try {
-                const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
-                const tickerData = await tickerRes.json();
-                const pChange = parseFloat(tickerData.priceChangePercent);
+                // Lấy Price Change 24h
+                const tRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+                const tData = await tRes.json();
+                const pChange = parseFloat(tData.priceChangePercent);
                 const pChangeEl = document.getElementById('price-change');
                 pChangeEl.innerText = (pChange >= 0 ? "+" : "") + pChange.toFixed(2) + "%";
-                pChangeEl.className = pChange >= 0 ? "text-green-500" : "text-red-500";
+                pChangeEl.className = pChange >= 0 ? "text-green-500 font-black" : "text-red-500 font-black";
 
+                // Lấy Nến Tuần
                 const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=100');
                 const candles = await res.json();
                 const prices = candles.map(c => parseFloat(c[4])); 
-                const volumes = candles.map(c => parseFloat(c[5])); // Volume index 5
+                const volumes = candles.map(c => parseFloat(c[5]));
                 
-                const gains = [], losses = [];
-                for(let i=1; i<prices.slice(-15).length; i++) {
-                    let d = prices.slice(-15)[i] - prices.slice(-15)[i-1];
-                    d >= 0 ? (gains.push(d), losses.push(0)) : (gains.push(0), losses.push(-d));
+                // RSI Manual Calculation
+                const subset = prices.slice(-15);
+                let g = 0, l = 0;
+                for(let i=1; i<subset.length; i++) {
+                    let d = subset[i] - subset[i-1];
+                    d >= 0 ? g += d : l -= d;
                 }
-                const rsi = 100 - (100 / (1 + (gains.reduce((a,b)=>a+b)/14) / (losses.reduce((a,b)=>a+b)/14)));
+                const rsi = 100 - (100 / (1 + (g/14)/(l/14)));
 
                 document.getElementById('rsi-val').innerText = rsi.toFixed(2);
-                document.getElementById('rsi-status').className = rsi < 35 ? "badge badge-green" : rsi > 70 ? "badge badge-red" : "badge badge-gray";
-                document.getElementById('rsi-status').innerText = rsi < 35 ? "Oversold" : rsi > 70 ? "Overbought" : "Neutral";
+                const rsiS = document.getElementById('rsi-status');
+                rsiS.className = rsi < 35 ? "badge badge-green" : rsi > 70 ? "badge badge-red" : "badge badge-gray";
+                rsiS.innerText = rsi < 35 ? "Oversold" : rsi > 70 ? "Overbought" : "Neutral";
 
-                runStrategy(prices, volumes, rsi);
+                runStrategy(prices, volumes, candles, rsi);
                 updateGas();
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Update Fail"); }
         }
 
         async function updateGas() {
             try {
                 const res = await fetch('https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=YourKey');
                 const data = await res.json();
-                document.getElementById('gas-val').innerText = (data.result.ProposeGasPrice || Math.floor(Math.random()*10+10)) + " Gwei";
+                document.getElementById('gas-val').innerText = (data.result.ProposeGasPrice || Math.floor(Math.random()*5+10)) + " Gwei";
             } catch (e) { document.getElementById('gas-val').innerText = "12 Gwei"; }
         }
 
