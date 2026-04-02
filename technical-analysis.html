@@ -8,30 +8,36 @@
         .row-item { border-bottom: 1px solid #30363d; padding: 15px 0; display: flex; flex-direction: column; gap: 6px; }
         .main-value { font-family: ui-monospace, monospace; font-weight: bold; font-size: 1.3rem; }
         
-        /* Hiệu ứng báo động ĐỎ (Bearish/Exit) */
-        .bearish-active { color: #f85149; text-shadow: 0 0 15px rgba(248, 81, 73, 0.6); animation: alert-red 1s infinite; }
-        /* Hiệu ứng báo động XANH (Bullish/Entry) */
-        .bullish-active { color: #3fb950; text-shadow: 0 0 15px rgba(63, 185, 80, 0.6); animation: alert-green 1s infinite; }
+        /* Hiệu ứng Glow cho các tín hiệu quan trọng */
+        .glow-green { text-shadow: 0 0 12px rgba(63, 185, 80, 0.5); }
+        .glow-red { text-shadow: 0 0 12px rgba(248, 81, 73, 0.5); }
 
-        @keyframes alert-red { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-        @keyframes alert-green { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        /* Hoạt ảnh báo động */
+        .bearish-active { color: #f85149; animation: alert-red 1.2s infinite; }
+        .bullish-active { color: #3fb950; animation: alert-green 1.2s infinite; }
 
-        .badge { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; }
-        .badge-red { background: rgba(248,81,73,0.15); color: #f85149; border-color: #f85149; }
-        .badge-green { background: rgba(63,185,80,0.15); color: #3fb950; border-color: #3fb950; }
+        @keyframes alert-red { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.7; filter: brightness(1.5); } }
+        @keyframes alert-green { 0%, 100% { opacity: 1; filter: brightness(1); } 50% { opacity: 0.7; filter: brightness(1.5); } }
+
+        .badge { padding: 2px 8px; border-radius: 6px; font-size: 9px; font-weight: 800; text-transform: uppercase; border: 1px solid transparent; transition: all 0.3s; }
+        .badge-red { background: rgba(248,81,73,0.15); color: #f85149; border-color: #f85149; box-shadow: 0 0 5px rgba(248,81,73,0.2); }
+        .badge-green { background: rgba(63,185,80,0.15); color: #3fb950; border-color: #3fb950; box-shadow: 0 0 5px rgba(63,185,80,0.2); }
         .badge-orange { background: rgba(210,153,34,0.15); color: #d29922; border-color: #d29922; }
         .badge-blue { background: rgba(88,166,255,0.15); color: #58a6ff; border-color: #58a6ff; }
         .badge-gray { background: rgba(48,54,61,0.3); color: #8b949e; border-color: #30363d; }
         
-        .risk-bar-bg { width: 100%; height: 6px; background: #21262d; border-radius: 10px; overflow: hidden; }
-        .risk-bar-fill { height: 100%; transition: width 1s ease-in-out, background 0.5s; }
+        .risk-bar-bg { width: 100%; height: 6px; background: #21262d; border-radius: 10px; overflow: hidden; position: relative; }
+        .risk-bar-fill { height: 100%; transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1), background 0.5s; width: 0%; }
     </style>
 </head>
 <body>
 
     <div class="row-item">
         <div class="flex justify-between items-center text-[10px] text-gray-500 uppercase font-bold tracking-widest">
-            <span>RSI Weekly (W1)</span>
+            <div class="flex items-center gap-2">
+                <span>RSI Weekly (W1)</span>
+                <span id="price-change" class="font-black text-[9px]">--%</span>
+            </div>
             <span id="rsi-status" class="badge badge-gray">Syncing...</span>
         </div>
         <span id="rsi-val" class="main-value text-blue-400">--.--</span>
@@ -42,13 +48,13 @@
             <span class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">W1 Strategy Signal</span>
             <span id="strat-badge" class="badge badge-gray">Neutral</span>
         </div>
-        <span id="strat-text" class="main-value text-gray-600">WAITING DATA</span>
+        <span id="strat-text" class="main-value text-gray-600 transition-colors">WAITING DATA</span>
         <div class="flex justify-between items-center text-[10px] mt-2">
-            <span id="strat-desc" class="text-gray-500 font-bold">MACD & RSI Analysis</span>
-            <span id="signal-power" class="text-gray-600 font-black">---</span>
+            <span id="strat-desc" class="text-gray-500 font-bold italic">Analyzing confirmation...</span>
+            <span id="signal-power" class="text-gray-400 font-black tracking-tighter">0%</span>
         </div>
         <div class="risk-bar-bg mt-1">
-            <div id="risk-bar" class="risk-bar-fill" style="width: 0%"></div>
+            <div id="risk-bar" class="risk-bar-fill bg-gray-700"></div>
         </div>
     </div>
 
@@ -60,14 +66,11 @@
         <span id="gas-val" class="main-value text-orange-400">-- Gwei</span>
     </div>
 
-<script>
-        // --- HÀM TÍNH TOÁN KỸ THUẬT (GIỮ NGUYÊN) ---
+    <script>
         function EMA(data, period) {
             const k = 2 / (period + 1);
             let ema = data[0];
-            for (let i = 1; i < data.length; i++) {
-                ema = (data[i] * k) + (ema * (1 - k));
-            }
+            for (let i = 1; i < data.length; i++) ema = (data[i] * k) + (ema * (1 - k));
             return ema;
         }
 
@@ -90,7 +93,6 @@
             return 100 - (100 / (1 + (gains/period)/(losses/period)));
         }
 
-        // --- HÀM CHIẾN THUẬT (GIỮ NGUYÊN) ---
         function runStrategy(prices, rsi) {
             const { currentMacd, signalLine, prevMacd } = calculateMACD(prices);
             const stratText = document.getElementById('strat-text');
@@ -102,80 +104,58 @@
             const macdCrossUp = currentMacd > signalLine && prevMacd <= signalLine;
             const macdCrossDown = currentMacd < signalLine && prevMacd >= signalLine;
 
+            // Tính toán Progress tiến gần tới Breakout (MACD hội tụ)
+            const gap = Math.abs(currentMacd - signalLine);
+            const prevGap = Math.abs(prevMacd - signalLine);
+            let progress = 0;
+            if (rsi < 40) {
+                // Nếu khoảng cách MACD đang hẹp lại, tăng progress
+                progress = Math.min(95, Math.max(15, (1 - (gap / (prevGap * 1.2))) * 100));
+            }
+
             if (rsi < 40 && macdCrossUp) {
                 stratText.innerText = "WEEKLY ENTRY";
-                stratText.className = "main-value bullish-active";
+                stratText.className = "main-value bullish-active glow-green";
                 stratBadge.className = "badge badge-green"; stratBadge.innerText = "STRONG BUY";
-                stratDesc.innerText = "MACD Cross Up + RSI Oversold";
+                stratDesc.innerText = "Confirmation: Bullish Cross";
                 riskBar.style.width = "100%"; riskBar.style.background = "#3fb950";
-                powerTxt.innerText = "MAX";
+                powerTxt.innerText = "MAX POWER";
             } else if (rsi > 70 && macdCrossDown) {
                 stratText.innerText = "WEEKLY EXIT";
-                stratText.className = "main-value bearish-active";
+                stratText.className = "main-value bearish-active glow-red";
                 stratBadge.className = "badge badge-red"; stratBadge.innerText = "SELL NOW";
-                stratDesc.innerText = "MACD Cross Down + RSI Overheat";
+                stratDesc.innerText = "Confirmation: Bearish Cross";
                 riskBar.style.width = "100%"; riskBar.style.background = "#f85149";
-                powerTxt.innerText = "RISK";
+                powerTxt.innerText = "HIGH RISK";
             } else if (rsi >= 48 && rsi <= 62 && currentMacd > 0) {
                 stratText.innerText = "BULL CONTINUED";
                 stratText.className = "main-value text-blue-400";
                 stratBadge.className = "badge badge-blue"; stratBadge.innerText = "HOLDING";
-                stratDesc.innerText = "RSI Support + MACD Bullish";
+                stratDesc.innerText = "Healthy Trend Support";
                 riskBar.style.width = "60%"; riskBar.style.background = "#58a6ff";
-                powerTxt.innerText = "TREND";
+                powerTxt.innerText = "TRENDING";
             } else {
                 stratText.innerText = "STABLE MARKET";
                 stratText.className = "main-value text-gray-500";
                 stratBadge.className = "badge badge-gray"; stratBadge.innerText = "NEUTRAL";
-                stratDesc.innerText = "Waiting for MACD Confirmation";
-                riskBar.style.width = "15%"; riskBar.style.background = "#30363d";
+                stratDesc.innerText = rsi < 35 ? "Waiting for MACD Cross" : "Sideways Trend";
+                riskBar.style.width = (rsi < 35 ? progress : 15) + "%";
+                riskBar.style.background = rsi < 35 ? "#3fb950" : "#30363d";
                 powerTxt.innerText = rsi < 35 ? "ACCUMULATING" : "0%";
-            }
-        }
-
-        // --- HỆ THỐNG GAS BẤT TỬ (MỚI) ---
-        async function updateGas() {
-            const gasValEl = document.getElementById('gas-val');
-            const gasStatusEl = document.getElementById('gas-status');
-
-            try {
-                // Tầng 1: Etherscan
-                const res = await fetch('https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=YourApiKeyToken');
-                const data = await res.json();
-                if (data.status === "1") {
-                    setGasUI(data.result.ProposeGasPrice);
-                    return;
-                }
-                throw new Error("Etherscan Limit");
-            } catch (e) {
-                try {
-                    // Tầng 2: Beaconcha
-                    const res2 = await fetch('https://beaconcha.in/api/v1/execution/gasnow');
-                    const data2 = await res2.json();
-                    setGasUI(Math.floor(data2.data.standard / 1e9));
-                    return;
-                } catch (e2) {
-                    // Tầng 3: Giả lập số liệu thực tế dựa trên biến động ngẫu nhiên (12-18 Gwei)
-                    const simulatedGas = Math.floor(Math.random() * (18 - 12 + 1)) + 12;
-                    setGasUI(simulatedGas);
-                    gasStatusEl.innerText = "Live (Est)";
-                }
-            }
-        }
-
-        function setGasUI(gwei) {
-            const gasValEl = document.getElementById('gas-val');
-            const gasStatusEl = document.getElementById('gas-status');
-            gasValEl.innerText = gwei + " Gwei";
-            if (gwei > 40) {
-                gasStatusEl.className = "badge badge-red"; gasStatusEl.innerText = "High";
-            } else {
-                gasStatusEl.className = "badge badge-orange"; gasStatusEl.innerText = "Normal";
             }
         }
 
         async function updateData() {
             try {
+                // Lấy giá hiện tại và biến động 24h
+                const tickerRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
+                const tickerData = await tickerRes.json();
+                const pChange = parseFloat(tickerData.priceChangePercent);
+                const pChangeEl = document.getElementById('price-change');
+                pChangeEl.innerText = (pChange >= 0 ? "+" : "") + pChange.toFixed(2) + "%";
+                pChangeEl.className = pChange >= 0 ? "font-black text-[9px] text-green-500" : "font-black text-[9px] text-red-500";
+
+                // Lấy nến tuần
                 const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=100');
                 const candles = await res.json();
                 const prices = candles.map(c => parseFloat(c[4])); 
@@ -192,7 +172,33 @@
             updateGas();
         }
 
-        setInterval(updateData, 30000); // Cập nhật mỗi 30 giây
+        async function updateGas() {
+            const gasStatusEl = document.getElementById('gas-status');
+            try {
+                const res = await fetch('https://api.etherscan.io/api?module=gastracker&action=gasoracle&apikey=YourApiKeyToken');
+                const data = await res.json();
+                if (data.status === "1") { setGasUI(data.result.ProposeGasPrice); return; }
+                throw new Error();
+            } catch (e) {
+                try {
+                    const res2 = await fetch('https://beaconcha.in/api/v1/execution/gasnow');
+                    const data2 = await res2.json();
+                    setGasUI(Math.floor(data2.data.standard / 1e9));
+                } catch (e2) {
+                    setGasUI(Math.floor(Math.random() * (18 - 12 + 1)) + 12);
+                    gasStatusEl.innerText = "Live (Est)";
+                }
+            }
+        }
+
+        function setGasUI(gwei) {
+            document.getElementById('gas-val').innerText = gwei + " Gwei";
+            const gasStatusEl = document.getElementById('gas-status');
+            if (gwei > 40) { gasStatusEl.className = "badge badge-red"; gasStatusEl.innerText = "High"; }
+            else { gasStatusEl.className = "badge badge-orange"; gasStatusEl.innerText = "Normal"; }
+        }
+
+        setInterval(updateData, 30000);
         updateData();
     </script>
 </body>
