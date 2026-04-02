@@ -2,118 +2,111 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: transparent; color: #c9d1d9; font-family: 'Inter', sans-serif; padding: 10px; margin: 0; overflow: hidden; }
-        .card { background: rgba(13, 17, 23, 0.95); border: 1px solid #30363d; border-radius: 12px; padding: 12px; height: 100%; display: flex; flex-direction: column; border-top: 2px solid #58a6ff; }
+        .card { background: rgba(13, 17, 23, 0.98); border: 1px solid #30363d; border-radius: 12px; padding: 12px; height: 100vh; display: flex; flex-direction: column; }
         
-        /* Hiệu ứng Radar Scan */
-        .radar { position: relative; width: 12px; height: 12px; background: #238636; border-radius: 50%; }
-        .radar::after { content: ''; position: absolute; width: 100%; height: 100%; background: inherit; border-radius: inherit; animation: scan 2s infinite; opacity: 0.6; }
-        @keyframes scan { 0% { transform: scale(1); opacity: 0.6; } 100% { transform: scale(3.5); opacity: 0; } }
+        .radar-static { width: 8px; height: 8px; background: #238636; border-radius: 50%; display: inline-block; }
 
-        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px dashed #21262d; }
-        .symbol-box { display: flex; flex-direction: column; }
-        .symbol-name { font-family: ui-monospace, monospace; font-weight: 800; font-size: 14px; color: #e6edf3; }
-        
-        /* Danger Meter */
-        .meter-container { width: 100%; height: 8px; background: #21262d; border-radius: 4px; overflow: hidden; margin: 8px 0; border: 1px solid #30363d; }
-        #meter-fill { height: 100%; width: 0%; transition: all 1s ease; }
+        .meter-bg { width: 100%; height: 4px; background: #21262d; border-radius: 10px; margin: 12px 0; }
+        #meter-fill { height: 100%; width: 0%; transition: width 2s ease-in-out; }
 
-        .alert-banner { padding: 10px; border-radius: 8px; font-size: 11px; font-weight: 700; text-align: center; margin-top: auto; border: 1px solid transparent; }
-        .status-badge { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 900; text-transform: uppercase; }
+        .data-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #21262d; transition: opacity 1s; }
+        .symbol-text { font-family: ui-monospace, monospace; font-weight: 700; font-size: 13px; color: #8b949e; }
         
-        .overheat-blink { animation: blink-red 0.8s infinite alternate; }
-        @keyframes blink-red { from { color: #f85149; filter: drop-shadow(0 0 2px #f85149); } to { color: #ffffff; } }
+        .alert-box { margin-top: auto; padding: 12px; border-radius: 8px; font-size: 11px; font-weight: 800; text-align: center; border: 1px solid #30363d; transition: all 1s; }
+        
+        /* Hiệu ứng mờ khi cập nhật dữ liệu */
+        .updating { opacity: 0.3; }
     </style>
 </head>
 <body>
     <div class="card">
-        <div class="flex justify-between items-center mb-2">
+        <div class="flex justify-between items-center">
             <div class="flex items-center gap-2">
-                <div class="radar"></div>
-                <span class="text-[10px] font-black text-blue-400 uppercase tracking-tighter">Leverage Radar System</span>
+                <div class="radar-static" id="status-dot"></div>
+                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">Leverage Monitor (60s Update)</span>
             </div>
-            <span class="text-[9px] text-gray-500 font-bold" id="last-update">--:--:--</span>
+            <span class="text-[9px] text-gray-600 font-mono" id="clock">--:--</span>
         </div>
 
-        <div class="meter-container">
-            <div id="meter-fill" style="background: linear-gradient(90deg, #238636, #d29922, #f85149);"></div>
+        <div class="meter-bg">
+            <div id="meter-fill" style="background: #3fb950;"></div>
         </div>
 
-        <div id="funding-list" class="flex-1 space-y-1">
-            </div>
+        <div id="list" class="flex-1"></div>
 
-        <div id="alert-banner" class="alert-banner">
-            ĐANG QUÉT TÍN HIỆU THANH KHOẢN...
+        <div id="alert" class="alert-box bg-[#161b22] text-gray-500">
+            ĐANG THEO DÕI TÂM LÝ THỊ TRƯỜNG...
         </div>
     </div>
 
     <script>
-        const symbols = [
-            { name: "BTC", base: 0.0012, vol: 0.002 },
-            { name: "ETH", base: 0.0008, vol: 0.001 },
-            { name: "SOL", base: -0.0025, vol: 0.008 },
-            { name: "DOGE", base: 0.0050, vol: 0.015 }
+        const coins = [
+            { n: "BTC", b: 0.0012 },
+            { n: "ETH", b: 0.0008 },
+            { n: "SOL", b: -0.0025 },
+            { n: "DOGE", b: 0.0050 }
         ];
 
-        function update() {
-            const list = document.getElementById('funding-list');
-            const banner = document.getElementById('alert-banner');
+        function refresh() {
+            const list = document.getElementById('list');
+            const alert = document.getElementById('alert');
             const meter = document.getElementById('meter-fill');
-            const time = document.getElementById('last-update');
+            const dot = document.getElementById('status-dot');
             
-            time.innerText = new Date().toLocaleTimeString();
-            let html = '';
-            let riskScore = 0;
-
-            symbols.forEach(s => {
-                const funding = s.base + (Math.random() * s.vol * 2 - s.vol);
-                const absF = Math.abs(funding);
-                riskScore += absF;
-                
-                const isRed = absF > 0.01;
-                const blinkClass = isRed ? 'overheat-blink' : '';
-                const badge = isRed ? '<span class="status-badge bg-red-500/20 text-red-500 border border-red-500/50">EXTREME</span>' : 
-                                     '<span class="status-badge bg-green-500/20 text-green-500 border border-green-500/50">STABLE</span>';
-
-                html += `
-                    <div class="data-row">
-                        <div class="symbol-box">
-                            <span class="symbol-name ${blinkClass}">${s.name}USDT</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            ${badge}
-                            <span class="font-mono font-bold text-[13px] ${funding >= 0 ? 'text-green-400' : 'text-red-400'}">
-                                ${funding >= 0 ? '+' : ''}${funding.toFixed(4)}%
-                            </span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            list.innerHTML = html;
+            // Hiệu ứng mờ nhẹ khi cập nhật
+            list.classList.add('updating');
             
-            // Cập nhật thanh Danger Meter (Mức độ rủi ro tổng thể)
-            const dangerLevel = Math.min(riskScore * 2000, 100);
-            meter.style.width = dangerLevel + '%';
+            setTimeout(() => {
+                document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                let totalRisk = 0;
+                let html = '';
 
-            // Cập nhật Banner Cảnh báo
-            if (riskScore > 0.02) {
-                banner.className = "alert-banner bg-red-500/10 border-red-500/50 text-red-500 alert-pulse";
-                banner.innerHTML = "⚠️ CẢNH BÁO: ĐÒN BẨY QUÁ TẢI - DỄ SẬP MẠNH";
-            } else if (riskScore < 0.005) {
-                banner.className = "alert-banner bg-green-500/10 border-green-500/50 text-green-500";
-                banner.innerHTML = "✅ AN TOÀN: THANH KHOẢN TỐT - CÓ THỂ MỞ LỆNH";
-            } else {
-                banner.className = "alert-banner bg-blue-500/10 border-blue-500/50 text-blue-400";
-                banner.innerHTML = "📡 RADAR: TÂM LÝ TRUNG LẬP - ĐỢI PHÁ VỠ";
-            }
+                coins.forEach(c => {
+                    // Biến động rất nhỏ để không gây nhiễu
+                    const f = c.b + (Math.random() * 0.001 - 0.0005);
+                    const absF = Math.abs(f);
+                    totalRisk += absF;
+                    
+                    const isExtreme = absF > 0.01;
+                    html += `
+                        <div class="data-row">
+                            <span class="symbol-text ${isExtreme ? 'text-red-400' : ''}">${c.n}USDT</span>
+                            <div class="flex items-center gap-3">
+                                <span class="font-mono font-bold text-[12px] ${f >= 0 ? 'text-green-500/80' : 'text-red-500/80'}">
+                                    ${f >= 0 ? '+' : ''}${f.toFixed(4)}%
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                list.innerHTML = html;
+                list.classList.remove('updating');
+
+                // Cập nhật thanh đo độ rủi ro (Giữ màu xanh nếu an toàn)
+                const level = Math.min(totalRisk * 2000, 100);
+                meter.style.width = level + '%';
+                meter.style.background = level > 70 ? '#f85149' : level > 40 ? '#d29922' : '#238636';
+
+                // Verdict tĩnh lặng
+                if (totalRisk > 0.02) {
+                    alert.style.color = "#f85149"; alert.style.borderColor = "#f85149";
+                    alert.innerText = "CẢNH BÁO: ĐÒN BẨY ĐANG TĂNG CAO";
+                    dot.style.background = "#f85149";
+                } else {
+                    alert.style.color = "#8b949e"; alert.style.borderColor = "#30363d";
+                    alert.innerText = "THỊ TRƯỜNG ỔN ĐỊNH - ĐỢI BIẾN ĐỘNG";
+                    dot.style.background = "#238636";
+                }
+            }, 500);
         }
 
-        setInterval(update, 3000);
-        update();
+        // Cập nhật mỗi 60 giây để tránh nhảy số liên tục
+        setInterval(refresh, 60000);
+        refresh();
     </script>
 </body>
 </html>
