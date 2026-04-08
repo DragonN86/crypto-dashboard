@@ -3,85 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTC Strategy VSA Pro - W1 Analysis</title>
+    <title>BTC Long-term Spot Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background: #0b0e14; color: #c9d1d9; font-family: 'Inter', sans-serif; padding: 12px; }
+        body { background: #0b0e14; color: #c9d1d9; font-family: 'Inter', sans-serif; padding: 12px; margin: 0; }
         .row-item { border-bottom: 1px solid #21262d; padding: 15px 0; }
-        .main-value { font-family: ui-monospace, monospace; font-weight: 900; font-size: 1.5rem; letter-spacing: -1px; }
+        .main-value { font-family: ui-monospace, monospace; font-weight: 900; font-size: 1.6rem; letter-spacing: -1px; }
         
-        /* Màu sắc trạng thái */
-        .text-vsa-bull { color: #26a69a; text-shadow: 0 0 10px rgba(38, 166, 154, 0.4); }
-        .text-vsa-bear { color: #ef5350; text-shadow: 0 0 10px rgba(239, 83, 80, 0.4); }
+        .badge { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; border: 1px solid transparent; }
+        .badge-green { background: rgba(38, 166, 154, 0.15); color: #26a69a; border-color: #26a69a; }
+        .badge-red { background: rgba(239, 83, 80, 0.15); color: #ef5350; border-color: #ef5350; }
+        .badge-blue { background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-color: #58a6ff; }
+        .badge-gray { background: rgba(48, 54, 61, 0.3); color: #8b949e; border-color: #30363d; }
         
-        .badge { padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 900; text-transform: uppercase; border: 1px solid transparent; }
-        .badge-vsa { background: rgba(187, 134, 252, 0.15); color: #bb86fc; border-color: #bb86fc; }
-        
-        .bar-bg { width: 100%; height: 6px; background: #161b22; border-radius: 10px; overflow: hidden; margin-top: 5px; }
-        .bar-fill { height: 100%; transition: width 0.8s ease; width: 0%; }
+        .bar-bg { width: 100%; height: 8px; background: #161b22; border-radius: 10px; overflow: hidden; margin-top: 6px; }
+        .bar-fill { height: 100%; transition: width 1s ease; width: 0%; }
 
         #strategic-verdict { 
-            margin-top: 15px; padding: 12px; border-radius: 12px; 
+            margin-top: 15px; padding: 15px; border-radius: 12px; 
             border: 1px solid #30363d; background: linear-gradient(145deg, #161b22, #0b0e14);
         }
-        .verdict-content { font-size: 11px; line-height: 1.6; color: #8b949e; }
-        .alert-flash { animation: flash 1s infinite; }
-        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+        .verdict-content { font-size: 12px; line-height: 1.6; color: #c9d1d9; }
+        .glow-green { text-shadow: 0 0 15px rgba(38, 166, 154, 0.6); color: #26a69a; }
+        .alert-flash { animation: flash 1.5s infinite; }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
     </style>
 </head>
 <body>
 
-    <!-- Section: Price & RSI -->
+    <!-- Section: RSI & Bollinger -->
     <div class="row-item">
         <div class="flex justify-between items-center text-[10px] text-gray-500 font-black uppercase tracking-widest">
             <div class="flex items-center gap-2">
-                <span>RSI Weekly</span>
+                <span>RSI Weekly (W1)</span>
                 <span id="price-change">--%</span>
             </div>
-            <span id="rsi-status" class="badge">Checking</span>
+            <span id="rsi-status" class="badge badge-gray">Syncing</span>
         </div>
         <div class="flex justify-between items-end mt-1">
             <span id="rsi-val" class="main-value text-white">--.--</span>
-            <div class="text-[9px] text-gray-500 font-bold text-right uppercase">
-                BB Upper: <span id="bb-upper" class="text-gray-400">--</span><br>
-                BB Lower: <span id="bb-lower" class="text-gray-400">--</span>
+            <div class="text-[9px] text-gray-500 font-bold text-right leading-tight uppercase">
+                Lower BB: <span id="bb-lower" class="text-gray-400">--</span><br>
+                Upper BB: <span id="bb-upper" class="text-gray-400">--</span>
             </div>
         </div>
     </div>
 
-    <!-- Section: Volume Spread Analysis (VSA) -->
-    <div class="row-item bg-gray-900/20 px-2 rounded-lg">
+    <!-- Section: VSA -->
+    <div class="row-item bg-gray-900/10 px-2 rounded-lg">
         <div class="flex justify-between items-center text-[10px] text-gray-500 font-black uppercase">
-            <span>Volume Spread Analysis (VSA)</span>
-            <span id="vol-ratio" class="text-purple-400">0% AVG</span>
+            <span>VSA Analysis</span>
+            <span id="vol-ratio" class="text-blue-400">0% AVG</span>
         </div>
-        <div id="vsa-type" class="text-sm font-bold mt-1 text-gray-400">SCANNING CANDLESTICK...</div>
+        <div id="vsa-type" class="text-sm font-bold mt-1 text-gray-400 uppercase tracking-tighter">Scanning...</div>
         <div class="bar-bg">
-            <div id="vol-bar" class="bar-fill" style="background: #bb86fc;"></div>
+            <div id="vol-bar" class="bar-fill" style="background: #58a6ff;"></div>
         </div>
     </div>
 
     <!-- Section: Strategy Engine -->
-    <div class="row-item border-none">
+    <div class="row-item border-none pb-0">
         <div class="flex justify-between items-center mb-2">
-            <span class="text-[10px] font-black text-gray-500 uppercase">W1 Strategy Engine</span>
-            <span id="strat-badge" class="badge">Waiting</span>
+            <span class="text-[10px] font-black text-gray-500 uppercase">Investment Engine</span>
+            <span id="strat-badge" class="badge badge-gray">Idle</span>
         </div>
-        <div id="strat-text" class="main-value text-gray-700">OFFLINE</div>
-        <div id="strat-desc" class="text-[11px] mt-1 italic text-gray-500 font-medium">Initializing technical indicators...</div>
-        <div class="bar-bg mt-3">
+        <div id="strat-text" class="main-value text-gray-700 uppercase">Checking Cycle...</div>
+        <div id="strat-desc" class="text-[11px] mt-1 italic text-gray-500 font-medium tracking-tight">Monitoring long-term accumulation...</div>
+        <div class="bar-bg mt-4">
             <div id="risk-bar" class="bar-fill"></div>
         </div>
     </div>
 
-    <!-- Verdict Box -->
+    <!-- Final Verdict Box -->
     <div id="strategic-verdict">
-        <div class="text-[10px] font-black text-gray-500 uppercase mb-2">Verdict & VSA Strategy</div>
-        <div id="verdict-text" class="verdict-content">Đang đồng bộ hóa dữ liệu từ Binance API...</div>
+        <div class="text-[10px] font-black text-gray-500 uppercase mb-2 tracking-widest">Kết quả phân tích Spot</div>
+        <div id="verdict-text" class="verdict-content italic text-gray-500 text-center">Đang tải dữ liệu chu kỳ...</div>
     </div>
 
     <script>
+        // --- 1. HÀM TOÁN HỌC ---
         function EMA(data, period) {
             const k = 2 / (period + 1);
             let ema = data[0];
@@ -95,7 +96,10 @@
             const ema26 = data.map((_, i) => i < 26 ? null : EMA(data.slice(0, i + 1), 26));
             const macdLine = ema12.map((val, i) => (val && ema26[i]) ? val - ema26[i] : null).filter(v => v !== null);
             const signalLine = macdLine.map((_, i) => i < 9 ? null : EMA(macdLine.slice(0, i + 1), 9)).filter(v => v !== null);
-            return { currentHist: macdLine[macdLine.length-1] - signalLine[signalLine.length-1], prevHist: macdLine[macdLine.length-2] - signalLine[signalLine.length-2] };
+            return { 
+                currentHist: macdLine[macdLine.length-1] - signalLine[signalLine.length-1], 
+                prevHist: macdLine[macdLine.length-2] - signalLine[signalLine.length-2] 
+            };
         }
 
         function calculateBB(data) {
@@ -105,6 +109,7 @@
             return { upper: mid + (2 * stdDev), lower: mid - (2 * stdDev) };
         }
 
+        // --- 2. HÀM CHIẾN LƯỢC (TÁCH BIỆT) ---
         function runStrategy(prices, volumes, candles, rsi) {
             const macd = calculateMACD(prices);
             const bb = calculateBB(prices);
@@ -114,77 +119,68 @@
             const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
             const volRatio = (curVol / avgVol) * 100;
 
-            // UI Elements
             const vsaType = document.getElementById('vsa-type');
             const stText = document.getElementById('strat-text');
             const stBadge = document.getElementById('strat-badge');
             const vText = document.getElementById('verdict-text');
             const riskBar = document.getElementById('risk-bar');
 
-            // 1. VSA Analysis Logic
+            // Phân tích nến VSA
             const open = parseFloat(lastCandle[1]), high = parseFloat(lastCandle[2]), low = parseFloat(lastCandle[3]), close = parseFloat(lastCandle[4]);
             const lowerWick = Math.min(open, close) - low;
-            const upperWick = high - Math.max(open, close);
             const body = Math.abs(close - open);
             
-            let vsaSignal = "NORMAL VOLUME";
-            let vsaColor = "text-gray-400";
-
-            if (volRatio > 150 && lowerWick > body) {
-                vsaSignal = "STOPPING VOLUME (BULLISH)";
-                vsaColor = "text-vsa-bull";
-            } else if (volRatio > 150 && upperWick > body) {
-                vsaSignal = "UPTHRUST / SUPPLY (BEARISH)";
-                vsaColor = "text-vsa-bear";
-            } else if (volRatio < 60) {
-                vsaSignal = "NO DEMAND / NO SUPPLY";
-                vsaColor = "text-purple-400";
-            }
+            let vsaSignal = "Volume Bình Thường";
+            let vsaColor = "text-gray-500";
+            if (volRatio > 140 && lowerWick > body) { vsaSignal = "Cá Mập Hấp Thụ Lực Bán"; vsaColor = "text-green-400"; }
+            else if (volRatio < 70) { vsaSignal = "Cạn Kiệt Lực Bán (Dry)"; vsaColor = "text-blue-400"; }
 
             vsaType.innerText = vsaSignal;
-            vsaType.className = `text-sm font-bold mt-1 ${vsaColor}`;
+            vsaType.className = `text-[11px] font-black mt-1 ${vsaColor} uppercase`;
             document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
             document.getElementById('vol-ratio').innerText = volRatio.toFixed(0) + "% AVG";
 
-            // 2. Combined Strategy Logic
             const isHistRising = macd.currentHist > macd.prevHist;
 
-            if (vsaSignal.includes("STOPPING") && rsi < 35) {
-                stText.innerText = "ACCUMULATION ZONE";
-                stText.className = "main-value text-vsa-bull alert-flash";
-                stBadge.className = "badge badge-vsa"; stBadge.innerText = "WHALE BUYING";
-                vText.innerText = "VSA ALERT: Khối lượng cực lớn xuất hiện tại đáy (Stopping Volume). Cá mập đang hấp thụ lực bán. Chiến lược: Mua gom mạnh tay (Spot).";
+            // --- LOGIC QUYẾT ĐỊNH SPOT ---
+            if (rsi < 35 || curPrice <= bb.lower * 1.02) {
+                stText.innerText = "VÙNG GOM SPOT (DCA)";
+                stText.className = "main-value glow-green alert-flash";
+                stBadge.className = "badge badge-green"; stBadge.innerText = "Strong Buy Zone";
+                vText.innerHTML = `<strong>Vị thế Spot (Dài hạn): GOM DẦN (DCA).</strong> Với RSI < 35 và giá ở biên dưới Bollinger, rủi ro giảm sâu thêm là thấp hơn nhiều so với tiềm năng tăng trưởng. Đây là vùng "mua khi mọi người sợ hãi".`;
                 riskBar.style.width = "100%"; riskBar.style.background = "#26a69a";
-            } else if (vsaSignal.includes("UPTHRUST") && rsi > 65) {
-                stText.innerText = "DISTRIBUTION PEAK";
-                stText.className = "main-value text-vsa-bear alert-flash";
-                stBadge.className = "badge badge-vsa"; stBadge.innerText = "WHALE SELLING";
-                vText.innerText = "VSA ALERT: Nỗ lực tăng giá thất bại với Vol lớn (Upthrust). Phe bán đã chặn đứng đà tăng. Chiến lược: Chốt lời ngay lập tức.";
-                riskBar.style.width = "100%"; riskBar.style.background = "#ef5350";
             } else if (isHistRising && macd.currentHist < 0) {
-                stText.innerText = "RECOVERY PHASE";
+                stText.innerText = "DẤU HIỆU PHỤC HỒI";
                 stText.className = "main-value text-blue-400";
-                stBadge.className = "badge badge-gray"; stBadge.innerText = "CONVERGENCE";
-                vText.innerText = "MACD dốc lên dù vẫn âm. Áp lực bán giảm dần. Chiến lược: Theo dõi nến xác nhận để vào lệnh Long.";
-                riskBar.style.width = "50%"; riskBar.style.background = "#58a6ff";
+                stBadge.className = "badge badge-blue"; stBadge.innerText = "Accumulating";
+                vText.innerHTML = `<strong>Vị thế Spot: TIẾP TỤC NẮM GIỮ.</strong> Histogram MACD đang dốc lên cho thấy áp lực bán đã bão hòa. Chu kỳ phục hồi dài hạn đang hình thành. Chiến lược: Kiên nhẫn giữ hàng.`;
+                riskBar.style.width = "60%"; riskBar.style.background = "#58a6ff";
+            } else if (rsi > 70) {
+                stText.innerText = "VÙNG QUÁ NHIỆT";
+                stText.className = "main-value text-red-400";
+                stBadge.className = "badge badge-red"; stBadge.innerText = "Overbought";
+                vText.innerHTML = `<strong>Vị thế Spot: CHỐT LỜI TỪNG PHẦN.</strong> Thị trường đang ở trạng thái hưng phấn cao độ. Đây là lúc nên hiện thực hóa lợi nhuận và không mở vị thế mua mới.`;
+                riskBar.style.width = "100%"; riskBar.style.background = "#ef5350";
             } else {
-                stText.innerText = "WAITING FOR VOL";
-                stText.className = "main-value text-gray-600";
-                stBadge.className = "badge badge-gray"; stBadge.innerText = "NEUTRAL";
-                vText.innerText = "Thị trường chưa có dấu hiệu bất thường từ dòng tiền lớn. Chiến lược: Đứng ngoài quan sát.";
-                riskBar.style.width = "20%"; riskBar.style.background = "#30363d";
+                stText.innerText = "ĐANG TÍCH LŨY (HOLD)";
+                stText.className = "main-value text-gray-500";
+                stBadge.className = "badge badge-gray"; stBadge.innerText = "Waiting";
+                vText.innerHTML = `<strong>Chiến lược: KIÊN NHẪN.</strong> Thị trường đang đi ngang tích lũy. Chưa có dấu hiệu bùng nổ hay sập mạnh. Hãy giữ nguyên vị thế và theo dõi thêm Volume.`;
+                riskBar.style.width = "30%"; riskBar.style.background = "#30363d";
             }
 
             document.getElementById('bb-upper').innerText = bb.upper.toLocaleString();
             document.getElementById('bb-lower').innerText = bb.lower.toLocaleString();
         }
 
+        // --- 3. CẬP NHẬT DỮ LIỆU ---
         async function updateData() {
             try {
                 const tRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
                 const tData = await tRes.json();
-                document.getElementById('price-change').innerText = (tData.priceChangePercent >= 0 ? "+" : "") + tData.priceChangePercent + "%";
-                document.getElementById('price-change').className = tData.priceChangePercent >= 0 ? "text-green-500" : "text-red-500";
+                const pChange = parseFloat(tData.priceChangePercent);
+                document.getElementById('price-change').innerText = (pChange >= 0 ? "+" : "") + pChange.toFixed(2) + "%";
+                document.getElementById('price-change').className = pChange >= 0 ? "text-green-500 font-bold" : "text-red-500 font-bold";
 
                 const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=100');
                 const candles = await res.json();
@@ -199,92 +195,13 @@
                 }
                 const rsi = 100 - (100 / (1 + (g/14)/(l/14)));
                 document.getElementById('rsi-val').innerText = rsi.toFixed(2);
-                document.getElementById('rsi-status').className = `badge ${rsi < 35 ? 'badge-green' : rsi > 70 ? 'badge-red' : 'badge-gray'}`;
-                document.getElementById('rsi-status').innerText = rsi < 35 ? 'Oversold' : rsi > 70 ? 'Overbought' : 'Neutral';
+                
+                const rsiS = document.getElementById('rsi-status');
+                rsiS.innerText = rsi < 35 ? "GOM HÀNG" : rsi > 70 ? "HƯNG PHẤN" : "ỔN ĐỊNH";
+                rsiS.className = `badge ${rsi < 35 ? 'badge-green' : rsi > 70 ? 'badge-red' : 'badge-gray'}`;
 
-                function runStrategy(prices, volumes, candles, rsi) {
-    const macd = calculateMACD(prices);
-    const bb = calculateBB(prices);
-    const lastCandle = candles[candles.length - 1];
-    const curPrice = parseFloat(lastCandle[4]);
-    const curVol = parseFloat(lastCandle[5]);
-    const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
-    const volRatio = (curVol / avgVol) * 100;
-
-    const vsaType = document.getElementById('vsa-type');
-    const stText = document.getElementById('strat-text');
-    const stBadge = document.getElementById('strat-badge');
-    const vText = document.getElementById('verdict-text');
-    const riskBar = document.getElementById('risk-bar');
-
-    // Phân tích nến VSA cho Spot
-    const open = parseFloat(lastCandle[1]), high = parseFloat(lastCandle[2]), low = parseFloat(lastCandle[3]), close = parseFloat(lastCandle[4]);
-    const lowerWick = Math.min(open, close) - low;
-    const body = Math.abs(close - open);
-    
-    // ĐỊNH NGHĨA CÁC TRẠNG THÁI ĐẦU TƯ DÀI HẠN
-    let vsaSignal = "THỊ TRƯỜNG ỔN ĐỊNH";
-    let vsaColor = "text-gray-400";
-
-    if (volRatio > 140 && lowerWick > body) {
-        vsaSignal = "SMART MONEY ABSORPTION (GOM HÀNG)";
-        vsaColor = "text-green-400";
-    } else if (volRatio < 70) {
-        vsaSignal = "DRY SUPPLY (CẠN CUNG)";
-        vsaColor = "text-blue-400";
-    } else if (volRatio > 150 && close < open) {
-        vsaSignal = "CLIMAX SELLING (HOẢNG LOẠN)";
-        vsaColor = "text-red-400";
-    }
-
-    vsaType.innerText = vsaSignal;
-    vsaType.className = `text-[11px] font-black mt-1 ${vsaColor}`;
-    document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
-    document.getElementById('vol-ratio').innerText = volRatio.toFixed(0) + "% AVG";
-
-    // --- LOGIC QUYẾT ĐỊNH ĐẦU TƯ SPOT ---
-    const isHistRising = macd.currentHist > macd.prevHist;
-
-    // TRƯỜNG HỢP 1: VÙNG MUA VÀNG (RSI THẤP + BB BOTTOM)
-    if (rsi < 35 || (curPrice <= bb.lower * 1.02)) {
-        stText.innerText = "VÙNG GOM SPOT (DCA)";
-        stText.className = "main-value text-green-400 alert-flash";
-        stBadge.className = "badge badge-green"; stBadge.innerText = "STRONG BUY ZONE";
-        
-        vText.innerHTML = `<strong>Vị thế Spot (Dài hạn): GOM DẦN (DCA).</strong> Với RSI < 30 và giá chạm dải dưới Bollinger, rủi ro giảm sâu thêm là thấp hơn nhiều so với tiềm năng tăng trưởng. Đây là vùng "mua khi mọi người sợ hãi". Hãy chia vốn mua từng phần.`;
-        riskBar.style.width = "100%"; riskBar.style.background = "#3fb950";
-    } 
-    // TRƯỜNG HỢP 2: XÁC NHẬN CHU KỲ TĂNG (MACD CONVERGENCE)
-    else if (isHistRising && macd.currentHist < 0) {
-        stText.innerText = "PHỤC HỒI DÀI HẠN";
-        stText.className = "main-value text-blue-400";
-        stBadge.className = "badge badge-blue"; stBadge.innerText = "ACCUMULATING";
-        
-        vText.innerHTML = `<strong>Vị thế Spot: TIẾP TỤC NẮM GIỮ.</strong> Histogram MACD đang dốc lên cho thấy áp lực bán đã bão hòa. Chu kỳ phục hồi đang hình thành. Chiến lược: Giữ chặt hàng, chưa nên chốt lời sớm.`;
-        riskBar.style.width = "70%"; riskBar.style.background = "#58a6ff";
-    }
-    // TRƯỜNG HỢP 3: CẢNH BÁO QUÁ NHIỆT (RSI CAO + BB TOP)
-    else if (rsi > 70 || curPrice >= bb.upper * 0.98) {
-        stText.innerText = "VÙNG CHỐT LỜI DẦN";
-        stText.className = "main-value text-red-400";
-        stBadge.className = "badge badge-red"; stBadge.innerText = "OVERBOUGHT";
-        
-        vText.innerHTML = `<strong>Vị thế Spot: CHỐT LỜI TỪNG PHẦN.</strong> Giá đã chạm vùng quá nhiệt khung tuần. Đây là lúc "tham lam khi người khác hưng phấn". Hãy hiện thực hóa lợi nhuận và chờ đợi nhịp điều chỉnh tiếp theo.`;
-        riskBar.style.width = "100%"; riskBar.style.background = "#f85149";
-    }
-    // TRƯỜNG HỢP 4: GIỮ NGUYÊN (SIDEWAYS)
-    else {
-        stText.innerText = "GIỮ VỊ THẾ (HOLD)";
-        stText.className = "main-value text-gray-500";
-        stBadge.className = "badge badge-gray"; stBadge.innerText = "WAITING";
-        
-        vText.innerHTML = `<strong>Chiến lược: KIÊN NHẪN.</strong> Thị trường đang trong giai đoạn tích lũy không rõ xu hướng. Không cần hành động vội vàng. Hãy quan sát thêm các tín hiệu từ Volume.`;
-        riskBar.style.width = "30%"; riskBar.style.background = "#30363d";
-    }
-
-    document.getElementById('bb-upper').innerText = bb.upper.toLocaleString();
-    document.getElementById('bb-lower').innerText = bb.lower.toLocaleString();
-}
+                runStrategy(prices, volumes, candles, rsi);
+            } catch (e) { console.error("API Error"); }
         }
 
         setInterval(updateData, 30000);
