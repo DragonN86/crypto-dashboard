@@ -3,86 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTC Long-term Spot Dashboard</title>
+    <title>BTC Technical Analysis - Spot Focused</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background: #0b0e14; color: #c9d1d9; font-family: 'Inter', sans-serif; padding: 12px; margin: 0; }
-        .row-item { border-bottom: 1px solid #21262d; padding: 15px 0; }
-        .main-value { font-family: ui-monospace, monospace; font-weight: 900; font-size: 1.6rem; letter-spacing: -1px; }
         
-        .badge { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; border: 1px solid transparent; }
-        .badge-green { background: rgba(38, 166, 154, 0.15); color: #26a69a; border-color: #26a69a; }
-        .badge-red { background: rgba(239, 83, 80, 0.15); color: #ef5350; border-color: #ef5350; }
-        .badge-blue { background: rgba(88, 166, 255, 0.15); color: #58a6ff; border-color: #58a6ff; }
-        .badge-gray { background: rgba(48, 54, 61, 0.3); color: #8b949e; border-color: #30363d; }
-        
-        .bar-bg { width: 100%; height: 8px; background: #161b22; border-radius: 10px; overflow: hidden; margin-top: 6px; }
-        .bar-fill { height: 100%; transition: width 1s ease; width: 0%; }
-
-        #strategic-verdict { 
-            margin-top: 15px; padding: 15px; border-radius: 12px; 
-            border: 1px solid #30363d; background: linear-gradient(145deg, #161b22, #0b0e14);
+        body { 
+            background: #0b0e14; 
+            color: #c9d1d9; 
+            font-family: 'Inter', sans-serif; 
+            display: flex;
+            justify-content: center;
+            padding: 20px;
         }
-        .verdict-content { font-size: 12px; line-height: 1.6; color: #c9d1d9; }
-        .glow-green { text-shadow: 0 0 15px rgba(38, 166, 154, 0.6); color: #26a69a; }
+
+        /* Container chính giống hình mẫu */
+        .dashboard-container {
+            width: 100%;
+            max-width: 450px;
+            background: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+
+        /* Tiêu đề Dashboard */
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #21262d;
+            padding-bottom: 12px;
+        }
+
+        /* Khu vực chỉ báo (Phần trên) */
+        .indicator-box {
+            background: rgba(22, 27, 34, 0.5);
+            border: 1px solid #21262d;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Khu vực kết luận (Phần dưới) */
+        .verdict-box {
+            background: rgba(35, 134, 54, 0.05); /* Xanh nhẹ cho Spot */
+            border: 1px solid #238636;
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .main-value { font-family: ui-monospace, monospace; font-weight: 900; font-size: 1.8rem; letter-spacing: -1px; }
+        .badge { padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 900; text-transform: uppercase; }
+        .bar-bg { width: 100%; height: 6px; background: #161b22; border-radius: 10px; overflow: hidden; margin-top: 8px; }
+        .bar-fill { height: 100%; transition: width 1s ease; width: 0%; }
+        
         .alert-flash { animation: flash 1.5s infinite; }
-        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes flash { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
     </style>
 </head>
 <body>
 
-    <!-- Section: RSI & Bollinger -->
-    <div class="row-item">
-        <div class="flex justify-between items-center text-[10px] text-gray-500 font-black uppercase tracking-widest">
+    <div class="dashboard-container">
+        <!-- HEADER -->
+        <div class="header-section">
             <div class="flex items-center gap-2">
-                <span>RSI Weekly (W1)</span>
-                <span id="price-change">--%</span>
+                <span class="text-xl">📈</span>
+                <h1 class="font-black text-sm uppercase tracking-tighter text-gray-300">Technical Analysis</h1>
             </div>
-            <span id="rsi-status" class="badge badge-gray">Syncing</span>
+            <span class="text-[10px] font-bold py-1 px-3 bg-blue-900/30 text-blue-400 rounded-full">W1 Signals</span>
         </div>
-        <div class="flex justify-between items-end mt-1">
-            <span id="rsi-val" class="main-value text-white">--.--</span>
-            <div class="text-[9px] text-gray-500 font-bold text-right leading-tight uppercase">
-                Lower BB: <span id="bb-lower" class="text-gray-400">--</span><br>
-                Upper BB: <span id="bb-upper" class="text-gray-400">--</span>
+
+        <!-- PHẦN TRÊN: CÁC CHỈ BÁO -->
+        <div class="indicator-box">
+            <div class="mb-4">
+                <div class="flex justify-between items-center text-[10px] text-gray-500 font-black uppercase mb-1">
+                    <span>RSI Weekly</span>
+                    <span id="price-change">--%</span>
+                </div>
+                <div class="flex justify-between items-end">
+                    <span id="rsi-val" class="main-value text-white">--.--</span>
+                    <span id="rsi-status" class="badge bg-gray-800 text-gray-400">Syncing</span>
+                </div>
+            </div>
+
+            <div class="mb-4 pt-4 border-t border-gray-800/50">
+                <div class="flex justify-between items-center text-[10px] text-gray-500 font-black uppercase">
+                    <span>Volume Analysis (VSA)</span>
+                    <span id="vol-ratio" class="text-blue-400">0% AVG</span>
+                </div>
+                <div id="vsa-type" class="text-xs font-bold mt-1 text-gray-400 uppercase tracking-tight">Scanning Supply...</div>
+                <div class="bar-bg">
+                    <div id="vol-bar" class="bar-fill" style="background: #3fb950;"></div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-800/50">
+                <div class="flex justify-between items-center text-[10px] text-gray-500 font-black uppercase mb-1">
+                    <span>Bollinger Valuation</span>
+                </div>
+                <div class="flex justify-between text-[11px] font-mono">
+                    <span class="text-red-400">Upper: <span id="bb-upper">--</span></span>
+                    <span class="text-green-400">Lower: <span id="bb-lower">--</span></span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Section: VSA -->
-    <div class="row-item bg-gray-900/10 px-2 rounded-lg">
-        <div class="flex justify-between items-center text-[10px] text-gray-500 font-black uppercase">
-            <span>VSA Analysis</span>
-            <span id="vol-ratio" class="text-blue-400">0% AVG</span>
-        </div>
-        <div id="vsa-type" class="text-sm font-bold mt-1 text-gray-400 uppercase tracking-tighter">Scanning...</div>
-        <div class="bar-bg">
-            <div id="vol-bar" class="bar-fill" style="background: #58a6ff;"></div>
-        </div>
-    </div>
+        <!-- PHẦN DƯỚI: KẾT QUẢ, PHÂN TÍCH -->
+        <div class="verdict-box">
+            <h2 class="text-xs font-black text-green-500 uppercase mb-3 tracking-widest flex items-center gap-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span>
+                Kết quả, Phân tích:
+            </h2>
+            
+            <div id="strat-text" class="text-lg font-black mb-2 text-white uppercase tracking-tighter">Initializing...</div>
+            
+            <p id="verdict-text" class="text-[12px] leading-relaxed text-gray-400 italic">
+                Đang tổng hợp dữ liệu từ chu kỳ nến tuần để đưa ra chiến thuật Spot tối ưu...
+            </p>
 
-    <!-- Section: Strategy Engine -->
-    <div class="row-item border-none pb-0">
-        <div class="flex justify-between items-center mb-2">
-            <span class="text-[10px] font-black text-gray-500 uppercase">Investment Engine</span>
-            <span id="strat-badge" class="badge badge-gray">Idle</span>
+            <div class="mt-4">
+                <div class="flex justify-between items-center text-[9px] font-black text-gray-500 uppercase mb-1">
+                    <span>Confidence Score</span>
+                    <span id="confidence-val">0%</span>
+                </div>
+                <div class="bar-bg bg-gray-800">
+                    <div id="risk-bar" class="bar-fill" style="background: #238636;"></div>
+                </div>
+            </div>
         </div>
-        <div id="strat-text" class="main-value text-gray-700 uppercase">Checking Cycle...</div>
-        <div id="strat-desc" class="text-[11px] mt-1 italic text-gray-500 font-medium tracking-tight">Monitoring long-term accumulation...</div>
-        <div class="bar-bg mt-4">
-            <div id="risk-bar" class="bar-fill"></div>
-        </div>
-    </div>
-
-    <!-- Final Verdict Box -->
-    <div id="strategic-verdict">
-        <div class="text-[10px] font-black text-gray-500 uppercase mb-2 tracking-widest">Kết quả phân tích Spot</div>
-        <div id="verdict-text" class="verdict-content italic text-gray-500 text-center">Đang tải dữ liệu chu kỳ...</div>
     </div>
 
     <script>
-        // --- 1. HÀM TOÁN HỌC ---
         function EMA(data, period) {
             const k = 2 / (period + 1);
             let ema = data[0];
@@ -109,8 +163,7 @@
             return { upper: mid + (2 * stdDev), lower: mid - (2 * stdDev) };
         }
 
-        // --- 2. HÀM CHIẾN LƯỢC (TÁCH BIỆT) ---
-        function runStrategy(prices, volumes, candles, rsi) {
+        function updateStrategy(prices, volumes, candles, rsi) {
             const macd = calculateMACD(prices);
             const bb = calculateBB(prices);
             const lastCandle = candles[candles.length - 1];
@@ -119,68 +172,53 @@
             const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
             const volRatio = (curVol / avgVol) * 100;
 
-            const vsaType = document.getElementById('vsa-type');
             const stText = document.getElementById('strat-text');
-            const stBadge = document.getElementById('strat-badge');
             const vText = document.getElementById('verdict-text');
+            const vsaType = document.getElementById('vsa-type');
             const riskBar = document.getElementById('risk-bar');
 
-            // Phân tích nến VSA
-            const open = parseFloat(lastCandle[1]), high = parseFloat(lastCandle[2]), low = parseFloat(lastCandle[3]), close = parseFloat(lastCandle[4]);
+            // 1. Phân tích VSA
+            const open = parseFloat(lastCandle[1]), close = parseFloat(lastCandle[4]), low = parseFloat(lastCandle[3]);
             const lowerWick = Math.min(open, close) - low;
             const body = Math.abs(close - open);
             
-            let vsaSignal = "Volume Bình Thường";
-            let vsaColor = "text-gray-500";
-            if (volRatio > 140 && lowerWick > body) { vsaSignal = "Cá Mập Hấp Thụ Lực Bán"; vsaColor = "text-green-400"; }
-            else if (volRatio < 70) { vsaSignal = "Cạn Kiệt Lực Bán (Dry)"; vsaColor = "text-blue-400"; }
+            if (volRatio > 140 && lowerWick > body) { vsaType.innerText = "Smart Money Absorption"; vsaType.className = "text-xs font-bold mt-1 text-green-400"; }
+            else if (volRatio < 70) { vsaType.innerText = "No Supply / Dry Market"; vsaType.className = "text-xs font-bold mt-1 text-blue-400"; }
+            else { vsaType.innerText = "Normal Trading Volume"; vsaType.className = "text-xs font-bold mt-1 text-gray-400"; }
 
-            vsaType.innerText = vsaSignal;
-            vsaType.className = `text-[11px] font-black mt-1 ${vsaColor} uppercase`;
-            document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
-            document.getElementById('vol-ratio').innerText = volRatio.toFixed(0) + "% AVG";
-
-            const isHistRising = macd.currentHist > macd.prevHist;
-
-            // --- LOGIC QUYẾT ĐỊNH SPOT ---
+            // 2. Phân tích Chiến thuật Spot
             if (rsi < 35 || curPrice <= bb.lower * 1.02) {
-                stText.innerText = "VÙNG GOM SPOT (DCA)";
-                stText.className = "main-value glow-green alert-flash";
-                stBadge.className = "badge badge-green"; stBadge.innerText = "Strong Buy Zone";
-                vText.innerHTML = `<strong>Vị thế Spot (Dài hạn): GOM DẦN (DCA).</strong> Với RSI < 35 và giá ở biên dưới Bollinger, rủi ro giảm sâu thêm là thấp hơn nhiều so với tiềm năng tăng trưởng. Đây là vùng "mua khi mọi người sợ hãi".`;
-                riskBar.style.width = "100%"; riskBar.style.background = "#26a69a";
-            } else if (isHistRising && macd.currentHist < 0) {
-                stText.innerText = "DẤU HIỆU PHỤC HỒI";
-                stText.className = "main-value text-blue-400";
-                stBadge.className = "badge badge-blue"; stBadge.innerText = "Accumulating";
-                vText.innerHTML = `<strong>Vị thế Spot: TIẾP TỤC NẮM GIỮ.</strong> Histogram MACD đang dốc lên cho thấy áp lực bán đã bão hòa. Chu kỳ phục hồi dài hạn đang hình thành. Chiến lược: Kiên nhẫn giữ hàng.`;
-                riskBar.style.width = "60%"; riskBar.style.background = "#58a6ff";
-            } else if (rsi > 70) {
-                stText.innerText = "VÙNG QUÁ NHIỆT";
-                stText.className = "main-value text-red-400";
-                stBadge.className = "badge badge-red"; stBadge.innerText = "Overbought";
-                vText.innerHTML = `<strong>Vị thế Spot: CHỐT LỜI TỪNG PHẦN.</strong> Thị trường đang ở trạng thái hưng phấn cao độ. Đây là lúc nên hiện thực hóa lợi nhuận và không mở vị thế mua mới.`;
-                riskBar.style.width = "100%"; riskBar.style.background = "#ef5350";
+                stText.innerText = "Vùng Gom Spot (DCA)";
+                stText.className = "text-lg font-black mb-2 text-green-400 alert-flash";
+                vText.innerHTML = "Vị thế Spot (Dài hạn): <b>GOM DẦN (DCA)</b>. Với RSI đang ở mức thấp và giá chạm vùng định giá thấp của Bollinger, rủi ro giảm sâu thêm là thấp hơn nhiều so với tiềm năng tăng trưởng. Đây là vùng 'mua khi mọi người sợ hãi'.";
+                riskBar.style.width = "100%";
+                document.getElementById('confidence-val').innerText = "95%";
+            } else if (macd.currentHist > macd.prevHist && macd.currentHist < 0) {
+                stText.innerText = "Phục Hồi Dài Hạn";
+                stText.className = "text-lg font-black mb-2 text-blue-400";
+                vText.innerHTML = "Vị thế Spot: <b>TIẾP TỤC NẮM GIỮ</b>. Histogram MACD đang dốc lên cho thấy áp lực bán đã bão hòa. Chu kỳ phục hồi đang hình thành rõ nét. Chiến lược: Giữ hàng chặt, không bán non.";
+                riskBar.style.width = "65%";
+                document.getElementById('confidence-val').innerText = "70%";
             } else {
-                stText.innerText = "ĐANG TÍCH LŨY (HOLD)";
-                stText.className = "main-value text-gray-500";
-                stBadge.className = "badge badge-gray"; stBadge.innerText = "Waiting";
-                vText.innerHTML = `<strong>Chiến lược: KIÊN NHẪN.</strong> Thị trường đang đi ngang tích lũy. Chưa có dấu hiệu bùng nổ hay sập mạnh. Hãy giữ nguyên vị thế và theo dõi thêm Volume.`;
-                riskBar.style.width = "30%"; riskBar.style.background = "#30363d";
+                stText.innerText = "Tích Lũy Đi Ngang";
+                stText.className = "text-lg font-black mb-2 text-gray-400";
+                vText.innerHTML = "Chiến lược: <b>KIÊN NHẪN</b>. Thị trường đang trong giai đoạn tích lũy không rõ xu hướng. Đây là lúc quan sát dòng tiền lớn. Không cần hành động vội vàng.";
+                riskBar.style.width = "30%";
+                document.getElementById('confidence-val').innerText = "40%";
             }
 
             document.getElementById('bb-upper').innerText = bb.upper.toLocaleString();
             document.getElementById('bb-lower').innerText = bb.lower.toLocaleString();
+            document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
+            document.getElementById('vol-ratio').innerText = volRatio.toFixed(0) + "% AVG";
         }
 
-        // --- 3. CẬP NHẬT DỮ LIỆU ---
         async function updateData() {
             try {
                 const tRes = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT');
                 const tData = await tRes.json();
-                const pChange = parseFloat(tData.priceChangePercent);
-                document.getElementById('price-change').innerText = (pChange >= 0 ? "+" : "") + pChange.toFixed(2) + "%";
-                document.getElementById('price-change').className = pChange >= 0 ? "text-green-500 font-bold" : "text-red-500 font-bold";
+                document.getElementById('price-change').innerText = (tData.priceChangePercent >= 0 ? "+" : "") + tData.priceChangePercent + "%";
+                document.getElementById('price-change').className = tData.priceChangePercent >= 0 ? "text-green-500" : "text-red-500";
 
                 const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=100');
                 const candles = await res.json();
@@ -195,12 +233,11 @@
                 }
                 const rsi = 100 - (100 / (1 + (g/14)/(l/14)));
                 document.getElementById('rsi-val').innerText = rsi.toFixed(2);
-                
-                const rsiS = document.getElementById('rsi-status');
-                rsiS.innerText = rsi < 35 ? "GOM HÀNG" : rsi > 70 ? "HƯNG PHẤN" : "ỔN ĐỊNH";
-                rsiS.className = `badge ${rsi < 35 ? 'badge-green' : rsi > 70 ? 'badge-red' : 'badge-gray'}`;
+                const rs = document.getElementById('rsi-status');
+                rs.innerText = rsi < 35 ? "Oversold" : rsi > 70 ? "Overbought" : "Neutral";
+                rs.className = `badge ${rsi < 35 ? 'bg-green-900 text-green-400' : rsi > 70 ? 'bg-red-900 text-red-400' : 'bg-gray-800 text-gray-400'}`;
 
-                runStrategy(prices, volumes, candles, rsi);
+                updateStrategy(prices, volumes, candles, rsi);
             } catch (e) { console.error("API Error"); }
         }
 
