@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTC Technical Analysis - Spot Pro</title>
+    <title>BTC Spot Pro - Active Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
@@ -17,6 +17,10 @@
         .bar-fill { height: 100%; transition: all 1s ease; }
         .alert-flash { animation: flash 1.3s infinite; }
         @keyframes flash { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        
+        /* Style cho nút active */
+        .tf-btn { transition: all 0.3s ease; background: #1e2937; color: #94a3b8; }
+        .tf-btn.active { background: #3b82f6; color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
     </style>
 </head>
 <body class="flex justify-center p-4 min-h-screen">
@@ -36,6 +40,24 @@
             </div>
         </div>
 
+        <!-- TRACKER: GIÁ TRUNG BÌNH GOM -->
+        <div class="bg-blue-900/20 border border-blue-500/30 rounded-2xl p-4 mb-6">
+            <div class="flex justify-between items-center mb-2">
+                <span class="text-[10px] font-black text-blue-400 uppercase tracking-widest">DCA Tracker</span>
+                <button onclick="setEntryPrice()" class="text-[10px] bg-blue-500/20 hover:bg-blue-500/40 px-2 py-1 rounded-lg transition">Sửa giá</button>
+            </div>
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-xs text-slate-400">Giá gom trung bình</p>
+                    <p id="entry-price-display" class="font-mono font-bold text-lg text-white">$0</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-slate-400">Lợi nhuận hiện tại</p>
+                    <p id="profit-pct" class="font-mono font-bold text-lg text-slate-500">0.00%</p>
+                </div>
+            </div>
+        </div>
+
         <!-- INDICATORS -->
         <div class="bg-slate-900/70 border border-slate-700 rounded-3xl p-5 mb-6">
             <div class="grid grid-cols-2 gap-6">
@@ -45,11 +67,10 @@
                     <span id="rsi-status" class="inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-slate-700">NEUTRAL</span>
                 </div>
                 <div>
-                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">MACD Histogram</div>
+                    <div class="text-xs uppercase tracking-widest text-slate-400 mb-1">MACD Hist</div>
                     <div id="macd-val" class="main-value text-emerald-400">-0.00</div>
                 </div>
             </div>
-
             <div class="mt-8">
                 <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">Bollinger Bands (20)</div>
                 <div class="flex justify-between text-sm">
@@ -69,19 +90,17 @@
         <div id="verdict-box" class="rounded-3xl p-6 border border-emerald-500/30 bg-emerald-950/30">
             <div class="flex items-center gap-3 mb-4">
                 <div id="signal-dot" class="w-4 h-4 bg-emerald-500 rounded-full animate-ping"></div>
-                <h2 id="strat-text" class="text-2xl font-black tracking-tighter">PHỤC HỒI - NẮM GIỮ</h2>
+                <h2 id="strat-text" class="text-2xl font-black tracking-tighter uppercase">Analyzing</h2>
             </div>
-            <p id="verdict-text" class="text-slate-300 leading-relaxed text-[15px]">
-                Histogram MACD đang đảo chiều lên. Áp lực bán suy yếu. Tiếp tục nắm giữ vị thế Spot.
-            </p>
+            <p id="verdict-text" class="text-slate-300 leading-relaxed text-[15px] italic">Đang tổng hợp dữ liệu...</p>
 
             <div class="mt-8">
                 <div class="flex justify-between text-xs font-semibold text-slate-400 mb-2">
-                    <span>ĐỘ TIN CẬY</span>
-                    <span id="confidence-val">68%</span>
+                    <span>ĐỘ TIN CẬY CHIẾN THUẬT</span>
+                    <span id="confidence-val">0%</span>
                 </div>
                 <div class="bar-bg">
-                    <div id="risk-bar" class="bar-fill bg-emerald-500" style="width: 68%"></div>
+                    <div id="risk-bar" class="bar-fill bg-emerald-500" style="width: 0%"></div>
                 </div>
             </div>
         </div>
@@ -89,9 +108,24 @@
 
     <script>
         let currentTF = '1w';
+        let entryPrice = localStorage.getItem('btc_entry_price') || 0;
 
+        // Cập nhật hiển thị giá Entry ngay khi load
+        document.getElementById('entry-price-display').textContent = '$' + Number(entryPrice).toLocaleString();
+
+        function setEntryPrice() {
+            const price = prompt("Nhập giá trung bình gom BTC của bạn:", entryPrice);
+            if (price !== null) {
+                entryPrice = price;
+                localStorage.setItem('btc_entry_price', price);
+                document.getElementById('entry-price-display').textContent = '$' + Number(price).toLocaleString();
+                updateData();
+            }
+        }
+
+        // --- CÁC HÀM TOÁN HỌC ---
         function calculateRSI(prices, period = 14) {
-            if (prices.length < period + 5) return 50; // An toàn hơn
+            if (prices.length < period + 1) return 50;
             let gains = 0, losses = 0;
             for (let i = prices.length - period; i < prices.length; i++) {
                 const diff = prices[i] - prices[i - 1];
@@ -99,7 +133,7 @@
                 else losses -= diff;
             }
             const avgGain = gains / period;
-            const avgLoss = losses / period || 0.0001; // Tránh chia 0
+            const avgLoss = losses / period || 0.0001;
             return Math.min(100, Math.max(0, 100 - (100 / (1 + avgGain / avgLoss))));
         }
 
@@ -115,107 +149,89 @@
         }
 
         function calculateMACD(prices) {
-            if (prices.length < 40) return { current: 0, prev: 0 };
             const ema12 = calculateEMA(prices, 12);
             const ema26 = calculateEMA(prices, 26);
             const macdLine = ema12.map((v, i) => v - ema26[i]);
             const signal = calculateEMA(macdLine, 9);
-            
             const current = macdLine[macdLine.length - 1] - signal[signal.length - 1];
             const prev = macdLine[macdLine.length - 2] - signal[signal.length - 2];
-            return { current: current, prev: prev };
+            return { current, prev };
         }
 
         function calculateBB(prices, period = 20) {
-            if (prices.length < period) return { upper: 0, lower: 0 };
             const slice = prices.slice(-period);
             const sma = slice.reduce((a, b) => a + b, 0) / period;
             const stdDev = Math.sqrt(slice.reduce((a, b) => a + (b - sma) ** 2, 0) / period);
-            return {
-                upper: sma + 2 * stdDev,
-                lower: sma - 2 * stdDev
-            };
-        }
-
-        function formatPrice(num) {
-            return num.toLocaleString('en-US', { maximumFractionDigits: 0 });
+            return { upper: sma + 2 * stdDev, lower: sma - 2 * stdDev };
         }
 
         async function updateData() {
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${currentTF}&limit=150`);
+                // Tăng limit lên 200 để EMA ổn định hơn
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${currentTF}&limit=200`);
                 const candles = await res.json();
-                const prices = candles.map(c => parseFloat(c[4])).filter(p => p > 0);
+                const prices = candles.map(c => parseFloat(c[4]));
+                const lastPrice = prices[prices.length - 1];
 
                 const rsi = calculateRSI(prices);
                 const macd = calculateMACD(prices);
                 const bb = calculateBB(prices);
-                const price = prices[prices.length - 1];
 
-                // Cập nhật giao diện
+                // Cập nhật RSI UI
                 document.getElementById('rsi-val').textContent = rsi.toFixed(2);
-                const rsiStatus = document.getElementById('rsi-status');
-                if (rsi < 35) {
-                    rsiStatus.textContent = "OVERSOLD";
-                    rsiStatus.className = "inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-emerald-900 text-emerald-400";
-                } else if (rsi > 70) {
-                    rsiStatus.textContent = "OVERBOUGHT";
-                    rsiStatus.className = "inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-red-900 text-red-400";
-                } else {
-                    rsiStatus.textContent = "NEUTRAL";
-                    rsiStatus.className = "inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-slate-700";
+                const rsiS = document.getElementById('rsi-status');
+                if (rsi < 35) { rsiS.textContent = "OVERSOLD"; rsiS.className = "inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-emerald-900 text-emerald-400"; }
+                else if (rsi > 70) { rsiS.textContent = "OVERBOUGHT"; rsiS.className = "inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-red-900 text-red-400"; }
+                else { rsiS.textContent = "NEUTRAL"; rsiS.className = "inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-slate-700"; }
+
+                // Cập nhật MACD UI
+                document.getElementById('macd-val').textContent = macd.current.toFixed(2);
+                document.getElementById('macd-val').className = `main-value ${macd.current >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+
+                // Cập nhật BB UI
+                document.getElementById('bb-upper').textContent = Math.round(bb.upper).toLocaleString();
+                document.getElementById('bb-lower').textContent = Math.round(bb.lower).toLocaleString();
+
+                // Cập nhật Lợi nhuận DCA
+                if (entryPrice > 0) {
+                    const profit = ((lastPrice - entryPrice) / entryPrice) * 100;
+                    const profEl = document.getElementById('profit-pct');
+                    profEl.textContent = (profit >= 0 ? "+" : "") + profit.toFixed(2) + "%";
+                    profEl.className = `font-mono font-bold text-lg ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
                 }
 
-                const macdEl = document.getElementById('macd-val');
-                macdEl.textContent = macd.current.toFixed(2);
-                macdEl.className = `main-value ${macd.current >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-
-                document.getElementById('bb-upper').textContent = formatPrice(bb.upper);
-                document.getElementById('bb-lower').textContent = formatPrice(bb.lower);
-
-                // === CHIẾN LƯỢC (đã tối ưu) ===
-                let stratText = "TÍCH LŨY - KIÊN NHẪN";
-                let color = "text-slate-300";
-                let confidence = 45;
-                let verdict = "Thị trường đang sideway. Hãy kiên nhẫn quan sát.";
-
-                if (rsi > 72 || price > bb.upper * 0.985) {
-                    stratText = "BÁN / REBALANCE";
-                    color = "text-red-400";
-                    confidence = 88;
-                    verdict = "Vùng quá mua mạnh. Nên chốt lời một phần hoặc rebalance danh mục.";
-                } else if (rsi < 36 || price < bb.lower * 1.025) {
-                    stratText = "VÙNG GOM DCA";
-                    color = "text-emerald-400";
-                    confidence = 93;
-                    verdict = "Điều kiện rất tốt để tích lũy Spot dài hạn.";
-                } else if (macd.current > macd.prev && macd.current < 50) {
-                    stratText = "PHỤC HỒI - NẮM GIỮ";
-                    color = "text-sky-400";
-                    confidence = 72;
-                    verdict = "Histogram MACD đang đảo chiều lên. Áp lực bán suy yếu. Nên tiếp tục nắm giữ.";
+                // CHIẾN THUẬT
+                let strat = "TÍCH LŨY - KIÊN NHẪN", col = "text-slate-300", conf = 45, verd = "Thị trường đang đi ngang. Hãy kiên nhẫn quan sát thêm.";
+                if (rsi > 72 || lastPrice > bb.upper * 0.985) {
+                    strat = "BÁN / REBALANCE"; col = "text-red-400"; conf = 88; verd = "Vùng quá mua mạnh. Nên chốt lời một phần hoặc tái cấu trúc danh mục.";
+                } else if (rsi < 36 || lastPrice < bb.lower * 1.025) {
+                    strat = "VÙNG GOM DCA"; col = "text-emerald-400"; conf = 93; verd = "Điều kiện lý tưởng để tích lũy Spot dài hạn. Hãy giải ngân theo kế hoạch.";
+                } else if (macd.current > macd.prev) {
+                    strat = "PHỤC HỒI - NẮM GIỮ"; col = "text-sky-400"; conf = 72; verd = "Xung lực bán đang yếu đi, Histogram dốc lên. Tiếp tục giữ hàng.";
                 }
 
-                document.getElementById('strat-text').textContent = stratText;
-                document.getElementById('strat-text').className = `text-2xl font-black tracking-tighter ${color} ${confidence > 80 ? 'alert-flash' : ''}`;
-                document.getElementById('verdict-text').innerHTML = verdict;
+                document.getElementById('strat-text').textContent = strat;
+                document.getElementById('strat-text').className = `text-2xl font-black tracking-tighter ${col} ${conf > 85 ? 'alert-flash' : ''}`;
+                document.getElementById('verdict-text').textContent = verd;
+                document.getElementById('confidence-val').textContent = conf + "%";
+                document.getElementById('risk-bar').style.width = conf + "%";
+                document.getElementById('risk-bar').style.background = col.includes('emerald') ? "#10b981" : col.includes('red') ? "#ef4444" : "#38bdf8";
 
-                const bar = document.getElementById('risk-bar');
-                bar.style.width = confidence + "%";
-                bar.style.background = confidence > 80 ? "#10b981" : confidence > 60 ? "#38bdf8" : "#64748b";
-
-                document.getElementById('confidence-val').textContent = confidence + "%";
-
-            } catch (e) {
-                console.error(e);
-            }
+            } catch (e) { console.error(e); }
         }
 
-        // Timeframe buttons
-        document.getElementById('btn-weekly').onclick = () => { currentTF = '1w'; updateData(); };
-        document.getElementById('btn-daily').onclick = () => { currentTF = '1d'; updateData(); };
+        // Switch Timeframe & Active Class
+        const btns = { '1w': document.getElementById('btn-weekly'), '1d': document.getElementById('btn-daily') };
+        Object.keys(btns).forEach(tf => {
+            btns[tf].onclick = () => {
+                currentTF = tf;
+                Object.values(btns).forEach(b => b.classList.remove('active'));
+                btns[tf].classList.add('active');
+                updateData();
+            };
+        });
 
-        setInterval(updateData, 25000);
+        setInterval(updateData, 20000);
         updateData();
     </script>
 </body>
