@@ -22,44 +22,44 @@
         <div>
             <h1 class="text-4xl font-black text-white uppercase tracking-tighter">WinTrack <span class="text-[#f2cc60]">2026</span></h1>
             <p class="text-gray-400 text-sm mt-1">
-                Chiến lược: <span class="text-[#58a6ff] font-bold">"KỶ LUẬT LÀ SỨC MẠNH"</span> 
-                | User: <span class="text-white font-semibold">vowill</span>
+                Chiến lược: <span class="text-[#58a6ff] font-bold">"KỶ LUẬT LÀ SỨC MẠNH"</span>[cite: 2]
+                | User: <span class="text-white font-semibold">vowill</span>[cite: 2]
             </p>
         </div>
         <div class="mt-4 md:mt-0 flex items-center gap-3 bg-[#1c2128] px-5 py-2.5 rounded-2xl border border-[#30363d]">
             <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-            <span class="text-xs font-mono uppercase tracking-widest">LIVE MULTI-FACTOR ANALYSIS</span>
+            <span class="text-xs font-mono uppercase tracking-widest">LIVE MULTI-FACTOR ANALYSIS</span>[cite: 2]
         </div>
     </header>
 
     <!-- DASHBOARD GRID -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">📈 BTC Spot Technical Analysis</div>
-            <div class="h-[360px]"><iframe id="tech-frame" src="technical-analysis.html" class="w-full h-full border-none"></iframe></div>
+            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">📈 BTC Spot Technical Analysis</div>[cite: 2]
+            <div class="h-[360px]"><iframe id="tech-frame" src="technical-analysis.html" class="w-full h-full border-none"></iframe></div>[cite: 2]
         </div>
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">📊 Market Sentiment</div>
-            <div class="h-[360px]"><iframe id="fear-frame" src="fear-greed.html" class="w-full h-full border-none"></iframe></div>
+            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">📊 Market Sentiment</div>[cite: 2]
+            <div class="h-[360px]"><iframe id="fear-frame" src="fear-greed.html" class="w-full h-full border-none"></iframe></div>[cite: 2]
         </div>
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🌍 BTC Dominance</div>
-            <div class="h-[360px]"><iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" class="w-full h-full border-none"></iframe></div>
+            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🌍 BTC Dominance</div>[cite: 2]
+            <div class="h-[360px]"><iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" class="w-full h-full border-none"></iframe></div>[cite: 2]
         </div>
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🔥 Leverage & Funding Signals</div>
-            <div class="h-[360px]"><iframe src="leverage-signals.html" class="w-full h-full border-none"></iframe></div>
+            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🔥 Leverage & Funding Signals</div>[cite: 2]
+            <div class="h-[360px]"><iframe src="leverage-signals.html" class="w-full h-full border-none"></iframe></div>[cite: 2]
         </div>
     </div>
 
     <!-- KẾ HOẠCH HÀNH ĐỘNG -->
     <section>
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold uppercase tracking-tight">KẾ HOẠCH HÀNH ĐỘNG</h2>
+            <h2 class="text-2xl font-bold uppercase tracking-tight">KẾ HOẠCH HÀNH ĐỘNG</h2>[cite: 2]
             <div id="phase-info" class="text-sm font-mono bg-[#1c2128] px-5 py-2 rounded-2xl flex items-center gap-3">
                 <span class="text-emerald-400">●</span>
-                <span id="current-phase">PHASE 00 - ACCUMULATING</span>
-                <span id="phase-duration" class="text-gray-400">0 phút</span>
+                <span id="current-phase">PHASE 00 - ACCUMULATING</span>[cite: 2]
+                <span id="phase-duration" class="text-gray-400">0 phút</span>[cite: 2]
             </div>
         </div>
 
@@ -67,16 +67,14 @@
     </section>
 
     <footer class="text-center mt-16 text-[#484f58] text-xs tracking-widest">
-        © 2026 CRYPTO EXIT SYSTEM BY VO WILL — KỶ LUẬT LÀ SỨC MẠNH
+        © 2026 CRYPTO EXIT SYSTEM BY VO WILL — KỶ LUẬT LÀ SỨC MẠNH[cite: 2]
     </footer>
 
     <script>
         let currentPhaseId = 0;
         let phaseStartTime = Date.now();
-
         const STORAGE_KEY = "wintrack_phase_state";
 
-        // Load trạng thái từ localStorage
         function loadPhaseState() {
             const saved = localStorage.getItem(STORAGE_KEY);
             if (saved) {
@@ -86,12 +84,8 @@
             }
         }
 
-        // Lưu trạng thái
         function savePhaseState() {
-            const data = {
-                phaseId: currentPhaseId,
-                startTime: phaseStartTime
-            };
+            const data = { phaseId: currentPhaseId, startTime: phaseStartTime };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         }
 
@@ -117,83 +111,83 @@
         }
 
         function activatePhase(id) {
-            if (currentPhaseId === id) return;
+            if (currentPhaseId === id && document.getElementById(`phase-card-${id}`).classList.contains('phase-card-active')) return;
 
-            for (let i = 0; i < 4; i++) {
+            phaseConfig.forEach((_, i) => {
                 const card = document.getElementById(`phase-card-${i}`);
                 if (card) card.classList.remove('phase-card-active', 'phase-card-accumulate');
-            }
+            });
 
             const card = document.getElementById(`phase-card-${id}`);
             const badge = document.getElementById(`badge-${id}`);
 
-            card.classList.add(id === 0 ? 'phase-card-accumulate' : 'phase-card-active');
-            badge.textContent = id === 0 ? "ACCUMULATING" : "ACTIVE";
-            badge.className = `text-[10px] font-bold px-4 py-1 rounded-full ${id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'}`;
+            if (card) {
+                card.classList.add(id === 0 ? 'phase-card-accumulate' : 'phase-card-active');
+                badge.textContent = id === 0 ? "ACCUMULATING" : "ACTIVE";
+                badge.className = `text-[10px] font-bold px-4 py-1 rounded-full ${id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'}`;
+            }
 
-            currentPhaseId = id;
-            phaseStartTime = Date.now();
-            savePhaseState();
+            if (currentPhaseId !== id) {
+                currentPhaseId = id;
+                phaseStartTime = Date.now();
+                savePhaseState();
+            }
 
-            document.getElementById('current-phase').textContent = `PHASE 0${id} - ${phaseConfig[id].status}`;
+            document.getElementById('current-phase').textContent = `PHASE 0${id} - ${id === 0 ? "ACCUMULATING" : "ACTIVE"}`;
         }
 
-async function updateStrategy() {
-    let rsi = 50, fear = 50;
+        async function updateStrategy() {
+            let rsi = 50, fear = 50;
 
-    // 1. Lấy dữ liệu RSI từ iframe Technical Analysis
-    try {
-        const techFrame = document.getElementById('tech-frame');
-        if (techFrame && techFrame.contentDocument) {
-            const rsiElement = techFrame.contentDocument.getElementById('rsi-val');
-            rsi = parseFloat(rsiElement?.innerText) || 50;
-        }
-    } catch(e) {
-        console.warn("Không thể truy cập tech-frame:", e);
-    }
+            // 1. Lấy RSI từ tech-frame
+            try {
+                const techFrame = document.getElementById('tech-frame');
+                const techDoc = techFrame.contentDocument || techFrame.contentWindow.document;
+                const rsiElement = techDoc.getElementById('rsi-val');
+                if (rsiElement) rsi = parseFloat(rsiElement.innerText) || 50;[cite: 2]
+            } catch(e) { console.warn("Tech Frame chưa sẵn sàng"); }
 
-    // 2. Lấy dữ liệu FEAR từ iframe Fear-Greed (PHẦN BẠN CẦN SỬA)
-    try {
-        const fearFrame = document.getElementById('fear-frame');
-        if (fearFrame && fearFrame.contentDocument) {
-            // Tìm phần tử có id="fear-val" trong file fear-greed.html
-            const fearElement = fearFrame.contentDocument.getElementById('fear-val');
-            if (fearElement) {
-                fear = parseFloat(fearElement.innerText) || 50;
-                console.log("Fear hiện tại từ file:fear-greed.html", fear);
+            // 2. Lấy Fear Index từ fear-greed.html (Cập nhật từ ID: fear-val)
+            try {
+                const fearFrame = document.getElementById('fear-frame');
+                const fearDoc = fearFrame.contentDocument || fearFrame.contentWindow.document;
+                const fearElement = fearDoc.getElementById('fear-val');
+                if (fearElement) {
+                    fear = parseFloat(fearElement.innerText) || 50;[cite: 2]
+                    console.log("WinTrack Sync: Fear Index =", fear);
+                }
+            } catch(e) { console.warn("Fear Frame chưa sẵn sàng. Chạy trên Live Server để đồng bộ."); }[cite: 2]
+
+            // 3. Logic kích hoạt Phase
+            if (rsi < 32 && fear < 30) {
+                activatePhase(0);[cite: 2]
+            } else if (rsi > 72 || fear > 75) {
+                activatePhase(2);[cite: 2]
+            } else if (rsi > 55) {
+                activatePhase(1);[cite: 2]
+            } else if (fear > 70) {
+                activatePhase(3);[cite: 2]
             }
         }
-    } catch(e) {
-        console.warn("Không thể truy cập fear-frame. Lưu ý: Cần chạy trên Live Server (http://) thay vì mở file trực tiếp (file://)", e);
-    }
-
-    // 3. Logic kích hoạt Phase dựa trên dữ liệu thật
-    if (rsi < 32 && fear < 30) {
-        activatePhase(0); // Tích lũy
-    } else if (rsi > 72 || fear > 75) {
-        activatePhase(2); // Chốt mạnh
-    } else if (rsi > 55) {
-        activatePhase(1); // Chốt một phần
-    } else if (fear > 70) {
-        activatePhase(3); // Gồng lãi
-    }
-}
 
         function updateDuration() {
             const minutes = Math.floor((Date.now() - phaseStartTime) / 60000);
-            document.getElementById('phase-duration').textContent = `${minutes} phút`;
+            document.getElementById('phase-duration').textContent = `${minutes} phút`;[cite: 2]
         }
 
         // Khởi chạy
         loadPhaseState();
         initPhases();
-        setInterval(updateStrategy, 7000);
-        setInterval(updateDuration, 30000);
         
+        // Cần độ trễ nhỏ để iframe kịp load trước khi scan lần đầu
         setTimeout(() => {
+            activatePhase(currentPhaseId); // Khôi phục giao diện từ storage
             updateStrategy();
             updateDuration();
-        }, 800);
+        }, 1000);
+
+        setInterval(updateStrategy, 10000); // Check mỗi 10 giây
+        setInterval(updateDuration, 30000); // Update phút mỗi 30 giây
     </script>
 </body>
 </html>
