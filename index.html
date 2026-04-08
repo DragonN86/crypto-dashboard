@@ -9,7 +9,6 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #0d1117; color: #c9d1d9; }
         
-        /* Hiệu ứng Card */
         .phase-card { 
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); 
             border: 1px solid #30363d;
@@ -17,7 +16,6 @@
             overflow: hidden;
         }
         
-        /* Trạng thái Active cho Phase chốt lời (Vàng) */
         .phase-card-active { 
             border-color: #f2cc60 !important; 
             background: rgba(242, 204, 96, 0.08) !important; 
@@ -25,22 +23,18 @@
             box-shadow: 0 10px 30px -10px rgba(242, 204, 96, 0.2);
         }
 
-        /* Trạng thái Active cho Phase tích lũy (Xanh) */
         .phase-card-accumulate { 
             border-color: #3fb950 !important; 
             background: rgba(63, 185, 80, 0.1) !important; 
             transform: translateY(-5px);
             box-shadow: 0 10px 30px -10px rgba(63, 185, 80, 0.2);
         }
-
-        .glow-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 8px; }
     </style>
 </head>
 <body class="min-h-screen p-4 lg:p-8">
 
-    <!-- HEADER SECTION -->
     <header class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center mb-10 pb-8 border-b border-[#30363d]">
-        <div class="text-center md:text-left">
+        <div>
             <h1 class="text-5xl font-black text-white uppercase tracking-tighter">WinTrack <span class="text-[#f2cc60]">2026</span></h1>
             <p class="text-gray-400 text-sm mt-2 font-medium">
                 Chiến lược: <span class="text-[#58a6ff]">"KỶ LUẬT LÀ SỨC MẠNH"</span> 
@@ -57,43 +51,31 @@
         </div>
     </header>
 
-    <!-- MONITORING DASHBOARD -->
     <main class="max-w-7xl mx-auto">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <!-- BTC Technical -->
             <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
                 <div class="bg-[#1c2128] p-4 border-b border-[#30363d] flex justify-between items-center">
                     <span class="text-xs font-bold text-gray-300">📈 BTC RSI (D1)</span>
                 </div>
-                <div class="h-[350px]"><iframe id="tech-frame" src="technical-analysis.html" class="w-full h-full border-none"></iframe></div>
+                <div class="h-[400px]"><iframe id="tech-frame" src="technical-analysis.html" class="w-full h-full border-none"></iframe></div>
             </div>
 
-            <!-- Market Sentiment -->
             <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-                <div class="bg-[#1c2128] p-4 border-b border-[#30363d] flex justify-between items-center">
-                    <span class="text-xs font-bold text-gray-300">📊 FEAR & GREED INDEX</span>
-                </div>
-                <div class="h-[350px]"><iframe id="fear-frame" src="fear-greed.html" class="w-full h-full border-none"></iframe></div>
+                <div class="bg-[#1c2128] p-4 border-b border-[#30363d] flex justify-between items-center text-xs font-bold text-gray-300">📊 FEAR & GREED INDEX</div>
+                <div class="h-[400px]"><iframe id="fear-frame" src="fear-greed.html" class="w-full h-full border-none"></iframe></div>
             </div>
 
-            <!-- BTC Dominance -->
             <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-                <div class="bg-[#1c2128] p-4 border-b border-[#30363d] flex justify-between items-center">
-                    <span class="text-xs font-bold text-gray-300">🌍 BTC DOMINANCE</span>
-                </div>
-                <div class="h-[350px]"><iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" class="w-full h-full border-none"></iframe></div>
+                <div class="bg-[#1c2128] p-4 border-b border-[#30363d] flex justify-between items-center text-xs font-bold text-gray-300">🌍 BTC DOMINANCE</div>
+                <div class="h-[400px]"><iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" class="w-full h-full border-none"></iframe></div>
             </div>
 
-            <!-- Market Signals (Static Reference) -->
             <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-                <div class="bg-[#1c2128] p-4 border-b border-[#30363d] flex justify-between items-center">
-                    <span class="text-xs font-bold text-gray-300">🔥 LEVERAGE SIGNALS</span>
-                </div>
-                <div class="h-[350px]"><iframe src="leverage-signals.html" class="w-full h-full border-none"></iframe></div>
+                <div class="bg-[#1c2128] p-4 border-b border-[#30363d] flex justify-between items-center text-xs font-bold text-gray-300">🔥 LEVERAGE SIGNALS</div>
+                <div class="h-[400px]"><iframe src="leverage-signals.html" class="w-full h-full border-none"></iframe></div>
             </div>
         </div>
 
-        <!-- ACTION PLAN SECTION -->
         <section class="mb-10">
             <div class="flex flex-col md:flex-row justify-between items-end md:items-center mb-8 gap-4">
                 <div>
@@ -103,7 +85,7 @@
                 <div id="phase-info" class="bg-[#1c2128] border border-[#30363d] px-6 py-3 rounded-2xl flex items-center gap-4">
                     <div class="flex flex-col">
                         <span class="text-[10px] text-gray-500 uppercase font-bold tracking-widest">Current Status</span>
-                        <span id="current-phase-text" class="text-sm font-bold text-white uppercase">Initializing...</span>
+                        <span id="current-phase-text" class="text-sm font-bold text-white uppercase">Waiting for Data...</span>
                     </div>
                     <div class="h-8 w-[1px] bg-[#30363d]"></div>
                     <div class="flex flex-col">
@@ -112,15 +94,9 @@
                     </div>
                 </div>
             </div>
-
-            <!-- Phases Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="phases-grid"></div>
         </section>
     </main>
-
-    <footer class="max-w-7xl mx-auto text-center mt-12 pt-8 border-t border-[#30363d] text-[#484f58] text-[10px] tracking-[0.3em] uppercase">
-        © 2026 WinTrack System by Vo Will — Discipline equals freedom
-    </footer>
 
     <script>
         let currentPhaseId = -1;
@@ -151,7 +127,6 @@
         function activatePhase(id) {
             if (currentPhaseId === id) return;
 
-            // Reset all cards
             phaseConfig.forEach((_, i) => {
                 const card = document.getElementById(`phase-card-${i}`);
                 const badge = document.getElementById(`badge-${i}`);
@@ -159,7 +134,6 @@
                 if (badge) badge.className = "text-[9px] font-black px-3 py-1 rounded-lg bg-[#0d1117] border border-[#30363d] text-gray-400 uppercase tracking-tighter";
             });
 
-            // Activate new card
             const activeCard = document.getElementById(`phase-card-${id}`);
             const activeBadge = document.getElementById(`badge-${id}`);
             
@@ -180,30 +154,44 @@
         }
 
         async function updateStrategy() {
-            let rsi = 50, fear = 50;
+            let rsi = null, fear = null;
 
             try {
-                const techDoc = document.getElementById('tech-frame').contentDocument || document.getElementById('tech-frame').contentWindow.document;
-                rsi = parseFloat(techDoc.getElementById('rsi-val')?.innerText) || 50;
-
-                const fearDoc = document.getElementById('fear-frame').contentDocument || document.getElementById('fear-frame').contentWindow.document;
-                fear = parseFloat(fearDoc.getElementById('fear-val')?.innerText) || 50;
+                const techFrame = document.getElementById('tech-frame');
+                const fearFrame = document.getElementById('fear-frame');
                 
-                console.log(`Sync Data: RSI=${rsi} | Fear=${fear}`);
+                const techDoc = techFrame.contentDocument || techFrame.contentWindow.document;
+                const fearDoc = fearFrame.contentDocument || fearFrame.contentWindow.document;
+
+                const rsiTxt = techDoc.getElementById('rsi-val')?.innerText;
+                const fearTxt = fearDoc.getElementById('fear-val')?.innerText;
+
+                if (!rsiTxt || !fearTxt) {
+                    console.log("Chưa tìm thấy thẻ rsi-val hoặc fear-val");
+                    return;
+                }
+
+                rsi = parseFloat(rsiTxt);
+                fear = parseFloat(fearTxt);
+                
+                console.log(`Dữ liệu thực: RSI=${rsi} | Fear=${fear}`);
             } catch(e) { 
-                console.warn("Đang chờ Iframe tải dữ liệu..."); 
+                console.error("Lỗi truy cập Iframe: Hãy chạy bằng Live Server!"); 
                 return;
             }
 
-            // --- CHIẾN LƯỢC QUYẾT ĐỊNH ---
-            if (rsi < 32 && fear < 30) {
+            // --- CHIẾN LƯỢC QUYẾT ĐỊNH (FIXED LOGIC) ---
+            if (rsi <= 35 && fear <= 30) {
                 activatePhase(0); // Tích lũy
-            } else if (rsi > 72 || fear > 80) {
+            } else if (rsi >= 70 || fear >= 80) {
                 activatePhase(2); // Chốt mạnh
             } else if (fear > 85) {
                 activatePhase(3); // Gồng lãi cuối
-            } else if (rsi > 55) {
-                activatePhase(1); // Chốt gốc
+            } else if (rsi > 55 || fear > 60) {
+                activatePhase(1); // Chốt gốc / Đợi chốt
+            } else {
+                // Vùng trung lập (Neutral): Nếu chưa có phase nào thì mặc định 1
+                if (currentPhaseId === -1) activatePhase(1);
             }
         }
 
@@ -212,7 +200,6 @@
             document.getElementById('phase-duration').textContent = `${minutes} phút`;
         }
 
-        // Khởi động hệ thống
         window.onload = () => {
             initPhases();
             const saved = localStorage.getItem(STORAGE_KEY);
@@ -220,16 +207,16 @@
                 const data = JSON.parse(saved);
                 currentPhaseId = data.id;
                 phaseStartTime = data.time;
+                activatePhase(currentPhaseId); // Khôi phục phase cũ ngay lập tức
             }
             
-            // Chạy kiểm tra sau 1.5s để iframe kịp load nội dung
             setTimeout(() => {
                 updateStrategy();
                 updateDuration();
-            }, 1500);
+            }, 3000); // Đợi 3 giây để API trong Iframe kịp trả kết quả
 
-            setInterval(updateStrategy, 10000); // 10 giây quét 1 lần
-            setInterval(updateDuration, 30000); // 30 giây cập nhật đồng hồ
+            setInterval(updateStrategy, 10000);
+            setInterval(updateDuration, 30000);
         };
     </script>
 </body>
