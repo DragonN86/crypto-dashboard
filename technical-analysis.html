@@ -202,8 +202,89 @@
                 document.getElementById('rsi-status').className = `badge ${rsi < 35 ? 'badge-green' : rsi > 70 ? 'badge-red' : 'badge-gray'}`;
                 document.getElementById('rsi-status').innerText = rsi < 35 ? 'Oversold' : rsi > 70 ? 'Overbought' : 'Neutral';
 
-                runStrategy(prices, volumes, candles, rsi);
-            } catch (e) { console.error("API Error"); }
+                function runStrategy(prices, volumes, candles, rsi) {
+    const macd = calculateMACD(prices);
+    const bb = calculateBB(prices);
+    const lastCandle = candles[candles.length - 1];
+    const curPrice = parseFloat(lastCandle[4]);
+    const curVol = parseFloat(lastCandle[5]);
+    const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
+    const volRatio = (curVol / avgVol) * 100;
+
+    const vsaType = document.getElementById('vsa-type');
+    const stText = document.getElementById('strat-text');
+    const stBadge = document.getElementById('strat-badge');
+    const vText = document.getElementById('verdict-text');
+    const riskBar = document.getElementById('risk-bar');
+
+    // Phân tích nến VSA cho Spot
+    const open = parseFloat(lastCandle[1]), high = parseFloat(lastCandle[2]), low = parseFloat(lastCandle[3]), close = parseFloat(lastCandle[4]);
+    const lowerWick = Math.min(open, close) - low;
+    const body = Math.abs(close - open);
+    
+    // ĐỊNH NGHĨA CÁC TRẠNG THÁI ĐẦU TƯ DÀI HẠN
+    let vsaSignal = "THỊ TRƯỜNG ỔN ĐỊNH";
+    let vsaColor = "text-gray-400";
+
+    if (volRatio > 140 && lowerWick > body) {
+        vsaSignal = "SMART MONEY ABSORPTION (GOM HÀNG)";
+        vsaColor = "text-green-400";
+    } else if (volRatio < 70) {
+        vsaSignal = "DRY SUPPLY (CẠN CUNG)";
+        vsaColor = "text-blue-400";
+    } else if (volRatio > 150 && close < open) {
+        vsaSignal = "CLIMAX SELLING (HOẢNG LOẠN)";
+        vsaColor = "text-red-400";
+    }
+
+    vsaType.innerText = vsaSignal;
+    vsaType.className = `text-[11px] font-black mt-1 ${vsaColor}`;
+    document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
+    document.getElementById('vol-ratio').innerText = volRatio.toFixed(0) + "% AVG";
+
+    // --- LOGIC QUYẾT ĐỊNH ĐẦU TƯ SPOT ---
+    const isHistRising = macd.currentHist > macd.prevHist;
+
+    // TRƯỜNG HỢP 1: VÙNG MUA VÀNG (RSI THẤP + BB BOTTOM)
+    if (rsi < 35 || (curPrice <= bb.lower * 1.02)) {
+        stText.innerText = "VÙNG GOM SPOT (DCA)";
+        stText.className = "main-value text-green-400 alert-flash";
+        stBadge.className = "badge badge-green"; stBadge.innerText = "STRONG BUY ZONE";
+        
+        vText.innerHTML = `<strong>Vị thế Spot (Dài hạn): GOM DẦN (DCA).</strong> Với RSI < 30 và giá chạm dải dưới Bollinger, rủi ro giảm sâu thêm là thấp hơn nhiều so với tiềm năng tăng trưởng. Đây là vùng "mua khi mọi người sợ hãi". Hãy chia vốn mua từng phần.`;
+        riskBar.style.width = "100%"; riskBar.style.background = "#3fb950";
+    } 
+    // TRƯỜNG HỢP 2: XÁC NHẬN CHU KỲ TĂNG (MACD CONVERGENCE)
+    else if (isHistRising && macd.currentHist < 0) {
+        stText.innerText = "PHỤC HỒI DÀI HẠN";
+        stText.className = "main-value text-blue-400";
+        stBadge.className = "badge badge-blue"; stBadge.innerText = "ACCUMULATING";
+        
+        vText.innerHTML = `<strong>Vị thế Spot: TIẾP TỤC NẮM GIỮ.</strong> Histogram MACD đang dốc lên cho thấy áp lực bán đã bão hòa. Chu kỳ phục hồi đang hình thành. Chiến lược: Giữ chặt hàng, chưa nên chốt lời sớm.`;
+        riskBar.style.width = "70%"; riskBar.style.background = "#58a6ff";
+    }
+    // TRƯỜNG HỢP 3: CẢNH BÁO QUÁ NHIỆT (RSI CAO + BB TOP)
+    else if (rsi > 70 || curPrice >= bb.upper * 0.98) {
+        stText.innerText = "VÙNG CHỐT LỜI DẦN";
+        stText.className = "main-value text-red-400";
+        stBadge.className = "badge badge-red"; stBadge.innerText = "OVERBOUGHT";
+        
+        vText.innerHTML = `<strong>Vị thế Spot: CHỐT LỜI TỪNG PHẦN.</strong> Giá đã chạm vùng quá nhiệt khung tuần. Đây là lúc "tham lam khi người khác hưng phấn". Hãy hiện thực hóa lợi nhuận và chờ đợi nhịp điều chỉnh tiếp theo.`;
+        riskBar.style.width = "100%"; riskBar.style.background = "#f85149";
+    }
+    // TRƯỜNG HỢP 4: GIỮ NGUYÊN (SIDEWAYS)
+    else {
+        stText.innerText = "GIỮ VỊ THẾ (HOLD)";
+        stText.className = "main-value text-gray-500";
+        stBadge.className = "badge badge-gray"; stBadge.innerText = "WAITING";
+        
+        vText.innerHTML = `<strong>Chiến lược: KIÊN NHẪN.</strong> Thị trường đang trong giai đoạn tích lũy không rõ xu hướng. Không cần hành động vội vàng. Hãy quan sát thêm các tín hiệu từ Volume.`;
+        riskBar.style.width = "30%"; riskBar.style.background = "#30363d";
+    }
+
+    document.getElementById('bb-upper').innerText = bb.upper.toLocaleString();
+    document.getElementById('bb-lower').innerText = bb.lower.toLocaleString();
+}
         }
 
         setInterval(updateData, 30000);
