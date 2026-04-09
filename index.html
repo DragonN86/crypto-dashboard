@@ -8,12 +8,44 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .phase-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-        .phase-card-active { border-color: #f2cc60 !important; background: rgba(242, 204, 96, 0.12) !important; transform: translateY(-4px); }
-        .phase-card-accumulate { border-color: #3fb950 !important; background: rgba(63, 185, 80, 0.15) !important; transform: translateY(-4px); }
-        .status-badge-active { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .phase-card { 
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        }
         
+        /* Hiệu ứng chung khi Phase Active */
+        .phase-card-active {
+            border-color: #f2cc60 !important;
+            background: rgba(242, 204, 96, 0.15) !important;
+            transform: translateY(-4px);
+            box-shadow: 0 0 25px rgba(242, 204, 96, 0.25);
+        }
+
+        /* Phase 00 đặc biệt (Xanh lá) */
+        .phase-card-accumulate {
+            border-color: #3fb950 !important;
+            background: rgba(63, 185, 80, 0.18) !important;
+            transform: translateY(-4px);
+            box-shadow: 0 0 25px rgba(63, 185, 80, 0.35);
+        }
+
+        /* Làm chữ PHASE sáng nổi bật */
+        .phase-card-active .phase-header-text,
+        .phase-card-accumulate .phase-header-text {
+            color: #ffffff !important;
+            text-shadow: 0 0 12px currentColor;
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge-active { 
+            animation: pulse 2s infinite; 
+        }
+        @keyframes pulse { 
+            0%,100% { opacity: 1; } 
+            50% { opacity: 0.75; } 
+        }
+
         .sentiment-box {
             background: linear-gradient(145deg, #1c2128, #161b22);
         }
@@ -37,14 +69,12 @@
     </header>
 
     <!-- DASHBOARD GRID -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-12">
-        <!-- Technical Analysis -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
             <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">📈 BTC Spot Technical Analysis</div>
             <div class="h-[360px]"><iframe id="tech-frame" src="technical-analysis.html" class="w-full h-full border-none"></iframe></div>
         </div>
 
-        <!-- Market Sentiment -->
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
             <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm flex items-center gap-2">
                 📊 Market Sentiment 
@@ -53,29 +83,29 @@
             <div class="h-[360px]"><iframe id="fear-frame" src="fear-greed.html" class="w-full h-full border-none"></iframe></div>
         </div>
 
-        <!-- BTC Dominance & Leverage -->
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
             <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🌍 BTC Dominance</div>
             <div class="h-[360px]"><iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" class="w-full h-full border-none"></iframe></div>
         </div>
+
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
             <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🔥 Leverage & Funding Signals</div>
             <div class="h-[360px]"><iframe src="leverage-signals.html" class="w-full h-full border-none"></iframe></div>
         </div>
     </div>
 
-    <!-- GIẢI THÍCH TÍCH HỢP (Mới) -->
+    <!-- GIẢI THÍCH TÍCH HỢP -->
     <div class="sentiment-box border border-[#30363d] rounded-3xl p-6 mb-8">
         <h3 class="text-lg font-bold text-[#f2cc60] mb-3">🚀 Tích hợp Cảm xúc Thị trường (Fear & Greed)</h3>
         <div class="grid md:grid-cols-2 gap-6 text-sm">
             <div>
-                <p class="text-gray-400 mb-2">• Technical indicators (RSI, MACD, Bollinger, EMA) chỉ phân tích <strong>giá và volume</strong>.</p>
-                <p class="text-gray-400">• Fear & Greed Index phân tích <strong>tâm lý đám đông</strong> (volatility, social, dominance, survey…).</p>
+                <p class="text-gray-400 mb-2">• Technical indicators chỉ phân tích <strong>giá và volume</strong>.</p>
+                <p class="text-gray-400">• Fear & Greed Index phân tích <strong>tâm lý đám đông</strong>.</p>
             </div>
             <div class="text-emerald-400">
-                <strong>Kết hợp = Cái nhìn toàn diện:</strong><br>
-                Giảm FOMO khi Greed cực cao<br>
-                Tăng tự tin DCA khi Extreme Fear + RSI Oversold
+                <strong>Kết hợp = Phân tích toàn diện</strong><br>
+                Giảm FOMO khi Greed cao<br>
+                Tăng tự tin DCA khi Extreme Fear
             </div>
         </div>
     </div>
@@ -134,8 +164,12 @@
             container.innerHTML = phaseConfig.map(p => `
                 <div id="phase-card-${p.id}" class="phase-card border border-[#30363d] p-6 rounded-3xl bg-[#1c2128]">
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-black uppercase tracking-widest text-gray-500">PHASE 0${p.id}</span>
-                        <span id="badge-${p.id}" class="text-[10px] font-bold px-4 py-1 rounded-full bg-[#21262d]">${p.status}</span>
+                        <span class="phase-header-text text-xs font-black uppercase tracking-widest text-gray-500">
+                            PHASE 0${p.id}
+                        </span>
+                        <span id="badge-${p.id}" class="text-[10px] font-bold px-4 py-1 rounded-full bg-[#21262d]">
+                            ${p.status}
+                        </span>
                     </div>
                     <h3 class="font-bold text-lg text-white">${p.title}</h3>
                     <p class="text-xs text-gray-400 mt-3">${p.desc}</p>
@@ -146,6 +180,7 @@
         function activatePhase(id) {
             if (currentPhaseId === id) return;
             
+            // Reset tất cả
             for (let i = 0; i < 4; i++) {
                 const card = document.getElementById(`phase-card-${i}`);
                 if (card) card.classList.remove('phase-card-active', 'phase-card-accumulate');
@@ -154,18 +189,26 @@
             const card = document.getElementById(`phase-card-${id}`);
             const badge = document.getElementById(`badge-${id}`);
 
-            card.classList.add(id === 0 ? 'phase-card-accumulate' : 'phase-card-active');
+            if (id === 0) {
+                card.classList.add('phase-card-accumulate');
+            } else {
+                card.classList.add('phase-card-active');
+            }
+
             badge.textContent = id === 0 ? "ACCUMULATING" : "ACTIVE";
-            badge.className = `text-[10px] font-bold px-4 py-1 rounded-full ${id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'}`;
+            badge.className = `text-[10px] font-bold px-4 py-1 rounded-full status-badge-active ${
+                id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'
+            }`;
 
             currentPhaseId = id;
             phaseStartTime = Date.now();
             savePhaseState();
 
-            document.getElementById('current-phase').textContent = `PHASE 0${id} - ${phaseConfig[id].status}`;
+            document.getElementById('current-phase').textContent = 
+                `PHASE 0${id} - ${phaseConfig[id].status}`;
         }
 
-        // Nhận dữ liệu từ các iframe
+        // Nhận dữ liệu từ iframe
         window.addEventListener('message', function(e) {
             if (e.data.type === 'WINTRACK_UPDATE') {
                 if (e.data.rsi) currentRSI = e.data.rsi;
@@ -174,19 +217,18 @@
         });
 
         async function updateStrategy() {
-            // Lấy RSI từ technical-analysis
             try {
                 const tech = document.getElementById('tech-frame').contentWindow;
                 const rsiEl = tech.document.getElementById('rsi-val');
                 if (rsiEl) currentRSI = parseFloat(rsiEl.innerText) || 50;
             } catch(e) {}
 
-            // Logic kết hợp RSI + Fear & Greed
+            // Logic Phase thông minh
             if (currentRSI < 35 && currentFear < 30) {
-                activatePhase(0); // Extreme Fear + Oversold → DCA mạnh
+                activatePhase(0);
             } 
             else if (currentRSI > 72 || currentFear > 80) {
-                activatePhase(2); // Overbought hoặc Extreme Greed → Chốt lời
+                activatePhase(2);
             } 
             else if (currentRSI > 55 || currentFear > 65) {
                 activatePhase(1);
@@ -210,7 +252,7 @@
         setTimeout(() => {
             updateStrategy();
             updateDuration();
-        }, 1000);
+        }, 800);
     </script>
 </body>
 </html>
