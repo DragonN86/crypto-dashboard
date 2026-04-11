@@ -6,139 +6,149 @@
     <title>BTC Spot Technical Analysis (W1)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
-        body { background: #0a0c12; color: #e0e7ff; font-family: 'Inter', sans-serif; }
-        .dashboard-container {
-            width: 100%; 
-            max-width: 520px;
-            background: #0f172a; 
-            border: 1px solid #334155;
-            border-radius: 28px; 
-            padding: 20px; 
-            box-shadow: 0 25px 70px rgba(0,0,0,0.7);
-        }
-        .main-value { font-size: 1.35rem; font-weight: 700; letter-spacing: -1.5px; }
-        .bar-bg { height: 8px; background: #1e2937; border-radius: 9999px; overflow: hidden; }
-        .bar-fill { height: 100%; transition: all 1s cubic-bezier(0.4, 0, 0.2, 1); }
-        .alert-flash { animation: flash 1.4s infinite; }
-        @keyframes flash { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        body { background: transparent; font-family: 'Inter', sans-serif; }
         
-        .confidence-bg {
-            height: 10px; 
-            background: #1e2937; 
-            border-radius: 9999px; 
-            overflow: hidden;
+        .wintrack-card {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 20px;
+        }
+        
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px rgb(16 185 129 / 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .signal-dot {
+            animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
         }
     </style>
 </head>
-<body class="flex justify-center p-4 min-h-screen bg-[#0a0c12]">
-    <div class="dashboard-container">
+<body class="p-4 md:p-6">
+    <div class="max-w-[520px] mx-auto">
+
         <!-- HEADER -->
-        <div class="flex justify-between items-start mb-6">
+        <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-3">
-                <span class="text-3xl">📊</span>
+                <div class="w-8 h-8 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-2xl">📊</div>
                 <div>
-                    <h1 class="font-black text-2xl tracking-tighter">BTC Spot <span class="text-emerald-400">(W1)</span></h1>
-                    <p class="text-xs text-slate-400">Technical Analysis v3.2</p>
+                    <h1 class="text-white font-bold text-2xl tracking-[-0.5px]">BTC Spot (W1)</h1>
+                    <p class="text-emerald-400 text-sm">Technical Analysis v3.3 • WINTRACK 2026</p>
                 </div>
             </div>
             <div class="text-right">
-                <div id="current-price" class="font-mono text-3xl font-bold text-emerald-400">65,000</div>
-                <p id="last-updated" class="text-[10px] text-slate-500">Đang cập nhật...</p>
+                <div id="current-price" class="font-mono text-4xl font-bold text-emerald-400">73,006</div>
+                <p id="last-updated" class="text-xs text-slate-500 mt-1">Cập nhật: vừa xong</p>
             </div>
         </div>
 
         <!-- DCA TRACKER -->
-        <div class="bg-blue-900/20 border border-blue-500/30 rounded-3xl p-5 mb-6">
-            <div class="flex justify-between items-center mb-3">
-                <span class="text-sm font-bold text-blue-400">DCA TRACKER</span>
+        <div class="wintrack-card p-5 mb-5 hover-lift">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-blue-400 font-bold text-sm tracking-widest">DCA TRACKER</span>
                 <button onclick="setEntryPrice()" 
-                        class="text-xs bg-blue-600 hover:bg-blue-500 px-4 py-1.5 rounded-2xl transition-colors">
+                        class="bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-bold rounded-2xl transition-colors">
                     Sửa giá gom
                 </button>
             </div>
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-2 gap-6">
                 <div>
-                    <p class="text-xs text-slate-400">GIÁ TRUNG BÌNH</p>
-                    <p id="entry-price-display" class="font-mono text-2xl font-bold">$0</p>
+                    <p class="text-slate-400 text-xs">GIÁ TRUNG BÌNH</p>
+                    <p id="entry-price-display" class="text-3xl font-bold text-white">$69,000</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-xs text-slate-400">LỢI NHUẬN</p>
-                    <p id="profit-pct" class="font-mono text-2xl font-bold text-emerald-400">0.00%</p>
+                    <p class="text-slate-400 text-xs">LỢI NHUẬN</p>
+                    <p id="profit-pct" class="text-3xl font-bold text-emerald-400">+5.81%</p>
                 </div>
             </div>
         </div>
 
         <!-- INDICATORS -->
-        <div class="bg-slate-900/70 border border-slate-700 rounded-3xl p-6 mb-6">
-            <div class="grid grid-cols-2 gap-6 mb-6">
+        <div class="wintrack-card p-6 mb-5 hover-lift">
+            <div class="grid grid-cols-2 gap-6">
+                <!-- RSI -->
                 <div>
                     <p class="text-xs text-slate-400 mb-1">RSI (14)</p>
-                    <div id="rsi-val" class="main-value text-white">50.0</div>
-                    <span id="rsi-status" class="inline-block mt-2 px-4 py-1 text-xs font-bold rounded-2xl bg-slate-700">NEUTRAL</span>
+                    <p id="rsi-val" class="text-4xl font-bold text-white">40.6</p>
+                    <span id="rsi-status" class="text-xs px-4 py-1 rounded-2xl bg-slate-700 inline-block mt-2">NEUTRAL</span>
                 </div>
+                <!-- MACD -->
                 <div>
                     <p class="text-xs text-slate-400 mb-1">MACD HIST</p>
-                    <div id="macd-val" class="main-value text-emerald-400">0.00</div>
+                    <p id="macd-val" class="text-4xl font-bold text-red-500">-25.50</p>
                 </div>
             </div>
 
-            <div class="space-y-6">
+            <div class="mt-8 space-y-6">
+                <!-- Supertrend -->
+                <div class="flex justify-between items-center">
+                    <span class="text-slate-400 text-sm">Supertrend (10,3)</span>
+                    <span id="supertrend-val" class="font-bold px-4 py-1 rounded-2xl text-emerald-400">BULL</span>
+                </div>
+
+                <!-- EMA 200 -->
                 <div class="flex justify-between text-sm">
-                    <span class="text-slate-400">EMA 200 (W1):</span>
+                    <span class="text-slate-400">EMA 200 (W1)</span>
                     <span id="ema200-val" class="font-mono font-bold">69,118</span>
                 </div>
 
+                <!-- Volume -->
                 <div>
                     <div class="flex justify-between text-xs mb-2">
                         <span class="text-slate-400">VOLUME ANALYSIS</span>
-                        <span id="vol-ratio" class="text-blue-400 font-bold">71%</span>
+                        <span id="vol-ratio" class="text-blue-400 font-bold">72%</span>
                     </div>
-                    <div class="bar-bg">
-                        <div id="vol-bar" class="bar-fill bg-blue-500" style="width: 71%"></div>
+                    <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
+                        <div id="vol-bar" class="h-full bg-blue-500 transition-all" style="width: 72%"></div>
                     </div>
                 </div>
 
-                <div>
-                    <p class="text-xs text-slate-400 mb-2">BOLLINGER BANDS (20,2)</p>
-                    <div class="flex justify-between text-sm font-mono">
-                        <span class="text-red-400">Upper: <span id="bb-upper">99,666</span></span>
-                        <span class="text-emerald-400">Lower: <span id="bb-lower">57,601</span></span>
-                    </div>
+                <!-- Weekly Range -->
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Weekly Range Position</span>
+                    <span id="weekly-range" class="font-mono text-emerald-400">18%</span>
+                </div>
+
+                <!-- Bollinger Bands -->
+                <div class="flex justify-between text-sm font-mono">
+                    <span class="text-red-400">Upper: <span id="bb-upper">99,666</span></span>
+                    <span class="text-emerald-400">Lower: <span id="bb-lower">57,601</span></span>
                 </div>
             </div>
         </div>
 
-        <!-- VERDICT -->
-        <div id="verdict-box" class="rounded-3xl p-6 border border-slate-600 bg-slate-900/80">
-            <div class="flex items-center gap-3 mb-3">
-                <div id="signal-dot" class="w-3.5 h-3.5 rounded-full bg-slate-400"></div>
-                <h2 id="strat-text" class="text-lg font-black tracking-tighter uppercase">KIÊN NHẪN - QUAN SÁT</h2>
+        <!-- VERDICT + ĐIỂM TIN CẬY -->
+        <div id="verdict-box" class="wintrack-card p-6 hover-lift">
+            <div class="flex items-center gap-3 mb-4">
+                <div id="signal-dot" class="w-4 h-4 rounded-full bg-emerald-500 signal-dot"></div>
+                <h2 id="strat-text" class="text-xl font-black tracking-tighter uppercase text-emerald-400">VÙNG GOM DCA MẠNH</h2>
             </div>
-            <p id="verdict-text" class="text-slate-300 text-[15px]">Thị trường đang trong giai đoạn quan sát.</p>
+            <p id="verdict-text" class="text-slate-300">Các chỉ báo W1 đang cho tín hiệu tích lũy cực mạnh.</p>
 
             <!-- ĐIỂM TIN CẬY -->
-            <div class="mt-6 pt-5 border-t border-slate-700">
-                <div class="flex justify-between text-xs font-bold text-slate-400 mb-2">
-                    <span>ĐIỂM TIN CẬY CHIẾN LƯỢC</span>
-                    <span id="score-number" class="font-mono text-lg">25</span>
+            <div class="mt-6 pt-6 border-t border-slate-700">
+                <div class="flex justify-between items-baseline mb-3">
+                    <span class="text-xs font-bold text-slate-400 tracking-widest">ĐIỂM TIN CẬY CHIẾN LƯỢC</span>
+                    <span id="score-number" class="font-mono text-3xl font-bold text-emerald-400">92</span>
                 </div>
-                <div class="confidence-bg">
-                    <div id="score-bar" class="h-full bg-gradient-to-r from-orange-400 via-yellow-400 to-emerald-400 transition-all duration-700" 
-                         style="width: 25%"></div>
+                <div class="h-3 bg-slate-700 rounded-3xl overflow-hidden">
+                    <div id="score-bar" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-700" 
+                         style="width: 92%"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        let entryPrice = parseFloat(localStorage.getItem('btc_entry_price')) || 0;
+        let entryPrice = parseFloat(localStorage.getItem('btc_entry_price')) || 69000;
         document.getElementById('entry-price-display').textContent = '$' + entryPrice.toLocaleString('en-US');
 
         function setEntryPrice() {
-            const input = prompt("Nhập giá trung bình gom BTC (USD):", entryPrice || 65000);
+            const input = prompt("Nhập giá trung bình gom BTC (USD):", entryPrice);
             if (input === null) return;
-            entryPrice = parseFloat(input) || 0;
+            entryPrice = parseFloat(input) || 69000;
             localStorage.setItem('btc_entry_price', entryPrice);
             document.getElementById('entry-price-display').textContent = '$' + entryPrice.toLocaleString('en-US');
         }
@@ -161,8 +171,7 @@
             const changes = prices.slice(1).map((p,i) => p - prices[i]);
             let avgGain = 0, avgLoss = 0;
             for (let i = 0; i < period; i++) {
-                if (changes[i] > 0) avgGain += changes[i];
-                else avgLoss -= changes[i];
+                if (changes[i] > 0) avgGain += changes[i]; else avgLoss -= changes[i];
             }
             avgGain /= period; avgLoss /= period;
             for (let i = period; i < changes.length; i++) {
@@ -174,21 +183,47 @@
             return avgLoss === 0 ? 100 : Math.min(100, Math.max(0, 100 - (100 / (1 + avgGain/avgLoss))));
         }
 
+        function calculateSupertrend(highs, lows, closes, period = 10, multiplier = 3) {
+            const lastClose = closes[closes.length-1];
+            const lastHigh = highs[highs.length-1];
+            const lastLow = lows[lows.length-1];
+            
+            let atrSum = 0;
+            for (let i = closes.length - period; i < closes.length; i++) {
+                const tr = Math.max(
+                    highs[i] - lows[i],
+                    Math.abs(highs[i] - closes[i-1]),
+                    Math.abs(lows[i] - closes[i-1])
+                );
+                atrSum += tr;
+            }
+            const atr = atrSum / period;
+            
+            const upper = ((lastHigh + lastLow) / 2) + multiplier * atr;
+            const lower = ((lastHigh + lastLow) / 2) - multiplier * atr;
+            
+            const trend = lastClose > upper ? 1 : (lastClose < lower ? -1 : 0);
+            return { trend, value: trend === 1 ? "BULL" : trend === -1 ? "BEAR" : "SIDE" };
+        }
+
         async function updateData() {
             try {
                 const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=300`);
                 const candles = await res.json();
+
+                const highs = candles.map(c => parseFloat(c[2]));
+                const lows = candles.map(c => parseFloat(c[3]));
                 const prices = candles.map(c => parseFloat(c[4]));
                 const volumes = candles.map(c => parseFloat(c[5]));
 
                 const lastPrice = prices[prices.length - 1];
                 const lastVol = volumes[volumes.length - 1];
 
+                // Tính chỉ báo
                 const rsi = calculateRSI(prices);
-                const ema200Arr = calculateEMA(prices, 200);
-                const lastEMA200 = ema200Arr[ema200Arr.length - 1];
-
-                // MACD - ĐÃ SỬA
+                const ema200 = calculateEMA(prices, 200)[prices.length-1];
+                const supertrend = calculateSupertrend(highs, lows, prices);
+                
                 const ema12 = calculateEMA(prices, 12);
                 const ema26 = calculateEMA(prices, 26);
                 const macdLine = ema12.map((v,i) => (v||0) - (ema26[i]||0));
@@ -200,70 +235,79 @@
                 const stdDev = Math.sqrt(slice20.reduce((a,b)=>a+(b-sma20)**2,0)/20);
                 const bbUpper = sma20 + 2*stdDev;
                 const bbLower = sma20 - 2*stdDev;
-                const bbPos = (lastPrice - bbLower) / (bbUpper - bbLower);
 
                 const avgVol = volumes.slice(-20).reduce((a,b)=>a+b,0)/20;
                 const volRatio = (lastVol / avgVol) * 100;
 
-                // UI Updates
+                // Weekly Range (8 tuần gần nhất)
+                const recentHigh = Math.max(...highs.slice(-8));
+                const recentLow = Math.min(...lows.slice(-8));
+                const weeklyRangePos = ((lastPrice - recentLow) / (recentHigh - recentLow)) * 100;
+
+                // === UI UPDATE ===
                 document.getElementById('current-price').textContent = lastPrice.toLocaleString('en-US');
                 document.getElementById('last-updated').textContent = "Cập nhật: vừa xong";
 
                 document.getElementById('rsi-val').textContent = rsi.toFixed(1);
                 document.getElementById('macd-val').textContent = macdHist.toFixed(2);
-                document.getElementById('macd-val').className = `main-value ${macdHist >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+                document.getElementById('macd-val').className = `text-4xl font-bold ${macdHist >= 0 ? 'text-emerald-400' : 'text-red-500'}`;
 
-                document.getElementById('ema200-val').textContent = Math.round(lastEMA200).toLocaleString('en-US');
-                document.getElementById('bb-upper').textContent = Math.round(bbUpper).toLocaleString('en-US');
-                document.getElementById('bb-lower').textContent = Math.round(bbLower).toLocaleString('en-US');
+                document.getElementById('supertrend-val').textContent = supertrend.value;
+                document.getElementById('supertrend-val').className = `font-bold px-4 py-1 rounded-2xl ${supertrend.trend === 1 ? 'bg-emerald-500/20 text-emerald-400' : supertrend.trend === -1 ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-300'}`;
+
+                document.getElementById('ema200-val').textContent = Math.round(ema200).toLocaleString('en-US');
                 document.getElementById('vol-ratio').textContent = Math.round(volRatio) + "%";
                 document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
+                document.getElementById('bb-upper').textContent = Math.round(bbUpper).toLocaleString('en-US');
+                document.getElementById('bb-lower').textContent = Math.round(bbLower).toLocaleString('en-US');
+                document.getElementById('weekly-range').textContent = Math.round(weeklyRangePos) + "%";
 
                 // Profit
                 if (entryPrice > 0) {
                     const profit = ((lastPrice - entryPrice) / entryPrice) * 100;
                     const pEl = document.getElementById('profit-pct');
                     pEl.textContent = (profit >= 0 ? "+" : "") + profit.toFixed(2) + "%";
-                    pEl.className = `font-mono text-2xl font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+                    pEl.className = `text-3xl font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
                 }
 
                 // Scoring
                 let score = 0;
                 if (rsi < 35) score += 40; else if (rsi > 72) score -= 40;
-                if (bbPos < 0.25) score += 30; else if (bbPos > 0.75) score -= 30;
+                if (supertrend.trend === 1) score += 35;
                 if (macdHist > 0) score += 20;
-                if (volRatio > 140) score += 18;
-                if (lastPrice > lastEMA200) score += 25; else score -= 30;
+                if (weeklyRangePos < 25) score += 30;
+                if (volRatio > 140) score += 15;
+                if (lastPrice > ema200) score += 25; else score -= 30;
 
-                // Confidence Bar
+                // Điểm tin cậy động
                 document.getElementById('score-number').textContent = score;
-                const barWidth = Math.min(100, Math.max(0, (Math.abs(score) / 130) * 100));
+                const barWidth = Math.min(100, Math.max(0, (score / 130) * 100));
                 document.getElementById('score-bar').style.width = barWidth + "%";
 
                 // Verdict
                 let verdict = "KIÊN NHẪN - QUAN SÁT";
                 let color = "text-slate-400";
-                let dot = "bg-slate-400";
+                let dotColor = "bg-slate-400";
 
                 if (score >= 85) {
                     verdict = "VÙNG GOM DCA MẠNH";
                     color = "text-emerald-400";
-                    dot = "bg-emerald-500 animate-ping";
+                    dotColor = "bg-emerald-500 signal-dot";
                 } else if (score >= 55) {
-                    verdict = "PHỤC HỒI - NẮM GIỮ";
+                    verdict = "XU HƯỚNG PHỤC HỒI";
                     color = "text-sky-400";
-                    dot = "bg-sky-400";
+                    dotColor = "bg-sky-400";
                 } else if (score <= -50) {
-                    verdict = "CHỐT LỜI / REBALANCE";
+                    verdict = "CẢNH BÁO CHỐT LỜI";
                     color = "text-red-400";
-                    dot = "bg-red-400";
+                    dotColor = "bg-red-400";
                 }
 
                 document.getElementById('strat-text').textContent = verdict;
-                document.getElementById('strat-text').className = `text-lg font-black tracking-tighter uppercase ${color}`;
-                document.getElementById('signal-dot').className = `w-3.5 h-3.5 rounded-full ${dot}`;
+                document.getElementById('strat-text').className = `text-xl font-black tracking-tighter uppercase ${color}`;
+                document.getElementById('signal-dot').className = `w-4 h-4 rounded-full ${dotColor}`;
                 document.getElementById('verdict-text').textContent = score >= 85 
-                    ? "Tín hiệu mua mạnh - Nên DCA thêm ngay." 
+                    ? "Tín hiệu mua mạnh trên khung W1 - Nên DCA thêm." 
                     : "Thị trường đang trong giai đoạn quan sát.";
 
             } catch (e) {
