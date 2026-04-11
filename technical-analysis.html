@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTC Spot Pro - Technical Analysis v3</title>
+    <title>BTC Spot Pro - Technical Analysis v4</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { background: #0a0c12; color: #e0e7ff; font-family: 'Inter', sans-serif; }
         .dashboard-container {
-            width: 100%; max-width: 450px; background: #0f172a; border: 1px solid #334155;
+            width: 100%; max-width: 480px; background: #0f172a; border: 1px solid #334155;
             border-radius: 28px; padding: 24px; box-shadow: 0 25px 70px rgba(0,0,0,0.7);
         }
         .main-value { font-size: 1.25rem; font-weight: 700; }
@@ -17,235 +18,284 @@
         .bar-fill { height: 100%; transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
         .alert-flash { animation: flash 1.3s infinite; }
         @keyframes flash { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
-        .confidence-bg { height: 10px; background: #1e2937; border-radius: 5px; position: relative; overflow: hidden; }
     </style>
 </head>
 <body class="flex justify-center items-start p-4 min-h-screen">
-
     <div class="dashboard-container">
         <div class="flex justify-between items-start mb-6">
             <div class="flex items-center gap-3">
                 <span class="text-3xl">📊</span>
                 <div>
-                    <h1 class="font-black text-xl tracking-tighter">BTC SPOT <span class="text-emerald-400">W1</span></h1>
-                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Live Analysis</p>
+                    <h1 class="font-black text-xl tracking-tighter">BTC SPOT <span class="text-emerald-400">PRO</span></h1>
+                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">v4 • Multi TF</p>
                 </div>
             </div>
-            <div id="current-price" class="font-mono text-2xl font-bold text-emerald-400 text-right">0.00</div>
+            <div id="current-price" class="font-mono text-2xl font-bold text-emerald-400">0.00</div>
         </div>
 
+        <!-- Multi Timeframe Tabs -->
+        <div class="flex gap-2 mb-6 border-b border-slate-700 pb-1">
+            <button onclick="switchTF(0)" id="tab-w1" class="tf-tab active px-4 py-1 text-sm font-bold rounded-xl">W1</button>
+            <button onclick="switchTF(1)" id="tab-d1" class="tf-tab px-4 py-1 text-sm font-bold rounded-xl">D1</button>
+        </div>
+
+        <!-- DCA -->
         <div class="bg-slate-800/40 border border-slate-700/50 rounded-2xl p-4 mb-6">
             <div class="flex justify-between items-center mb-2">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">DCA Status</span>
+                <span class="text-[10px] font-black text-slate-400 uppercase">DCA Status</span>
                 <button onclick="setEntryPrice()" class="text-[9px] bg-blue-500/20 hover:bg-blue-500/40 text-blue-400 px-2 py-1 rounded transition-colors uppercase font-bold">Set Entry</button>
             </div>
             <div class="flex justify-between items-end">
                 <div>
-                    <p id="entry-price-display" class="font-mono font-bold text-lg text-white">$0</p>
-                    <p class="text-[9px] text-slate-500 uppercase">Average Entry</p>
+                    <p id="entry-price-display" class="font-mono font-bold text-lg">$0</p>
+                    <p class="text-[9px] text-slate-500">Average Entry</p>
                 </div>
                 <div class="text-right">
                     <p id="profit-pct" class="font-mono font-bold text-lg">0.00%</p>
-                    <p class="text-[9px] text-slate-500 uppercase">P/L Percent</p>
+                    <p class="text-[9px] text-slate-500">P/L</p>
                 </div>
             </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                <p class="text-[9px] text-slate-500 font-black uppercase mb-1">RSI (14)</p>
+                <p class="text-[9px] text-slate-500 font-black">RSI (14)</p>
                 <div id="rsi-val" class="text-lg font-bold">--</div>
             </div>
             <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800">
-                <p class="text-[9px] text-slate-500 font-black uppercase mb-1">MACD Hist</p>
-                <div id="macd-val" class="text-lg font-bold">--</div>
+                <p class="text-[9px] text-slate-500 font-black">Supertrend</p>
+                <div id="supertrend-val" class="text-lg font-bold">--</div>
             </div>
         </div>
 
         <div class="space-y-4 mb-6 bg-slate-900/30 p-4 rounded-2xl border border-slate-800/50">
             <div class="flex justify-between text-xs font-mono">
-                <span class="text-slate-500 font-bold">EMA 200 (W1):</span>
+                <span class="text-slate-500">EMA 200:</span>
                 <span id="ema200-val" class="text-white">---</span>
             </div>
+            <div class="flex justify-between text-xs font-mono">
+                <span class="text-slate-500">Weekly Range:</span>
+                <span id="weekly-range" class="text-emerald-400">0%</span>
+            </div>
             <div>
-                <div class="flex justify-between text-[9px] font-black uppercase mb-1">
-                    <span class="text-slate-500">Vol Ratio (VSA)</span>
+                <div class="flex justify-between text-[9px] font-black mb-1">
+                    <span class="text-slate-500">Vol Spike</span>
                     <span id="vol-ratio" class="text-blue-400">0%</span>
                 </div>
-                <div class="bar-bg"><div id="vol-bar" class="bar-fill bg-blue-500" style="width: 0%"></div></div>
-            </div>
-            <div class="flex justify-between text-[9px] font-black uppercase">
-                <span class="text-slate-500">BB Pos: <span id="bb-pos" class="text-white">--</span></span>
-                <span class="text-slate-500">Lower BB: <span id="bb-lower" class="text-emerald-500">--</span></span>
+                <div class="bar-bg"><div id="vol-bar" class="bar-fill bg-blue-500" style="width:0%"></div></div>
             </div>
         </div>
 
-        <div id="verdict-box" class="rounded-3xl p-5 border border-slate-700 bg-slate-900/80 transition-all duration-500">
-            <div class="mb-4">
-                <div class="flex justify-between items-end mb-2">
-                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Điểm tin cậy chiến lược</span>
-                    <span id="score-number" class="font-mono text-lg font-bold">0</span>
-                </div>
-                <div class="confidence-bg flex">
-                    <div id="score-bar-negative" class="h-full bg-red-500/80 transition-all duration-1000" style="width: 0%"></div>
-                    <div id="score-bar-positive" class="h-full bg-emerald-500/80 transition-all duration-1000" style="width: 0%"></div>
-                </div>
-                <div class="flex justify-between text-[7px] text-slate-600 mt-1 font-black uppercase tracking-tighter">
-                    <span>Overbought/Risk</span>
-                    <span>Neutral</span>
-                    <span>Oversold/Buy</span>
-                </div>
-            </div>
+        <!-- Score History Chart -->
+        <div class="mb-6">
+            <p class="text-[10px] text-slate-400 mb-2 font-bold">SCORE HISTORY</p>
+            <canvas id="scoreChart" height="60"></canvas>
+        </div>
 
-            <div class="flex items-center gap-3 pt-3 border-t border-slate-800">
-                <div id="signal-dot" class="w-2.5 h-2.5 rounded-full bg-slate-600"></div>
+        <!-- Verdict -->
+        <div id="verdict-box" class="rounded-3xl p-5 border border-slate-700 bg-slate-900/80 transition-all">
+            <div class="flex items-center gap-3">
+                <div id="signal-dot" class="w-3 h-3 rounded-full bg-slate-600"></div>
                 <h2 id="strat-text" class="text-lg font-black tracking-tighter uppercase">Analyzing...</h2>
             </div>
-            <p id="verdict-text" class="text-[11px] leading-relaxed text-slate-400 mt-1 italic">Vui lòng chờ dữ liệu từ sàn...</p>
+            <p id="verdict-text" class="text-[11px] leading-relaxed text-slate-400 mt-2">Đang tải dữ liệu...</p>
+            <div id="alert-box" class="hidden mt-3 text-xs p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400"></div>
         </div>
     </div>
 
     <script>
         let entryPrice = parseFloat(localStorage.getItem('btc_entry_price')) || 0;
+        let currentTF = 0; // 0 = W1, 1 = D1
+        let scoreHistory = JSON.parse(localStorage.getItem('scoreHistory')) || [];
+        let scoreChart;
+
         document.getElementById('entry-price-display').textContent = '$' + entryPrice.toLocaleString();
 
         function setEntryPrice() {
-            const input = prompt("Nhập giá vốn BTC của bạn (USD):", entryPrice || 60000);
+            const input = prompt("Nhập giá vốn BTC (USD):", entryPrice || 65000);
             if (input === null) return;
             entryPrice = parseFloat(input) || 0;
             localStorage.setItem('btc_entry_price', entryPrice);
             document.getElementById('entry-price-display').textContent = '$' + entryPrice.toLocaleString();
+        }
+
+        function switchTF(tf) {
+            currentTF = tf;
+            document.querySelectorAll('.tf-tab').forEach((el, i) => {
+                el.classList.toggle('active', i === tf);
+                el.classList.toggle('bg-slate-700', i === tf);
+            });
             updateData();
         }
 
+        // Helper functions (EMA, RSI, Supertrend...)
         function calculateEMA(data, period) {
             const k = 2 / (period + 1);
             let ema = data[0];
-            return data.map(val => ema = (val * k) + (ema * (1 - k)));
+            return data.map(price => ema = (price * k) + (ema * (1 - k)));
         }
 
         function calculateRSI(prices, period = 14) {
             let gains = 0, losses = 0;
-            for (let i = 1; i <= period; i++) {
+            for (let i = 1; i < Math.min(period + 1, prices.length); i++) {
                 const diff = prices[i] - prices[i-1];
-                diff > 0 ? gains += diff : losses -= diff;
+                if (diff > 0) gains += diff; else losses -= diff;
             }
-            let avgGain = gains / period, avgLoss = losses / period;
+            let avgGain = gains / period;
+            let avgLoss = losses / period;
+
             for (let i = period + 1; i < prices.length; i++) {
                 const diff = prices[i] - prices[i-1];
                 avgGain = (avgGain * (period - 1) + (diff > 0 ? diff : 0)) / period;
                 avgLoss = (avgLoss * (period - 1) + (diff < 0 ? -diff : 0)) / period;
             }
-            return 100 - (100 / (1 + avgGain / avgLoss));
+            return avgLoss === 0 ? 100 : 100 - (100 / (1 + avgGain / avgLoss));
+        }
+
+        function calculateSupertrend(highs, lows, closes, period = 10, multiplier = 3) {
+            const atr = [];
+            let finalTrend = 0;
+            let upperBand = 0, lowerBand = 0;
+
+            for (let i = period; i < closes.length; i++) {
+                const tr = Math.max(
+                    highs[i] - lows[i],
+                    Math.abs(highs[i] - closes[i-1]),
+                    Math.abs(lows[i] - closes[i-1])
+                );
+                atr.push(tr);
+            }
+
+            const avgAtr = atr.slice(-period).reduce((a,b)=>a+b,0)/period;
+            const lastClose = closes[closes.length-1];
+            const lastHigh = highs[highs.length-1];
+            const lastLow = lows[lows.length-1];
+
+            upperBand = ((lastHigh + lastLow)/2) + multiplier * avgAtr;
+            lowerBand = ((lastHigh + lastLow)/2) - multiplier * avgAtr;
+
+            // Simple trend detection
+            finalTrend = lastClose > upperBand ? 1 : (lastClose < lowerBand ? -1 : 0);
+            return { trend: finalTrend, upper: upperBand, lower: lowerBand };
         }
 
         async function updateData() {
             try {
-                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=250`);
+                const interval = currentTF === 0 ? '1w' : '1d';
+                const res = await fetch(`https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=${interval}&limit=300`);
                 const candles = await res.json();
-                const prices = candles.map(c => parseFloat(c[4]));
+
+                const highs = candles.map(c => parseFloat(c[2]));
+                const lows = candles.map(c => parseFloat(c[3]));
+                const closes = candles.map(c => parseFloat(c[4]));
                 const volumes = candles.map(c => parseFloat(c[5]));
-                const lastPrice = prices[prices.length - 1];
+                const lastPrice = closes[closes.length - 1];
+                const prevClose = closes[closes.length - 2];
 
-                // Indicators logic
-                const rsi = calculateRSI(prices);
-                const macdEma12 = calculateEMA(prices, 12);
-                const macdEma26 = calculateEMA(prices, 26);
-                const macdLine = macdEma12.map((v, i) => v - macdEma26[i]);
-                const signalLine = calculateEMA(macdLine, 9);
-                const hist = macdLine[macdLine.length - 1] - signalLine[signalLine.length - 1];
-                
-                const ema200 = calculateEMA(prices, 200).pop();
-                const slice20 = prices.slice(-20);
-                const sma20 = slice20.reduce((a, b) => a + b, 0) / 20;
-                const stdDev = Math.sqrt(slice20.reduce((a, b) => a + (b - sma20) ** 2, 0) / 20);
-                const bbLower = sma20 - 2 * stdDev;
-                const bbUpper = sma20 + 2 * stdDev;
-                const bbPos = (lastPrice - bbLower) / (bbUpper - bbLower);
-                const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
-                const volRatio = (volumes[volumes.length - 1] / avgVol) * 100;
+                // Indicators
+                const rsi = calculateRSI(closes);
+                const ema200 = calculateEMA(closes, 200).pop();
+                const supertrend = calculateSupertrend(highs, lows, closes);
 
-                // UI Global
+                const avgVol = volumes.slice(-20).reduce((a,b)=>a+b,0)/20;
+                const volRatio = (volumes[volumes.length-1] / avgVol) * 100;
+
+                // Weekly Range Position
+                const periodHigh = Math.max(...highs.slice(-8));
+                const periodLow = Math.min(...lows.slice(-8));
+                const rangePos = ((lastPrice - periodLow) / (periodHigh - periodLow)) * 100;
+
+                // Volume Spike + Rejection
+                let alertMsg = "";
+                if (volRatio > 180 && lastPrice < prevClose * 0.995) {
+                    alertMsg = "⚠️ VOLUME SPIKE + BEARISH REJECTION";
+                } else if (volRatio > 180 && lastPrice > prevClose * 1.005) {
+                    alertMsg = "✅ VOLUME SPIKE + BULLISH STRENGTH";
+                }
+
+                // Update UI
                 document.getElementById('current-price').textContent = lastPrice.toLocaleString();
                 document.getElementById('rsi-val').textContent = rsi.toFixed(1);
-                document.getElementById('macd-val').textContent = hist.toFixed(1);
-                document.getElementById('macd-val').className = hist >= 0 ? 'text-emerald-400' : 'text-red-400';
+                document.getElementById('supertrend-val').textContent = supertrend.trend === 1 ? "BULL" : supertrend.trend === -1 ? "BEAR" : "SIDE";
+                document.getElementById('supertrend-val').className = `text-lg font-bold ${supertrend.trend === 1 ? 'text-emerald-400' : supertrend.trend === -1 ? 'text-red-400' : 'text-slate-400'}`;
                 document.getElementById('ema200-val').textContent = Math.round(ema200).toLocaleString();
+                document.getElementById('weekly-range').textContent = rangePos.toFixed(0) + "%";
                 document.getElementById('vol-ratio').textContent = Math.round(volRatio) + "%";
                 document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
-                document.getElementById('bb-pos').textContent = (bbPos * 100).toFixed(0) + "%";
-                document.getElementById('bb-lower').textContent = Math.round(bbLower).toLocaleString();
 
-                if (entryPrice > 0) {
-                    const p = ((lastPrice - entryPrice) / entryPrice) * 100;
-                    const pEl = document.getElementById('profit-pct');
-                    pEl.textContent = (p >= 0 ? "+" : "") + p.toFixed(2) + "%";
-                    pEl.className = `font-mono font-bold text-lg ${p >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
-                }
-
-                // Scoring System
+                // Scoring
                 let score = 0;
-                if (rsi < 35) score += 45; else if (rsi > 70) score -= 45;
-                if (bbPos < 0.2) score += 30; else if (bbPos > 0.8) score -= 30;
-                if (hist > 0) score += 15;
-                if (lastPrice > ema200) score += 20; else score -= 25;
-                if (volRatio > 130) score += 10;
+                if (rsi < 35) score += 40;
+                else if (rsi > 70) score -= 40;
+                if (supertrend.trend === 1) score += 35;
+                else if (supertrend.trend === -1) score -= 35;
+                if (lastPrice > ema200) score += 20;
+                if (rangePos < 25) score += 25;
+                if (volRatio > 150) score += 15;
 
-                // Confidence Bar UI
-                const maxS = 120;
-                const sNum = document.getElementById('score-number');
-                const pBar = document.getElementById('score-bar-positive');
-                const nBar = document.getElementById('score-bar-negative');
-                
-                sNum.textContent = (score > 0 ? "+" : "") + score;
-                if (score >= 0) {
-                    pBar.style.width = Math.min(100, (score/maxS)*100) + "%";
-                    nBar.style.width = "0%";
-                    sNum.className = "font-mono text-lg font-bold text-emerald-400";
-                } else {
-                    nBar.style.width = Math.min(100, (Math.abs(score)/maxS)*100) + "%";
-                    pBar.style.width = "0%";
-                    sNum.className = "font-mono text-lg font-bold text-red-400";
-                }
+                // Save history
+                scoreHistory.push({time: Date.now(), score: Math.round(score)});
+                if (scoreHistory.length > 50) scoreHistory.shift();
+                localStorage.setItem('scoreHistory', JSON.stringify(scoreHistory));
 
-                // Verdict Logic
-                let vText = "KIÊN NHẪN QUAN SÁT";
-                let vDesc = "Thị trường chưa rõ xu hướng, hạn chế mua đuổi.";
-                let vColor = "text-slate-400";
-                let vDot = "bg-slate-500";
-                let bColor = "border-slate-700";
+                // Render chart
+                renderScoreChart();
 
-                if (score >= 80) {
-                    vText = "VÙNG GOM DCA MẠNH";
-                    vDesc = "Các chỉ báo kỹ thuật khung W1 đang ở vùng chiết khấu cực tốt.";
-                    vColor = "text-emerald-400 alert-flash";
-                    vDot = "bg-emerald-500 animate-ping";
-                    bColor = "border-emerald-500/50";
-                } else if (score >= 40) {
-                    vText = "XU HƯỚNG PHỤC HỒI";
-                    vDesc = "Dòng tiền có dấu hiệu quay lại, ưu tiên nắm giữ.";
-                    vColor = "text-sky-400";
-                    vDot = "bg-sky-500";
-                    bColor = "border-sky-500/30";
-                } else if (score <= -50) {
-                    vText = "CẢNH BÁO CHỐT LỜI";
-                    vDesc = "Rủi ro điều chỉnh cao, nên hiện thực hóa lợi nhuận.";
-                    vColor = "text-red-400";
-                    vDot = "bg-red-500 animate-pulse";
-                    bColor = "border-red-500/50";
-                }
+                // Verdict
+                let vText = "KIÊN NHẪN", vColor = "text-slate-400", vDot = "bg-slate-500";
+                if (score >= 85) { vText = "MUA MẠNH - DCA"; vColor = "text-emerald-400 alert-flash"; vDot = "bg-emerald-500"; }
+                else if (score >= 45) { vText = "XU HƯỚNG TÍCH CỰC"; vColor = "text-sky-400"; vDot = "bg-sky-500"; }
+                else if (score <= -60) { vText = "CẢNH BÁO BÁN"; vColor = "text-red-400"; vDot = "bg-red-500"; }
 
                 document.getElementById('strat-text').textContent = vText;
                 document.getElementById('strat-text').className = `text-lg font-black tracking-tighter uppercase ${vColor}`;
-                document.getElementById('verdict-text').textContent = vDesc;
-                document.getElementById('signal-dot').className = `w-2.5 h-2.5 rounded-full ${vDot}`;
-                document.getElementById('verdict-box').className = `rounded-3xl p-5 border ${bColor} bg-slate-900/80 transition-all duration-500`;
+                document.getElementById('signal-dot').className = `w-3 h-3 rounded-full ${vDot}`;
 
-            } catch (e) { console.error("Update Error:", e); }
+                // Alert
+                const alertBox = document.getElementById('alert-box');
+                if (alertMsg) {
+                    alertBox.textContent = alertMsg;
+                    alertBox.classList.remove('hidden');
+                } else {
+                    alertBox.classList.add('hidden');
+                }
+
+            } catch (e) {
+                console.error(e);
+            }
         }
 
+        function renderScoreChart() {
+            const ctx = document.getElementById('scoreChart');
+            if (scoreChart) scoreChart.destroy();
+
+            const labels = scoreHistory.map((_, i) => i);
+            const scores = scoreHistory.map(s => s.score);
+
+            scoreChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Score',
+                        data: scores,
+                        borderColor: '#22d3ee',
+                        tension: 0.3,
+                        borderWidth: 2,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    plugins: { legend: { display: false } },
+                    scales: { y: { display: false }, x: { display: false } }
+                }
+            });
+        }
+
+        // Init
         setInterval(updateData, 30000);
         updateData();
+        renderScoreChart();
     </script>
 </body>
 </html>
