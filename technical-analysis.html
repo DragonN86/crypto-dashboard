@@ -203,7 +203,7 @@
             const lower = ((lastHigh + lastLow) / 2) - multiplier * atr;
             
             const trend = lastClose > upper ? 1 : (lastClose < lower ? -1 : 0);
-            return { trend, value: trend === 1 ? "BULL" : trend === -1 ? "BEAR" : "SIDE" };
+            return { trend, value: trend === 1 ? "BULL" : trend === -1 ? "BEAR" : "SIDEWAY" };
         }
 
         async function updateData() {
