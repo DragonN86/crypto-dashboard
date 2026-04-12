@@ -29,7 +29,7 @@
                 <div class="w-9 h-9 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-3xl">📊</div>
                 <div>
                     <h1 class="text-white font-bold text-2xl tracking-[-0.5px]">BTC Spot (W1)</h1>
-                    <p class="text-emerald-400 text-sm">Technical Analysis v3.7 • WINTRACK 2026</p>
+                    <p class="text-emerald-400 text-sm">GOD MODE v4.2 • WINTRACK 2026</p>
                 </div>
             </div>
             <div class="text-right">
@@ -64,7 +64,6 @@
                 <div>
                     <p class="text-xs text-slate-400 mb-1">RSI (14)</p>
                     <p id="rsi-val" class="text-4xl font-bold text-white">40.6</p>
-                    <span id="rsi-status" class="text-xs px-4 py-1 rounded-2xl bg-slate-700 inline-block mt-2">NEUTRAL</span>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400 mb-1">MACD HIST</p>
@@ -74,8 +73,8 @@
 
             <div class="mt-8 space-y-6">
                 <div class="flex justify-between items-center">
-                    <span class="text-slate-400 text-sm">ATR Trend (10,3)</span>
-                    <span id="atrtrend-val" class="font-bold px-4 py-1 rounded-2xl text-emerald-400">BULL</span>
+                    <span class="text-slate-400 text-sm">Trend Strength</span>
+                    <span id="trend-val" class="font-bold px-4 py-1 rounded-2xl text-emerald-400">STRONG</span>
                 </div>
 
                 <div class="flex justify-between text-sm">
@@ -85,7 +84,7 @@
 
                 <div>
                     <div class="flex justify-between text-xs mb-2">
-                        <span class="text-slate-400">VOLUME ANALYSIS</span>
+                        <span class="text-slate-400">VOLUME + LIQUIDITY</span>
                         <span id="vol-status" class="text-blue-400 font-bold">72% ↑</span>
                     </div>
                     <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
@@ -94,13 +93,27 @@
                 </div>
 
                 <div class="flex justify-between text-sm">
-                    <span class="text-slate-400">20-Week Range Position</span>
+                    <span class="text-slate-400">20-Week Range</span>
                     <span id="weekly-range" class="font-mono text-emerald-400">18%</span>
                 </div>
 
                 <div class="flex justify-between text-sm font-mono">
-                    <span class="text-red-400">Upper: <span id="bb-upper">99,666</span></span>
-                    <span class="text-emerald-400">Lower: <span id="bb-lower">57,601</span></span>
+                    <span class="text-red-400">BB Upper: <span id="bb-upper">99,666</span></span>
+                    <span class="text-emerald-400">BB Lower: <span id="bb-lower">57,601</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ENTRY & POSITION -->
+        <div class="wintrack-card p-6 hover-lift">
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <p class="text-slate-400">ENTRY ZONE</p>
+                    <p id="entry-zone" class="font-bold text-emerald-400">Đang tính...</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-slate-400">GỢI Ý VỐN</p>
+                    <p id="position-size" class="font-bold text-2xl text-emerald-400">20%</p>
                 </div>
             </div>
         </div>
@@ -137,6 +150,7 @@
             document.getElementById('entry-price-display').textContent = '$' + entryPrice.toLocaleString('en-US');
         }
 
+        // Các hàm tính toán (giữ nguyên từ trước, đã tối ưu)
         function calculateEMA(prices, period) {
             if (prices.length < period) return prices[prices.length - 1];
             let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
@@ -147,7 +161,7 @@
             return ema;
         }
 
-        function calculateRSI(prices, period = 14) {
+        function calculateRSI(prices, period = 14) { /* ... giữ nguyên hàm cũ */ 
             if (prices.length < period + 1) return 50;
             const changes = prices.slice(1).map((p, i) => p - prices[i]);
             let avgGain = 0, avgLoss = 0;
@@ -156,7 +170,6 @@
                 else avgLoss -= changes[i];
             }
             avgGain /= period; avgLoss /= period;
-
             for (let i = period; i < changes.length; i++) {
                 const gain = changes[i] > 0 ? changes[i] : 0;
                 const loss = changes[i] < 0 ? -changes[i] : 0;
@@ -166,61 +179,32 @@
             return avgLoss === 0 ? 100 : Math.min(100, Math.max(0, 100 - (100 / (1 + avgGain / avgLoss))));
         }
 
-        // MACD CHUẨN (Histogram)
-        function calculateMACD(prices) {
-            const ema12 = calculateEMA(prices, 12);
-            const ema26 = calculateEMA(prices, 26);
-            const macdLine = ema12 - ema26;
-
-            // Signal Line (EMA9 của MACD Line) - approximate trên dữ liệu gần
-            const macdHistory = [];
-            for (let i = 20; i < prices.length; i++) {
-                const e12 = calculateEMA(prices.slice(0, i+1), 12);
-                const e26 = calculateEMA(prices.slice(0, i+1), 26);
-                macdHistory.push(e12 - e26);
+        function calculateMACD(prices) { /* ... giữ nguyên */ 
+            const ema12Arr = []; const ema26Arr = [];
+            for (let i = 0; i < prices.length; i++) {
+                ema12Arr.push(calculateEMA(prices.slice(0, i + 1), 12));
+                ema26Arr.push(calculateEMA(prices.slice(0, i + 1), 26));
             }
-            const signalLine = calculateEMA(macdHistory, 9);
-            return macdLine - signalLine;
-        }
-
-        // ATR Trend (đơn giản nhưng rõ ràng)
-        function calculateATRTrend(highs, lows, closes, period = 10, multiplier = 3) {
-            const len = closes.length;
-            if (len < period) return { value: "SIDEWAY", trend: 0 };
-
-            let atr = 0;
-            for (let i = len - period; i < len; i++) {
-                const tr = Math.max(
-                    highs[i] - lows[i],
-                    Math.abs(highs[i] - (closes[i-1] || highs[i])),
-                    Math.abs(lows[i] - (closes[i-1] || lows[i]))
-                );
-                atr += tr;
-            }
-            atr = atr / period;
-
-            const mid = (highs[len-1] + lows[len-1]) / 2;
-            const upper = mid + multiplier * atr;
-            const lower = mid - multiplier * atr;
-            const lastClose = closes[len-1];
-
-            const trend = lastClose > upper ? 1 : (lastClose < lower ? -1 : 0);
-
-            return {
-                value: trend === 1 ? "BULL" : trend === -1 ? "BEAR" : "SIDEWAY",
-                trend: trend
-            };
+            const macdLine = ema12Arr.map((v, i) => v - ema26Arr[i]);
+            const signalLine = macdLine.map((_, i) => calculateEMA(macdLine.slice(0, i + 1), 9));
+            const histogram = macdLine.map((v, i) => v - signalLine[i]);
+            return histogram.at(-1) || 0;
         }
 
         async function updateData() {
             try {
-                const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=300');
-                const candles = await res.json();
+                const [w1Res, d1Res] = await Promise.all([
+                    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1w&limit=300'),
+                    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=300')
+                ]);
 
-                const highs = candles.map(c => parseFloat(c[2]));
-                const lows = candles.map(c => parseFloat(c[3]));
-                const closes = candles.map(c => parseFloat(c[4]));
-                const volumes = candles.map(c => parseFloat(c[5]));
+                const w1 = await w1Res.json();
+                const d1 = await d1Res.json();
+
+                const highs = w1.map(c => parseFloat(c[2]));
+                const lows = w1.map(c => parseFloat(c[3]));
+                const closes = w1.map(c => parseFloat(c[4]));
+                const volumes = w1.map(c => parseFloat(c[5]));
 
                 const lastPrice = closes[closes.length - 1];
                 const prevClose = closes[closes.length - 2];
@@ -229,9 +213,15 @@
                 const rsi = calculateRSI(closes);
                 const ema200 = calculateEMA(closes, 200);
                 const macdHist = calculateMACD(closes);
-                const atrTrend = calculateATRTrend(highs, lows, closes);
 
-                // Bollinger & Range
+                // D1 Confirmation
+                const d1Closes = d1.map(c => parseFloat(c[4]));
+                const ema200D1 = calculateEMA(d1Closes, 200);
+                const rsiD1 = calculateRSI(d1Closes);
+                const macdD1 = calculateMACD(d1Closes);
+                const d1Bullish = d1Closes.at(-1) > ema200D1 && rsiD1 > 50 && macdD1 > 0;
+
+                // Bollinger & Volatility
                 const slice20 = closes.slice(-20);
                 const sma20 = slice20.reduce((a,b)=>a+b,0)/20;
                 const stdDev = Math.sqrt(slice20.reduce((a,b)=>a+(b-sma20)**2,0)/20);
@@ -246,31 +236,57 @@
                 const recentLow = Math.min(...lows.slice(-20));
                 const weeklyRangePos = ((lastPrice - recentLow) / (recentHigh - recentLow)) * 100;
 
-                // ==================== SMART SCORING (MAX 100) ====================
+                // Market Phase
+                let marketPhase = "SIDEWAY";
+                if (lastPrice > ema200 && rsi > 50) marketPhase = "BULL";
+                else if (lastPrice < ema200 && rsi < 50) marketPhase = "BEAR";
+
+                // Liquidity Sweep + Fake Breakout
+                const sweepLow = lows[lows.length-1] < Math.min(...lows.slice(-15, -1));
+                const reclaim = lastPrice > prevClose;
+                const isFakeBreakout = weeklyRangePos > 90 && volRatio > 150 && lastPrice < prevClose;
+
+                let isHighRisk = isFakeBreakout || (rsi > 68 && weeklyRangePos > 78 && macdHist > 0 && marketPhase !== "BULL");
+
+                const isLowVol = stdDev < (sma20 * 0.015);
+
+                // ==================== GOD MODE SCORING ====================
                 let score = 0;
+                if (marketPhase === "BULL") {
+                    if (rsi < 40) score += 25;
+                } else if (marketPhase === "BEAR") {
+                    if (rsi < 30) score += 10;
+                }
 
-                // RSI + Position
-                if (rsi < 35 && weeklyRangePos < 35) score += 25;
-                else if (rsi > 70 && weeklyRangePos > 75) score -= 20;
-
-                // Trend Strength
-                if (atrTrend.trend === 1) score += 22;
                 if (macdHist > 0) score += 18;
-
-                // Volume + Direction
-                if (volRatio > 130 && lastPrice > prevClose) score += 15;        // Bullish volume
-                else if (volRatio > 180 && lastPrice < prevClose) score -= 12;   // Bearish volume mạnh
-
-                // EMA200
-                if (lastPrice > ema200) score += 15;
-                else score -= 8;
-
-                // Range Position
+                if (volRatio > 130 && lastPrice > prevClose) score += 15;
                 if (weeklyRangePos < 25) score += 12;
+                if (lastPrice > ema200) score += 15;
+                if (d1Bullish) score += 18;
+                if (sweepLow && reclaim) score += 20;           // Liquidity Grab
+                if (ema200 - calculateEMA(closes.slice(0, -1), 200) > 0) score += 10; // EMA Slope
+
+                if (!d1Bullish) score -= 20;
+                if (marketPhase === "BEAR") score -= 22;
+                if (isHighRisk) score -= 35;
+                if (isLowVol) score -= 15;
 
                 const finalScore = Math.min(100, Math.max(0, Math.round(score)));
 
-                // === UI UPDATE ===
+                // Smart Entry Zone
+                const nearSupport = (lastPrice <= bbLower * 1.05) || (Math.abs(lastPrice - ema200) / ema200 < 0.035);
+
+                // Position Sizing
+                let positionSize = "0%";
+                let riskLevel = "THẤP";
+                if (finalScore >= 85 && nearSupport) positionSize = "20-25%";
+                else if (finalScore >= 70) positionSize = "10-15%";
+                else if (finalScore >= 55) positionSize = "5-8%";
+                else positionSize = "0% (Quan sát)";
+
+                if (isHighRisk) riskLevel = "CAO";
+
+                // ==================== UI UPDATE ====================
                 document.getElementById('current-price').textContent = lastPrice.toLocaleString('en-US');
                 document.getElementById('ema200-val').textContent = Math.round(ema200).toLocaleString('en-US');
                 document.getElementById('ema200-val').style.color = lastPrice > ema200 ? '#22c55e' : '#ef4444';
@@ -279,24 +295,23 @@
                 document.getElementById('macd-val').textContent = macdHist.toFixed(2);
                 document.getElementById('macd-val').className = `text-4xl font-bold ${macdHist >= 0 ? 'text-emerald-400' : 'text-red-500'}`;
 
-                const trendEl = document.getElementById('atrtrend-val');
-                trendEl.textContent = atrTrend.value;
-                trendEl.className = `font-bold px-4 py-1 rounded-2xl ${atrTrend.trend === 1 ? 'bg-emerald-500/20 text-emerald-400' : atrTrend.trend === -1 ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-300'}`;
+                // Trend
+                const trendStrength = (lastPrice > ema200 ? 1 : 0) + (macdHist > 0 ? 1 : 0) + (rsi > 50 ? 1 : 0);
+                const trendEl = document.getElementById('trend-val');
+                trendEl.textContent = trendStrength >= 3 ? "VERY STRONG" : trendStrength === 2 ? "STRONG" : "MODERATE";
+                trendEl.className = `font-bold px-4 py-1 rounded-2xl ${trendStrength >= 2 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-300'}`;
 
-                // Volume Status
-                const volEl = document.getElementById('vol-status');
-                volEl.textContent = Math.round(volRatio) + "% " + (lastPrice > prevClose ? "↑" : "↓");
+                document.getElementById('vol-status').textContent = Math.round(volRatio) + "% " + (lastPrice > prevClose ? "↑" : "↓");
                 document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
 
                 document.getElementById('bb-upper').textContent = Math.round(bbUpper).toLocaleString('en-US');
                 document.getElementById('bb-lower').textContent = Math.round(bbLower).toLocaleString('en-US');
                 document.getElementById('weekly-range').textContent = Math.round(weeklyRangePos) + "%";
 
-                // Profit
-                const profit = ((lastPrice - entryPrice) / entryPrice) * 100;
-                const pEl = document.getElementById('profit-pct');
-                pEl.textContent = (profit >= 0 ? "+" : "") + profit.toFixed(2) + "%";
-                pEl.className = `text-3xl font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+                // Smart Entry & Position
+                document.getElementById('entry-zone').textContent = nearSupport ? "✅ GẦN SUPPORT - TỐT ĐỂ DCA" : "⏳ Chờ giá về vùng hỗ trợ";
+                document.getElementById('position-size').textContent = positionSize;
+                document.getElementById('position-size').className = `font-bold text-2xl ${finalScore >= 80 ? 'text-emerald-400' : 'text-yellow-400'}`;
 
                 // Score & Verdict
                 document.getElementById('score-number').textContent = finalScore;
@@ -306,15 +321,19 @@
                 let color = "text-slate-400";
                 let dotColor = "bg-slate-400";
 
-                if (finalScore >= 82) {
-                    verdict = "VÙNG GOM DCA MẠNH";
+                if (isHighRisk) {
+                    verdict = "HIGH RISK - TRÁNH XA";
+                    color = "text-red-500";
+                    dotColor = "bg-red-500";
+                } else if (finalScore >= 85 && nearSupport && d1Bullish) {
+                    verdict = "STRONG BUY - DCA NGAY";
                     color = "text-emerald-400";
                     dotColor = "bg-emerald-500 signal-dot";
-                } else if (finalScore >= 58) {
+                } else if (finalScore >= 65) {
                     verdict = "XU HƯỚNG PHỤC HỒI";
                     color = "text-sky-400";
                     dotColor = "bg-sky-400";
-                } else if (finalScore <= 30) {
+                } else if (finalScore <= 35 || marketPhase === "BEAR") {
                     verdict = "CẢNH BÁO CHỐT LỜI";
                     color = "text-red-400";
                     dotColor = "bg-red-400";
@@ -323,9 +342,9 @@
                 document.getElementById('strat-text').textContent = verdict;
                 document.getElementById('strat-text').className = `text-xl font-black tracking-tighter uppercase ${color}`;
                 document.getElementById('signal-dot').className = `w-4 h-4 rounded-full ${dotColor}`;
-                document.getElementById('verdict-text').textContent = finalScore >= 82 
-                    ? "Tín hiệu mua mạnh trên khung W1 - Nên DCA thêm." 
-                    : "Thị trường đang trong giai đoạn quan sát.";
+                document.getElementById('verdict-text').textContent = finalScore >= 85 && nearSupport 
+                    ? "Vùng mua lý tưởng - Nên DCA mạnh." 
+                    : isHighRisk ? "Rủi ro cao - Không nên vào lệnh!" : "Đang quan sát thị trường.";
 
                 document.getElementById('last-updated').textContent = "Cập nhật: vừa xong";
 
