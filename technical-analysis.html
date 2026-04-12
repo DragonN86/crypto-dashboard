@@ -34,7 +34,7 @@
                 <div class="w-9 h-9 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-3xl">📊</div>
                 <div>
                     <h1 class="text-white font-bold text-2xl tracking-[-0.5px]">BTC Spot (W1)</h1>
-                    <p class="text-emerald-400 text-sm">Technical Analysis v3.4 • WINTRACK 2026</p>
+                    <p class="text-emerald-400 text-sm">Technical Analysis v3.6 • WINTRACK 2026</p>
                 </div>
             </div>
             <div class="text-right">
@@ -79,19 +79,16 @@
             </div>
 
             <div class="mt-8 space-y-6">
-                <!-- Supertrend -->
                 <div class="flex justify-between items-center">
                     <span class="text-slate-400 text-sm">Supertrend (10,3)</span>
                     <span id="supertrend-val" class="font-bold px-4 py-1 rounded-2xl text-emerald-400">BULL</span>
                 </div>
 
-                <!-- EMA 200 -->
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-400">EMA 200 (W1)</span>
                     <span id="ema200-val" class="font-mono font-bold text-emerald-400">69,118</span>
                 </div>
 
-                <!-- Volume -->
                 <div>
                     <div class="flex justify-between text-xs mb-2">
                         <span class="text-slate-400">VOLUME ANALYSIS</span>
@@ -102,13 +99,11 @@
                     </div>
                 </div>
 
-                <!-- Weekly Range -->
                 <div class="flex justify-between text-sm">
                     <span class="text-slate-400">Weekly Range Position</span>
                     <span id="weekly-range" class="font-mono text-emerald-400">18%</span>
                 </div>
 
-                <!-- Bollinger Bands -->
                 <div class="flex justify-between text-sm font-mono">
                     <span class="text-red-400">Upper: <span id="bb-upper">99,666</span></span>
                     <span class="text-emerald-400">Lower: <span id="bb-lower">57,601</span></span>
@@ -124,7 +119,6 @@
             </div>
             <p id="verdict-text" class="text-slate-300">Các chỉ báo W1 đang cho tín hiệu tích lũy cực mạnh.</p>
             
-            <!-- Score -->
             <div class="mt-6 pt-6 border-t border-slate-700">
                 <div class="flex justify-between items-baseline mb-3">
                     <span class="text-xs font-bold text-slate-400 tracking-widest">ĐIỂM TIN CẬY</span>
@@ -150,7 +144,7 @@
             document.getElementById('entry-price-display').textContent = '$' + entryPrice.toLocaleString('en-US');
         }
 
-        // ==================== TÍNH TOÁN CHÍNH XÁC ====================
+        // ==================== CÁC HÀM TÍNH TOÁN ====================
         function calculateEMA(prices, period) {
             if (prices.length < period) return prices[prices.length - 1];
             let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
@@ -161,48 +155,53 @@
             return ema;
         }
 
+        function calculateRSI(prices, period = 14) {
+            if (prices.length < period + 1) return 50;
+            const changes = prices.slice(1).map((p, i) => p - prices[i]);
+            let avgGain = 0, avgLoss = 0;
+            for (let i = 0; i < period; i++) {
+                if (changes[i] > 0) avgGain += changes[i];
+                else avgLoss -= changes[i];
+            }
+            avgGain /= period;
+            avgLoss /= period;
+
+            for (let i = period; i < changes.length; i++) {
+                const gain = changes[i] > 0 ? changes[i] : 0;
+                const loss = changes[i] < 0 ? -changes[i] : 0;
+                avgGain = (avgGain * (period - 1) + gain) / period;
+                avgLoss = (avgLoss * (period - 1) + loss) / period;
+            }
+            return avgLoss === 0 ? 100 : Math.min(100, Math.max(0, 100 - (100 / (1 + avgGain / avgLoss))));
+        }
+
         function calculateMACD(prices) {
             const ema12 = calculateEMA(prices, 12);
             const ema26 = calculateEMA(prices, 26);
-            const macdLine = ema12 - ema26;
-            
-            // Signal Line (EMA9 of MACD) - approximate
-            const signal = calculateEMA(prices.slice(-30).map((_, i) => {
-                return calculateEMA(prices.slice(0, prices.length - 30 + i + 1), 12) - 
-                       calculateEMA(prices.slice(0, prices.length - 30 + i + 1), 26);
-            }), 9);
-            
-            return macdLine - signal;
+            return ema12 - ema26;
         }
 
         function calculateSupertrend(highs, lows, closes, period = 10, multiplier = 3) {
-            let atr = 0;
-            let upperBand = 0, lowerBand = 0;
-            let trend = 1; // 1 = up, -1 = down
-
             const len = closes.length;
             if (len < period) return { value: "SIDEWAY", trend: 0 };
 
-            // Tính ATR đơn giản cho nến cuối
+            let atr = 0;
             for (let i = len - period; i < len; i++) {
                 const tr = Math.max(
                     highs[i] - lows[i],
-                    Math.abs(highs[i] - closes[i-1] || highs[i]),
-                    Math.abs(lows[i] - closes[i-1] || lows[i])
+                    Math.abs(highs[i] - (closes[i-1] || highs[i])),
+                    Math.abs(lows[i] - (closes[i-1] || lows[i]))
                 );
                 atr += tr;
             }
             atr = atr / period;
 
             const mid = (highs[len-1] + lows[len-1]) / 2;
-            upperBand = mid + multiplier * atr;
-            lowerBand = mid - multiplier * atr;
-
+            const upper = mid + multiplier * atr;
+            const lower = mid - multiplier * atr;
             const lastClose = closes[len-1];
-            
-            if (lastClose > upperBand) trend = 1;
-            else if (lastClose < lowerBand) trend = -1;
-            // else giữ trend trước
+
+            let trend = lastClose > upper ? 1 : (lastClose < lower ? -1 : 0);
 
             return {
                 value: trend === 1 ? "BULL" : trend === -1 ? "BEAR" : "SIDEWAY",
@@ -223,39 +222,47 @@
                 const lastPrice = closes[closes.length - 1];
                 const lastVol = volumes[volumes.length - 1];
 
-                // Tính chỉ báo
-                const rsi = calculateRSI(closes); // (giữ hàm RSI cũ của bạn hoặc mình có thể cải tiến thêm)
+                const rsi = calculateRSI(closes);
                 const ema200 = calculateEMA(closes, 200);
-                const supertrend = calculateSupertrend(highs, lows, closes);
                 const macdHist = calculateMACD(closes);
+                const supertrend = calculateSupertrend(highs, lows, closes);
 
-                // Bollinger
                 const slice20 = closes.slice(-20);
-                const sma20 = slice20.reduce((a,b)=>a+b,0)/20;
-                const stdDev = Math.sqrt(slice20.reduce((a,b)=>a+(b-sma20)**2,0)/20);
-                const bbUpper = sma20 + 2*stdDev;
-                const bbLower = sma20 - 2*stdDev;
+                const sma20 = slice20.reduce((a, b) => a + b, 0) / 20;
+                const stdDev = Math.sqrt(slice20.reduce((a, b) => a + (b - sma20) ** 2, 0) / 20);
+                const bbUpper = sma20 + 2 * stdDev;
+                const bbLower = sma20 - 2 * stdDev;
 
-                const avgVol = volumes.slice(-20).reduce((a,b)=>a+b,0)/20;
+                const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
                 const volRatio = Math.min(200, (lastVol / avgVol) * 100);
 
                 const recentHigh = Math.max(...highs.slice(-8));
                 const recentLow = Math.min(...lows.slice(-8));
                 const weeklyRangePos = ((lastPrice - recentLow) / (recentHigh - recentLow)) * 100;
 
-                // === CẬP NHẬT UI ===
+                // ==================== SCORING MỚI (MAX 100) ====================
+                let score = 0;
+                if (rsi < 35) score += 20;           // RSI oversold
+                else if (rsi > 70) score -= 15;      // RSI overbought
+
+                if (supertrend.trend === 1) score += 25;   // Supertrend mạnh
+                if (macdHist > 0) score += 15;             // MACD dương
+                if (weeklyRangePos < 30) score += 15;      // Giá gần đáy tuần
+                if (volRatio > 130) score += 10;           // Volume mạnh
+                if (lastPrice > ema200) score += 15;       // Giá trên EMA200
+                else score -= 10;                          // Phạt nhẹ
+
+                const finalScore = Math.min(100, Math.max(0, Math.round(score)));
+
+                // Cập nhật UI
                 document.getElementById('current-price').textContent = lastPrice.toLocaleString('en-US');
                 document.getElementById('ema200-val').textContent = Math.round(ema200).toLocaleString('en-US');
-                
-                // Màu EMA200 động
-                const emaEl = document.getElementById('ema200-val');
-                emaEl.style.color = lastPrice > ema200 ? '#22c55e' : '#ef4444';
+                document.getElementById('ema200-val').style.color = lastPrice > ema200 ? '#22c55e' : '#ef4444';
 
                 document.getElementById('rsi-val').textContent = rsi.toFixed(1);
                 document.getElementById('macd-val').textContent = macdHist.toFixed(2);
                 document.getElementById('macd-val').className = `text-4xl font-bold ${macdHist >= 0 ? 'text-emerald-400' : 'text-red-500'}`;
 
-                // Supertrend
                 const stEl = document.getElementById('supertrend-val');
                 stEl.textContent = supertrend.value;
                 stEl.className = `font-bold px-4 py-1 rounded-2xl ${supertrend.trend === 1 ? 'bg-emerald-500/20 text-emerald-400' : supertrend.trend === -1 ? 'bg-red-500/20 text-red-400' : 'bg-slate-700 text-slate-300'}`;
@@ -272,22 +279,35 @@
                 pEl.textContent = (profit >= 0 ? "+" : "") + profit.toFixed(2) + "%";
                 pEl.className = `text-3xl font-bold ${profit >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
 
-                // Scoring & Verdict (giữ logic cũ nhưng cải tiến nhẹ)
-                let score = 0;
-                if (rsi < 35) score += 40;
-                else if (rsi > 70) score -= 35;
-                if (supertrend.trend === 1) score += 40;
-                if (macdHist > 0) score += 25;
-                if (weeklyRangePos < 30) score += 30;
-                if (volRatio > 130) score += 15;
-                if (lastPrice > ema200) score += 30; else score -= 25;
-
-                const finalScore = Math.min(100, Math.max(0, score));
+                // Score UI
                 document.getElementById('score-number').textContent = finalScore;
                 document.getElementById('score-bar').style.width = finalScore + "%";
 
-                // Verdict logic...
-                // (Bạn có thể giữ nguyên phần verdict cũ)
+                // Verdict
+                let verdict = "KIÊN NHẪN - QUAN SÁT";
+                let color = "text-slate-400";
+                let dotColor = "bg-slate-400";
+
+                if (finalScore >= 85) {
+                    verdict = "VÙNG GOM DCA MẠNH";
+                    color = "text-emerald-400";
+                    dotColor = "bg-emerald-500 signal-dot";
+                } else if (finalScore >= 60) {
+                    verdict = "XU HƯỚNG PHỤC HỒI";
+                    color = "text-sky-400";
+                    dotColor = "bg-sky-400";
+                } else if (finalScore <= 25) {
+                    verdict = "CẢNH BÁO CHỐT LỜI";
+                    color = "text-red-400";
+                    dotColor = "bg-red-400";
+                }
+
+                document.getElementById('strat-text').textContent = verdict;
+                document.getElementById('strat-text').className = `text-xl font-black tracking-tighter uppercase ${color}`;
+                document.getElementById('signal-dot').className = `w-4 h-4 rounded-full ${dotColor}`;
+                document.getElementById('verdict-text').textContent = finalScore >= 85 
+                    ? "Tín hiệu mua mạnh trên khung W1 - Nên DCA thêm." 
+                    : "Thị trường đang trong giai đoạn quan sát.";
 
                 document.getElementById('last-updated').textContent = "Cập nhật: vừa xong";
 
@@ -295,13 +315,6 @@
                 console.error(e);
                 document.getElementById('last-updated').textContent = "Lỗi kết nối API";
             }
-        }
-
-        // Hàm RSI (giữ nguyên hoặc cải tiến)
-        function calculateRSI(prices, period = 14) {
-            if (prices.length < period + 1) return 50;
-            // ... (giữ hàm RSI cũ của bạn)
-            // Để ngắn gọn, bạn có thể paste lại hàm RSI cũ vào đây
         }
 
         setInterval(updateData, 30000);
