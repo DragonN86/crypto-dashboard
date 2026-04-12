@@ -37,7 +37,7 @@
                 <div class="w-9 h-9 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-3xl">📊</div>
                 <div>
                     <h1 class="text-white font-bold text-2xl tracking-[-0.5px]">BTC Spot (W1)</h1>
-                    <p class="text-emerald-400 text-sm">BUY THE DIP v4.8 PRO • WINTRACK 2026</p>
+                    <p class="text-emerald-400 text-sm">BUY THE DIP v4.9 • WINTRACK 2026</p>
                 </div>
             </div>
             <div class="text-right">
@@ -299,7 +299,11 @@
                 const emaSlopeUp = ema200 > emaPrev;
                 const macroUptrend = emaSlopeUp && rsi > 40;
 
-                const fallingKnife = rsi < 38 && macdHist < 0 && lastPrice < prevClose && weeklyRangePos < 40;
+                const fallingKnife =
+                    rsi < 35 &&
+                    macdHist < 0 &&
+                    lastPrice < prevClose &&
+                    weeklyRangePos < 35;
 
                 const isFakeBreakout = weeklyRangePos > 88 && volRatio > 140 && lastPrice < prevClose;
                 const isBullTrap = rsi > 68 && weeklyRangePos > 75 && macdHist > 0 && marketPhase !== "BULL";
@@ -308,9 +312,9 @@
                 const isLowVol = stdDev < (sma20 * 0.015);
 
                 const trueBottom =
-                    rsi < 33 &&
-                    weeklyRangePos < 25 &&
-                    lastPrice <= ema200 * 1.01;
+                    rsi < 40 &&
+                    weeklyRangePos < 35 &&
+                    lastPrice <= ema200 * 1.03;
 
                 const panicBottom =
                     rsi < 30 &&
@@ -321,17 +325,21 @@
                     volRatio > 140 &&
                     lastPrice > prevClose;
 
+                const earlyDip =
+                    rsi < 42 &&
+                    weeklyRangePos < 40 &&
+                    lastPrice > ema200;
+
                 const buyDip =
-                    (trueBottom || panicBottom || liquidityFlush) &&
-                    !fallingKnife &&
-                    macroUptrend;
+                    (trueBottom || panicBottom || liquidityFlush || earlyDip) &&
+                    !fallingKnife;
 
                 let rsiSignal = (marketPhase === "BULL" && rsi < 45) ? 1 : (marketPhase === "BEAR" && rsi < 30) ? 0.4 : 0;
                 let macdSignal = macdHist > 0 ? 1 : 0;
                 let trendSignal = (lastPrice > ema200 ? 1 : 0) + (emaSlopeUp ? 1 : 0);
                 let structureSignal =
                     (trueBottom ? 2 : 0) +
-                    (weeklyRangePos < 30 ? 1 : 0);
+                    (earlyDip && !trueBottom ? 1 : 0);
                 let volumeSignal = (volRatio > 130 && lastPrice > prevClose) ? 1 : 0;
 
                 let score =
@@ -356,12 +364,10 @@
                 const finalScore = Math.min(100, Math.max(0, Math.round(score)));
 
                 let positionSize = "0%";
-                if (isHighRisk || isLowVol || !macroUptrend) positionSize = "0% (Rủi ro cao)";
-                else if (panicBottom) positionSize = "25-30% (ALL IN ZONE)";
-                else if (liquidityFlush) positionSize = "20-25%";
-                else if (finalScore >= 82 && buyDip) positionSize = "15-20%";
-                else if (finalScore >= 70) positionSize = "10-15%";
-                else if (finalScore >= 55) positionSize = "5-8%";
+                if (panicBottom) positionSize = "25-30%";
+                else if (trueBottom) positionSize = "15-20%";
+                else if (earlyDip) positionSize = "5-10%";
+                else if (isHighRisk) positionSize = "0% (Rủi ro cao)";
 
                 document.getElementById('current-price').textContent = lastPrice.toLocaleString('en-US');
                 document.getElementById('ema200-val').textContent = Math.round(ema200).toLocaleString('en-US');
@@ -379,7 +385,15 @@
                 document.getElementById('vol-bar').style.width = Math.min(100, volRatio) + "%";
                 document.getElementById('weekly-range').textContent = Math.round(weeklyRangePos) + "%";
 
-                document.getElementById('entry-zone').textContent = buyDip ? "✅ VÙNG MUA GIÁ RẺ - TỐT ĐỂ DCA" : "⏳ Chờ giá về vùng hỗ trợ";
+                let entryZoneText = "⏳ Chờ giá về vùng hỗ trợ";
+                if (buyDip) {
+                    if (earlyDip && !trueBottom && !panicBottom && !liquidityFlush) {
+                        entryZoneText = "✅ VÙNG GOM SỚM (EARLY DIP)";
+                    } else {
+                        entryZoneText = "✅ VÙNG MUA GIÁ RẺ - TỐT ĐỂ DCA";
+                    }
+                }
+                document.getElementById('entry-zone').textContent = entryZoneText;
                 document.getElementById('position-size').textContent = positionSize;
 
                 document.getElementById('score-number').textContent = finalScore;
@@ -410,9 +424,15 @@
                 document.getElementById('strat-text').textContent = verdict;
                 document.getElementById('strat-text').className = `text-xl font-black tracking-tighter uppercase ${color}`;
                 document.getElementById('signal-dot').className = `w-4 h-4 rounded-full ${dotColor}`;
-                document.getElementById('verdict-text').textContent = buyDip && finalScore >= 82
-                    ? "Đây là vùng mua dip chất lượng cao - Nên DCA mạnh."
-                    : isHighRisk ? "Rủi ro cao - Không nên vào!" : "Đang quan sát thị trường.";
+                let verdictBody = "Đang quan sát thị trường.";
+                if (isHighRisk) {
+                    verdictBody = "Rủi ro cao - Không nên vào!";
+                } else if (buyDip && finalScore >= 82) {
+                    verdictBody = "Đây là vùng mua dip chất lượng cao - Nên DCA mạnh.";
+                } else if (buyDip && earlyDip && !trueBottom && !panicBottom && !liquidityFlush) {
+                    verdictBody = "Gom sớm (early dip): vào từng phần nhỏ, theo dõi kháng cự gần.";
+                }
+                document.getElementById('verdict-text').textContent = verdictBody;
 
                 document.getElementById('last-updated').textContent = "Cập nhật: vừa xong";
 
