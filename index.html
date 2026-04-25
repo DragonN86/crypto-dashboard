@@ -9,7 +9,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .phase-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-       
+      
         .phase-card-active {
             border-color: #f2cc60 !important;
             background: rgba(242, 204, 96, 0.18) !important;
@@ -31,6 +31,14 @@
         }
         .status-badge-active { animation: pulse 2s infinite; }
         @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+        .iframe-container {
+            height: 520px;
+            border: none;
+        }
+        @media (max-width: 1024px) {
+            .iframe-container { height: 460px; }
+        }
     </style>
 </head>
 <body class="bg-[#0d1117] text-[#c9d1d9] min-h-screen p-6 lg:p-10">
@@ -45,37 +53,51 @@
         </div>
         <div class="mt-4 md:mt-0 flex items-center gap-3 bg-[#1c2128] px-5 py-2.5 rounded-2xl border border-[#30363d]">
             <span class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-            <span class="text-xs font-mono uppercase tracking-widest">LIVE MULTI-FACTOR ANALYSIS (W1)</span>
+            <span class="text-xs font-mono uppercase tracking-widest">LIVE MULTI-FACTOR ANALYSIS</span>
         </div>
     </header>
 
-    <!-- DASHBOARD GRID - NEW LAYOUT -->
-    <div class="grid grid-cols-1 lg:grid-cols-[1fr,1fr] gap-6 mb-12">
-        
-        <!-- LEFT: BTC Spot Technical Analysis (Tall) -->
-        <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22] row-span-2">
-            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">📈 BTC Spot Technical Analysis (W1)</div>
-            <div class="h-[760px]"><iframe id="tech-frame" src="technical-analysis.html" class="w-full h-full border-none"></iframe></div>
-        </div>
+    <!-- DASHBOARD GRID - 2 CỘT 2 HÀNG -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-12">
 
-        <!-- RIGHT COLUMN 1: BTC Dominance -->
+        <!-- HÀNG TRÊN: Technical Analysis -->
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
-            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🌍 BTC Dominance</div>
-            <div class="h-[380px]">
-                <iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" class="w-full h-full border-none"></iframe>
+            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm flex items-center gap-2">
+                📈 BTC Spot Technical Analysis (W1) • v6.0
+            </div>
+            <div class="iframe-container">
+                <iframe id="tech-w1" src="technical-analysis.html" class="w-full h-full border-none"></iframe>
             </div>
         </div>
 
-        <!-- RIGHT COLUMN 2: Leverage & Funding Signals -->
+        <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
+            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm flex items-center gap-2">
+                📊 BTC Spot Technical Analysis (Daily)
+            </div>
+            <div class="iframe-container">
+                <iframe id="tech-day" src="technical-day.html" class="w-full h-full border-none"></iframe>
+            </div>
+        </div>
+
+        <!-- HÀNG DƯỚI: Còn lại -->
+        <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
+            <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🌍 BTC Dominance</div>
+            <div class="iframe-container">
+                <iframe src="https://s.tradingview.com/widgetembed/?symbol=CRYPTOCAP%3ABTC.D&interval=D&theme=dark" 
+                        class="w-full h-full border-none"></iframe>
+            </div>
+        </div>
+
         <div class="border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22]">
             <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm">🔥 Leverage & Funding Signals</div>
-            <div class="h-[380px]">
+            <div class="iframe-container">
                 <iframe src="leverage-signals.html" class="w-full h-full border-none"></iframe>
             </div>
         </div>
+
     </div>
 
-    <!-- KẾ HOẠCH HÀNH ĐỘNG -->
+    <!-- KẾ HOẠCH HÀNH ĐỘNG (giữ nguyên) -->
     <section>
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold uppercase tracking-tight">KẾ HOẠCH HÀNH ĐỘNG</h2>
@@ -93,6 +115,7 @@
     </footer>
 
     <script>
+        // === SCRIPT GIỮ NGUYÊN (không thay đổi) ===
         let currentPhaseId = 0;
         let phaseStartTime = Date.now();
         let signals = { rsi: 50, fear: 50, score: 0, verdict: "", emaTrend: "", bbPos: 0.5, volRatio: 100, macd: 0 };
@@ -134,27 +157,27 @@
 
         function activatePhase(id) {
             if (id === currentPhaseId && document.querySelector('.phase-card-active, .phase-card-accumulate')) return;
-            
+           
             for (let i = 0; i < 4; i++) {
                 const card = document.getElementById(`phase-card-${i}`);
                 if (card) card.classList.remove('phase-card-active', 'phase-card-accumulate');
             }
-            
+           
             const card = document.getElementById(`phase-card-${id}`);
             const badge = document.getElementById(`badge-${id}`);
-            
+           
             if (id === 0) card.classList.add('phase-card-accumulate');
             else card.classList.add('phase-card-active');
-            
+           
             badge.textContent = id === 0 ? "ACCUMULATING" : "ACTIVE";
             badge.className = `text-[10px] font-bold px-4 py-1 rounded-full status-badge-active ${id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'}`;
-            
+           
             if (id !== currentPhaseId) {
                 currentPhaseId = id;
                 phaseStartTime = Date.now();
                 savePhaseState();
             }
-           
+          
             document.getElementById('current-phase').textContent = `PHASE 0${id} - ${phaseConfig[id].status}`;
         }
 
@@ -192,17 +215,13 @@
             document.getElementById('phase-duration').textContent = `${minutes} phút`;
         }
 
+        // Khởi chạy
         loadPhaseState();
         initPhases();
         activatePhase(currentPhaseId);
-
         setInterval(updateStrategy, 6000);
         setInterval(updateDuration, 30000);
-
-        setTimeout(() => {
-            updateStrategy();
-            updateDuration();
-        }, 2000);
+        setTimeout(() => { updateStrategy(); updateDuration(); }, 2000);
     </script>
 </body>
 </html>
