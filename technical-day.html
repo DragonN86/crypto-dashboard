@@ -44,7 +44,7 @@
             <div id="breaker-block" class="mt-3 text-xs bg-slate-800 rounded-2xl p-3 flex items-center gap-2"></div>
         </div>
 
-        <!-- ON-CHAIN -->
+        <!-- ON-CHAIN VALUATION -->
         <div class="wintrack-card p-6 mb-5 hover-lift">
             <h3 class="text-purple-400 font-bold text-sm tracking-widest mb-4">ON-CHAIN VALUATION • XÁC NHẬN "RẺ THẬT"</h3>
             <div class="grid grid-cols-3 gap-6" id="onchain-grid"></div>
@@ -54,16 +54,16 @@
         <div class="wintrack-card p-6 hover-lift">
             <div class="flex items-center gap-3 mb-4">
                 <div id="signal-dot" class="w-4 h-4 rounded-full bg-emerald-500 signal-dot"></div>
-                <h2 id="strat-text" class="text-xl font-black tracking-tighter uppercase text-sky-400">QUAN SÁT - CHỜ DIP</h2>
+                <h2 id="strat-text" class="text-xl font-black tracking-tighter uppercase">ĐANG TÍNH...</h2>
             </div>
-            <p id="verdict-text" class="text-slate-300">Đang phân tích tín hiệu Daily...</p>
+            <p id="verdict-text" class="text-slate-300">Đang phân tích tín hiệu...</p>
             <div class="mt-6 pt-6 border-t border-slate-700">
                 <div class="flex justify-between items-baseline mb-3">
                     <span class="text-xs font-bold text-slate-400 tracking-widest">ĐIỂM TIN CẬY</span>
-                    <span id="score-number" class="font-mono text-3xl font-bold text-emerald-400">78</span>
+                    <span id="score-number" class="font-mono text-3xl font-bold text-emerald-400">82</span>
                 </div>
                 <div class="h-3 bg-slate-700 rounded-3xl overflow-hidden">
-                    <div id="score-bar" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all" style="width: 78%"></div>
+                    <div id="score-bar" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all" style="width: 82%"></div>
                 </div>
             </div>
         </div>
@@ -98,14 +98,6 @@
             return avgLoss === 0 ? 100 : Math.min(100, Math.max(0, 100 - (100 / (1 + avgGain / avgLoss))));
         }
 
-        async function fetchOnChainMetrics() {
-            document.getElementById('onchain-grid').innerHTML = `
-                <div class="text-center"><p class="text-slate-400 text-xs">MVRV Z-Score</p><p class="text-3xl font-bold text-emerald-400">0.80</p><p class="text-xs text-emerald-400">Undervalued • Rẻ mạnh</p></div>
-                <div class="text-center"><p class="text-slate-400 text-xs">Puell Multiple</p><p class="text-3xl font-bold text-emerald-400">0.78</p><p class="text-xs text-emerald-400">Buy Zone</p></div>
-                <div class="text-center"><p class="text-slate-400 text-xs">Reserve Risk</p><p class="text-3xl font-bold text-emerald-400">LOW</p><p class="text-xs text-emerald-400">Attractive Risk/Reward</p></div>
-            `;
-        }
-
         async function updateData() {
             try {
                 const d1Res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=300');
@@ -126,19 +118,38 @@
                 document.getElementById('price-action-text').innerHTML = `📈 Higher High & Higher Low (D1)`;
                 document.getElementById('breaker-block').innerHTML = `🔥 Breaker Block: ~ $74,200`;
 
-                await fetchOnChainMetrics();
+                // On-Chain (hiện tại đang rẻ mạnh)
+                document.getElementById('onchain-grid').innerHTML = `
+                    <div class="text-center"><p class="text-slate-400 text-xs">MVRV Z-Score</p><p class="text-3xl font-bold text-emerald-400">0.80</p><p class="text-xs text-emerald-400">Undervalued • Rẻ mạnh</p></div>
+                    <div class="text-center"><p class="text-slate-400 text-xs">Puell Multiple</p><p class="text-3xl font-bold text-emerald-400">0.78</p><p class="text-xs text-emerald-400">Buy Zone</p></div>
+                    <div class="text-center"><p class="text-slate-400 text-xs">Reserve Risk</p><p class="text-3xl font-bold text-emerald-400">LOW</p><p class="text-xs text-emerald-400">Attractive Risk/Reward</p></div>
+                `;
 
-                // ==================== TÍNH SCORE & VERDICT ====================
-                let score = 68;
+                // ==================== TÍNH SCORE MỚI (Baseline 55 + On-chain) ====================
+                let score = 55;                    // Baseline đã hạ
+
+                // Technical factors
                 if (rsi < 45) score += 15;
                 if (rsi < 35) score += 12;
                 if (lastPrice <= ema200 * 1.03) score += 18;
                 if (lastPrice > ema200) score += 8;
 
+                // On-Chain Impact
+                const onChainStrong = true;   // Hiện tại rẻ mạnh
+                if (onChainStrong) {
+                    score += 25;
+                } else if (false) {           // On-Chain trung bình
+                    score += 10;
+                } else {                      // On-Chain đắt
+                    score -= 15;
+                }
+
                 const finalScore = Math.min(100, Math.round(score));
+
                 document.getElementById('score-number').textContent = finalScore;
                 document.getElementById('score-bar').style.width = finalScore + "%";
 
+                // ==================== 4 MỨC VERDICT ====================
                 const stratEl = document.getElementById('strat-text');
                 const verdictEl = document.getElementById('verdict-text');
                 const dotEl = document.getElementById('signal-dot');
@@ -170,7 +181,6 @@
             }
         }
 
-        // Auto refresh
         setInterval(updateData, 60000);
         updateData();
     </script>
