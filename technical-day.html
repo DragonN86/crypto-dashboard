@@ -112,7 +112,7 @@
                 document.getElementById('current-price').textContent = price.toLocaleString('en-US');
 
                 // Price Action Fix
-                const support = Math.round(ema200 * 0.98); // Sửa để support nằm dưới giá
+                const support = Math.round(ema200 * 0.97); // Sửa để support nằm dưới giá
                 document.getElementById('price-action-text').innerHTML = price > ema200 
                     ? `📈 Cấu trúc tăng (Higher High & Higher Low)` 
                     : `📉 Cấu trúc điều chỉnh`;
