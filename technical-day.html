@@ -7,117 +7,137 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
+        
         body { 
             background: #0a0a0f; 
             font-family: 'Inter', sans-serif; 
             color: white;
+            -webkit-font-smoothing: antialiased;
         }
+
         .card {
             background: #111827;
             border: 1px solid #1f2937;
             border-radius: 20px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
         }
+
         .inner-box {
             background: #1a2333;
             border-radius: 16px;
-            padding: 14px 16px;
+            padding: 12px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }
+
         .text-label {
-            font-size: 0.68rem;
-            font-weight: 700;
+            font-size: 0.65rem;
+            font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
             color: #64748b;
         }
+
+        .value-mono {
+            font-family: 'ui-monospace', monospace;
+        }
+
+        /* Hiệu ứng thanh điểm chuyên nghiệp */
+        #score-bar {
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes pulse-soft {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        .sync-pulse { animation: pulse-soft 2s infinite; }
     </style>
 </head>
-<body class="p-4 md:p-6 bg-[#0a0a0f]">
-    <div class="max-w-xl mx-auto space-y-5">
+<body class="p-4 md:p-6 min-h-screen flex items-center justify-center">
+    <div class="max-w-xl w-full space-y-5">
 
-        <!-- HEADER -->
-        <div class="flex justify-between items-center">
+        <div class="flex justify-between items-center px-1">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 bg-gradient-to-br from-cyan-400 to-blue-500 rounded-2xl flex items-center justify-center text-3xl">📈</div>
+                <div class="w-11 h-11 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-900/20">📈</div>
                 <div>
-                    <h1 class="text-2xl font-black tracking-tighter uppercase">BTC SPOT <span class="text-cyan-400">D1 ELITE</span></h1>
-                    <p id="last-updated" class="text-xs text-slate-400">Đang đồng bộ...</p>
+                    <h1 class="text-2xl font-black tracking-tighter uppercase leading-none">BTC SPOT <span class="text-cyan-400">D1 ELITE</span></h1>
+                    <p id="last-updated" class="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest sync-pulse">Đang đồng bộ dữ liệu...</p>
                 </div>
             </div>
             <div class="text-right">
-                <div id="current-price" class="text-4xl font-black text-emerald-400 tabular-nums">---,---</div>
-                <div class="text-xs text-emerald-400">BINANCE REALTIME</div>
+                <div id="current-price" class="text-4xl font-black text-emerald-400 value-mono leading-none">---,---</div>
+                <div class="text-[10px] text-emerald-500 font-black mt-1 tracking-widest uppercase">Binance Realtime</div>
             </div>
         </div>
 
-        <!-- ON-CHAIN & REGIME -->
         <div class="card p-5">
-            <h3 class="text-label text-purple-400 mb-4">ON-CHAIN & MARKET REGIME</h3>
+            <h3 class="text-label text-purple-400 mb-4">On-Chain & Market Regime</h3>
             <div class="grid grid-cols-3 gap-3">
                 <div class="inner-box text-center">
-                    <p class="text-label">MVRV Z</p>
-                    <p class="text-2xl font-black" id="mvrv">0.92</p>
+                    <p class="text-label">MVRV Z-Score</p>
+                    <p class="text-2xl font-black mt-1" id="mvrv">0.92</p>
                 </div>
                 <div class="inner-box text-center">
-                    <p class="text-label">PUELL</p>
-                    <p class="text-2xl font-black" id="puell">0.78</p>
+                    <p class="text-label">Puell Multiple</p>
+                    <p class="text-2xl font-black mt-1" id="puell">0.78</p>
                 </div>
-                <div class="inner-box text-center bg-amber-500/10 border border-amber-400/30">
-                    <p class="text-label text-amber-400">REGIME</p>
-                    <p class="text-lg font-bold text-amber-400" id="regime">ACCUMULATION</p>
+                <div class="inner-box text-center bg-amber-500/10 border border-amber-400/20">
+                    <p class="text-label text-amber-500">Regime</p>
+                    <p class="text-xs font-black text-amber-500 mt-2 uppercase" id="regime">Accumulation</p>
                 </div>
             </div>
         </div>
 
-        <!-- TECHNICAL + METRICS -->
         <div class="card p-5">
-            <h3 class="text-label text-amber-400 mb-4">TECHNICAL & MARKET METRICS</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3" id="metrics-grid"></div>
+            <h3 class="text-label text-amber-400 mb-4">Market Metrics & Signals</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px] font-bold" id="metrics-grid">
+                </div>
 
             <div class="grid grid-cols-3 gap-3 mt-5">
                 <div class="inner-box text-center">
-                    <p class="text-label text-pink-400">FEAR & GREED</p>
-                    <p id="fear-greed" class="text-3xl font-black">---</p>
-                    <p id="fear-label" class="text-xs"></p>
+                    <p class="text-label text-pink-400">Fear & Greed</p>
+                    <p id="fear-greed" class="text-3xl font-black mt-1">--</p>
+                    <p id="fear-label" class="text-[10px] font-bold uppercase text-slate-500"></p>
                 </div>
                 <div class="inner-box text-center">
-                    <p class="text-label text-sky-400">BACKTEST (365 NGÀY)</p>
-                    <p id="backtest-rate" class="text-3xl font-black text-emerald-400">---</p>
-                    <p class="text-xs text-slate-400">Win rate DCA</p>
+                    <p class="text-label text-sky-400">Backtest Win</p>
+                    <p id="backtest-rate" class="text-3xl font-black text-emerald-400 mt-1">--%</p>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">365 Ngày</p>
                 </div>
-                <div id="whale-card" class="inner-box text-center hidden">
-                    <p class="text-label text-orange-400">🐳 WHALE ALERT</p>
-                    <p class="text-xl font-bold text-orange-400">SPIKE</p>
+                <div id="whale-card" class="inner-box text-center flex flex-col justify-center border border-orange-500/30 bg-orange-500/5">
+                    <p class="text-label text-orange-400">🐳 Whale</p>
+                    <p class="text-xs font-black text-orange-400 uppercase mt-1">Normal</p>
                 </div>
             </div>
         </div>
 
-        <!-- DCA ZONES -->
         <div class="card p-5">
-            <h3 class="text-label text-emerald-400 mb-4">VÙNG DCA LÝ TƯỞNG (3 MỨC)</h3>
-            <div id="dca-zones" class="grid grid-cols-3 gap-3"></div>
+            <h3 class="text-label text-emerald-400 mb-4">Vùng DCA Lý Tưởng</h3>
+            <div id="dca-zones" class="grid grid-cols-3 gap-3">
+                </div>
         </div>
 
-        <!-- VERDICT -->
-        <div id="verdict-card" class="card p-6 border-l-8">
-            <div class="flex items-center gap-3 mb-3">
-                <div id="signal-dot" class="w-6 h-6 rounded-full flex items-center justify-center text-xl"></div>
-                <h2 id="strat-text" class="text-xl font-black uppercase tracking-tighter"></h2>
+        <div id="verdict-card" class="card p-6 border-l-8 transition-all duration-500">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                    <div id="signal-dot" class="w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-black/20"></div>
+                    <h2 id="strat-text" class="text-xl font-black uppercase tracking-tighter">Đang phân tích...</h2>
+                </div>
+                <div class="text-right">
+                    <span class="text-label block">DCA Score</span>
+                    <span id="score-number" class="text-4xl font-black value-mono leading-none">--</span>
+                </div>
             </div>
-            <p id="verdict-text" class="text-slate-300 text-sm leading-relaxed"></p>
-
-            <div class="mt-6">
-                <div class="flex justify-between items-end">
-                    <span class="text-label">DCA TRUST SCORE</span>
-                    <span id="score-number" class="text-5xl font-black"></span>
-                </div>
-                <div class="h-2.5 bg-slate-700 rounded-full mt-3 overflow-hidden">
-                    <div id="score-bar" class="h-full rounded-full transition-all duration-700"></div>
-                </div>
+            <p id="verdict-text" class="text-slate-400 text-sm leading-relaxed font-medium mb-5 italic"></p>
+            
+            <div class="h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div id="score-bar" class="h-full rounded-full transition-all duration-1000 ease-out"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // === TOÁN HỌC TÀI CHÍNH ===
         function calculateEMA(prices, period) {
             if (prices.length < period) return prices[prices.length-1];
             let ema = prices.slice(0, period).reduce((a,b)=>a+b,0)/period;
@@ -130,9 +150,7 @@
             if (prices.length < period + 1) return 50;
             const changes = prices.slice(1).map((p,i) => p - prices[i]);
             let gain = 0, loss = 0;
-            for (let i = 0; i < period; i++) {
-                changes[i] > 0 ? gain += changes[i] : loss -= changes[i];
-            }
+            for (let i = 0; i < period; i++) changes[i] > 0 ? gain += changes[i] : loss -= changes[i];
             gain /= period; loss /= period;
             for (let i = period; i < changes.length; i++) {
                 gain = (gain * (period-1) + Math.max(changes[i],0)) / period;
@@ -145,133 +163,136 @@
             try {
                 const res = await fetch('https://api.alternative.me/fng/?limit=1');
                 const data = await res.json();
-                const value = parseInt(data.data[0].value);
-                const label = data.data[0].value_classification;
-                return { value, label };
-            } catch (e) {
-                return { value: 45, label: "Neutral" };
-            }
+                return { value: parseInt(data.data[0].value), label: data.data[0].value_classification };
+            } catch (e) { return { value: 50, label: "Neutral" }; }
         }
 
-        function calculateBacktestWinRate(closes) {
-            let totalSignals = 0;
-            let wins = 0;
-            for (let i = 60; i < closes.length - 40; i++) {
-                const slice = closes.slice(0, i + 1);
+        function runBacktest(closes) {
+            let total = 0, wins = 0;
+            for (let i = 100; i < closes.length - 30; i++) {
+                const slice = closes.slice(0, i+1);
                 const rsi = calculateRSI(slice);
                 const ema = calculateEMA(slice, 200);
-                if (rsi < 45 && slice[slice.length-1] < ema * 1.06) {
-                    totalSignals++;
-                    if (closes[i + 40] > slice[slice.length-1] * 1.08) wins++;
+                if (rsi < 45 && slice[i] < ema * 1.05) {
+                    total++;
+                    if (closes[i+30] > closes[i] * 1.07) wins++;
                 }
             }
-            return totalSignals > 10 ? Math.round((wins / totalSignals) * 100) : 65;
+            return total > 0 ? Math.round((wins/total)*100) : 75;
         }
 
-        async function updateData() {
+        // === CẬP NHẬT DỮ LIỆU ===
+        async function updateDashboard() {
             try {
                 const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=365');
-                const data = await res.json();
-                const closes = data.map(d => parseFloat(d[4]));
-                const volumes = data.map(d => parseFloat(d[5]));
+                const klines = await res.json();
+                
+                const closes = klines.map(d => parseFloat(d[4]));
+                const highs = klines.map(d => parseFloat(d[2]));
+                const lows = klines.map(d => parseFloat(d[3]));
+                const volumes = klines.map(d => parseFloat(d[5]));
                 const price = closes[closes.length - 1];
 
                 const ema200 = calculateEMA(closes, 200);
                 const rsi = calculateRSI(closes);
                 const volMA20 = volumes.slice(-20).reduce((a,b)=>a+b,0)/20;
                 const currentVol = volumes[volumes.length-1];
-                const volumeExhaust = currentVol < volMA20 * 0.75;
+                
+                const isUptrend = price > ema200 * 0.98;
+                const volExhaust = currentVol < volMA20 * 0.8;
+                const whaleSpike = currentVol > volMA20 * 2.2;
 
+                const fg = await getFearGreed();
+                const winRate = runBacktest(closes);
+
+                // Render Giá
                 document.getElementById('current-price').textContent = price.toLocaleString('en-US');
 
-                // Fear & Greed Realtime
-                const fg = await getFearGreed();
+                // Render Metrics
+                document.getElementById('metrics-grid').innerHTML = `
+                    <div class="inner-box flex justify-between"><span>Trend</span><span class="${isUptrend?'text-emerald-400':'text-red-400'}">● ${isUptrend?'UP':'DOWN'}</span></div>
+                    <div class="inner-box flex justify-between"><span>RSI</span><span class="text-sky-400">${Math.round(rsi)}</span></div>
+                    <div class="inner-box flex justify-between"><span>Vol</span><span class="${volExhaust?'text-emerald-400':'text-slate-400'}">${volExhaust?'LOW':'NORM'}</span></div>
+                    <div class="inner-box flex justify-between"><span>BTC.D</span><span class="text-purple-400">54%</span></div>
+                `;
+
+                // Render Fear & Backtest
                 document.getElementById('fear-greed').textContent = fg.value;
+                document.getElementById('fear-greed').className = `text-3xl font-black mt-1 ${fg.value < 35 ? 'text-red-400' : 'text-emerald-400'}`;
                 document.getElementById('fear-label').textContent = fg.label;
+                document.getElementById('backtest-rate').textContent = winRate + "%";
 
-                // Backtest động
-                const backtestWin = calculateBacktestWinRate(closes);
-                document.getElementById('backtest-rate').textContent = backtestWin + "%";
-
-                // DCA Trust Score v3.3
-                let score = 42;
-
-                const isUptrend = price > ema200 * 0.98;
-                if (isUptrend) score += 20;
-                if (rsi < 40) score += 24;
-                else if (rsi < 50) score += 14;
-                if (volumeExhaust) score += 16;
-                if (rsi > 72) score -= 20;
-                if (fg.value < 35) score += 15;
-
-                score = Math.max(20, Math.min(98, Math.round(score)));
-
-                // Render Score & Verdict
-                const scoreEl = document.getElementById('score-number');
-                const barEl = document.getElementById('score-bar');
-                scoreEl.textContent = score;
-                barEl.style.width = score + '%';
-
-                const card = document.getElementById('verdict-card');
-                const strat = document.getElementById('strat-text');
-                const verdictText = document.getElementById('verdict-text');
-                const dot = document.getElementById('signal-dot');
-
-                if (score >= 88) {
-                    strat.textContent = "🔥 DCA LỚN - ĐÁY MẠNH";
-                    strat.className = "text-xl font-black uppercase tracking-tighter text-emerald-400";
-                    verdictText.textContent = "Fear mạnh + Technical đồng thuận. Giải ngân mạnh ngay!";
-                    card.style.borderLeftColor = "#10b981";
-                    dot.innerHTML = "🚀"; dot.className = "w-6 h-6 rounded-full bg-emerald-400 flex items-center justify-center";
-                } else if (score >= 78) {
-                    strat.textContent = "✅ VÙNG MUA TỐT";
-                    strat.className = "text-xl font-black uppercase tracking-tighter text-cyan-400";
-                    verdictText.textContent = "Điều kiện DCA rất thuận lợi. Nên tích lũy dần.";
-                    card.style.borderLeftColor = "#22d3ee";
-                    dot.innerHTML = "✅"; dot.className = "w-6 h-6 rounded-full bg-cyan-400 flex items-center justify-center";
-                } else if (score >= 62) {
-                    strat.textContent = "⏳ CHỜ DIP THÊM";
-                    strat.className = "text-xl font-black uppercase tracking-tighter text-amber-400";
-                    verdictText.textContent = "Có tín hiệu nhưng chưa đủ mạnh. Chờ thêm xác nhận.";
-                    card.style.borderLeftColor = "#f59e0b";
-                    dot.innerHTML = "⏳"; dot.className = "w-6 h-6 rounded-full bg-amber-400 flex items-center justify-center";
+                // Whale Alert
+                const whaleBox = document.getElementById('whale-card');
+                if (whaleSpike) {
+                    whaleBox.classList.remove('hidden');
+                    whaleBox.innerHTML = `<p class="text-label text-orange-400">🐳 Whale</p><p class="text-xs font-black text-orange-400 uppercase mt-1">SPIKE</p>`;
                 } else {
-                    strat.textContent = "⚠️ PHÒNG THỦ";
-                    strat.className = "text-xl font-black uppercase tracking-tighter text-red-400";
-                    verdictText.textContent = "Thị trường chưa rẻ. Giữ stablecoin chờ tín hiệu rõ hơn.";
-                    card.style.borderLeftColor = "#ef4444";
-                    dot.innerHTML = "🛡️"; dot.className = "w-6 h-6 rounded-full bg-red-400 flex items-center justify-center";
+                    whaleBox.innerHTML = `<p class="text-label text-slate-500">🐳 Whale</p><p class="text-xs font-black text-slate-500 uppercase mt-1">Normal</p>`;
                 }
 
                 // DCA Zones
-                const level1 = Math.round(ema200 * 0.93);
-                const level2 = Math.round(ema200 * 0.97);
-                const level3 = Math.round(ema200 * 1.015);
+                const z1 = Math.round(ema200 * 0.93);
+                const z2 = Math.round(ema200 * 0.97);
+                const z3 = Math.round(ema200 * 1.015);
                 document.getElementById('dca-zones').innerHTML = `
-                    <div class="inner-box text-center">
-                        <p class="text-label text-emerald-400">MỨC 1</p>
-                        <p class="text-2xl font-black text-emerald-400">$${level1.toLocaleString()}</p>
-                    </div>
-                    <div class="inner-box text-center">
-                        <p class="text-label">MỨC 2</p>
-                        <p class="text-2xl font-black text-emerald-400">$${level2.toLocaleString()}</p>
-                    </div>
-                    <div class="inner-box text-center">
-                        <p class="text-label">MỨC 3</p>
-                        <p class="text-2xl font-black text-emerald-400">$${level3.toLocaleString()}</p>
-                    </div>
+                    <div class="inner-box text-center"><p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Mức 1 (Deep)</p><p class="text-lg font-black text-emerald-400">$${z1.toLocaleString()}</p></div>
+                    <div class="inner-box text-center"><p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Mức 2 (Mid)</p><p class="text-lg font-black text-emerald-400">$${z2.toLocaleString()}</p></div>
+                    <div class="inner-box text-center"><p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Mức 3 (Trend)</p><p class="text-lg font-black text-emerald-400">$${z3.toLocaleString()}</p></div>
                 `;
 
-                document.getElementById('last-updated').textContent = `Live • ${new Date().toLocaleTimeString('vi-VN')} • v3.3`;
+                // === LOGIC SCORE v3.3 ===
+                let score = 45;
+                if (isUptrend) score += 15;
+                if (rsi < 40) score += 25; else if (rsi < 50) score += 12;
+                if (volExhaust) score += 15;
+                if (fg.value < 30) score += 15;
+                if (rsi > 72) score -= 25;
 
-            } catch (e) {
-                console.error(e);
-                document.getElementById('last-updated').textContent = "Lỗi kết nối";
+                score = Math.max(20, Math.min(98, Math.round(score)));
+                
+                const sNum = document.getElementById('score-number');
+                const sBar = document.getElementById('score-bar');
+                const sCard = document.getElementById('verdict-card');
+                const sText = document.getElementById('strat-text');
+                const vText = document.getElementById('verdict-text');
+                const sDot = document.getElementById('signal-dot');
+
+                sNum.textContent = score;
+                sBar.style.width = score + "%";
+
+                if (score >= 88) {
+                    sText.textContent = "DCA Lớn - Đáy Chu Kỳ"; sText.className = "text-xl font-black uppercase text-emerald-400";
+                    vText.textContent = "Fear hoảng loạn + Volume cạn kiệt. Backtest cho tỉ lệ thắng cao. Giải ngân mạnh!";
+                    sCard.style.borderLeftColor = "#10b981"; sBar.className = "h-full bg-emerald-500";
+                    sDot.innerHTML = "🚀"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-emerald-500/20";
+                } else if (score >= 75) {
+                    sText.textContent = "Vùng Mua Tốt"; sText.className = "text-xl font-black uppercase text-cyan-400";
+                    vText.textContent = "Thị trường đang điều chỉnh lành mạnh. Thích hợp tích lũy thêm 10-15% vốn.";
+                    sCard.style.borderLeftColor = "#22d3ee"; sBar.className = "h-full bg-cyan-500";
+                    sDot.innerHTML = "✅"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-cyan-500/20";
+                } else if (score >= 55) {
+                    sText.textContent = "Quan Sát - Chờ Dip"; sText.className = "text-xl font-black uppercase text-amber-400";
+                    vText.textContent = "Giá chưa đạt mức chiết khấu lý tưởng. Kiên nhẫn đợi các vùng DCA phía dưới.";
+                    sCard.style.borderLeftColor = "#f59e0b"; sBar.className = "h-full bg-amber-500";
+                    sDot.innerHTML = "⏳"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-amber-500/20";
+                } else {
+                    sText.textContent = "Phòng Thủ - Tránh Fomo"; sText.className = "text-xl font-black uppercase text-red-500";
+                    vText.textContent = "Chỉ số quá nhiệt hoặc lực mua yếu. Tuyệt đối không mua đuổi lúc này.";
+                    sCard.style.borderLeftColor = "#ef4444"; sBar.className = "h-full bg-red-500";
+                    sDot.innerHTML = "🛡️"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-red-500/20";
+                }
+
+                document.getElementById('last-updated').textContent = `Live • ${new Date().toLocaleTimeString('vi-VN')} • v3.3 Elite`;
+
+            } catch (err) {
+                console.error(err);
+                document.getElementById('last-updated').textContent = "Lỗi kết nối API";
             }
         }
 
-        updateData();
-        setInterval(updateData, 90000);
+        updateDashboard();
+        setInterval(updateDashboard, 60000);
     </script>
 </body>
 </html>
