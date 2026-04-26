@@ -30,23 +30,22 @@
             border: 1px solid #30363d;
         }
 
-        /* Chiều cao mặc định */
         .iframe-wrapper:not(.tall-iframe) {
-            padding-top: 68%; /* ~16:9 */
+            padding-top: 68%;
         }
 
-        /* === 2 Ô CHÍNH CAO GẤP ĐÔI === */
+        /* === 2 Ô CHÍNH - ĐÃ GIẢM 10% === */
         .tall-iframe {
-            padding-top: 120% !important; /* Tăng mạnh */
+            padding-top: 130% !important;   /* Giảm từ 145% */
         }
 
         @media (min-width: 1024px) {
             .iframe-wrapper:not(.tall-iframe) { padding-top: 75%; }
-            .tall-iframe { padding-top: 150% !important; }
+            .tall-iframe { padding-top: 148% !important; }   /* Giảm từ 165% */
         }
 
         @media (min-width: 1280px) {
-            .tall-iframe { padding-top: 150% !important; }
+            .tall-iframe { padding-top: 157% !important; }   /* Giảm từ 175% */
         }
 
         .iframe-wrapper iframe {
@@ -56,7 +55,6 @@
             border: none;
         }
 
-        /* Grid điều chỉnh cho 2 ô chính cao hơn */
         .main-analysis {
             grid-row: span 2;
         }
@@ -85,7 +83,7 @@
     <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-8">
         <!-- DASHBOARD GRID -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-12 auto-rows-fr">
-            <!-- W1 - CAO GẤP ĐÔI -->
+            <!-- W1 -->
             <div class="main-analysis border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22] shadow-2xl">
                 <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm flex items-center gap-2">
                     📈 BTC Spot Technical Analysis (W1) • v6.0
@@ -95,7 +93,7 @@
                 </div>
             </div>
 
-            <!-- Daily - CAO GẤP ĐÔI -->
+            <!-- Daily -->
             <div class="main-analysis border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22] shadow-2xl">
                 <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm flex items-center gap-2">
                     📊 BTC Spot Technical Analysis (Daily)
@@ -141,7 +139,6 @@
     </div>
 
     <script>
-        // Giữ nguyên script cũ của bạn
         let currentPhaseId = 0;
         let phaseStartTime = Date.now();
         const STORAGE_KEY = "wintrack_phase_state";
@@ -181,8 +178,6 @@
         }
 
         function activatePhase(id) {
-            if (id === currentPhaseId && document.querySelector('.phase-card-active, .phase-card-accumulate')) return;
-           
             document.querySelectorAll('.phase-card').forEach(card => {
                 card.classList.remove('phase-card-active', 'phase-card-accumulate');
             });
@@ -210,7 +205,6 @@
             document.getElementById('phase-duration').textContent = `${minutes} phút`;
         }
 
-        // Khởi chạy
         loadPhaseState();
         initPhases();
         activatePhase(currentPhaseId);
