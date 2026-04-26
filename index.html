@@ -34,18 +34,18 @@
             padding-top: 68%;
         }
 
-        /* === 2 Ô CHÍNH - ĐÃ GIẢM 10% === */
+        /* === 2 Ô CHÍNH - ĐÃ GIẢM THÊM 10% === */
         .tall-iframe {
-            padding-top: 130% !important;   /* Giảm từ 145% */
+            padding-top: 117% !important;
         }
 
         @media (min-width: 1024px) {
             .iframe-wrapper:not(.tall-iframe) { padding-top: 75%; }
-            .tall-iframe { padding-top: 148% !important; }   /* Giảm từ 165% */
+            .tall-iframe { padding-top: 133% !important; }
         }
 
         @media (min-width: 1280px) {
-            .tall-iframe { padding-top: 157% !important; }   /* Giảm từ 175% */
+            .tall-iframe { padding-top: 141% !important; }
         }
 
         .iframe-wrapper iframe {
@@ -183,33 +183,4 @@
             });
            
             const card = document.getElementById(`phase-card-${id}`);
-            const badge = document.getElementById(`badge-${id}`);
-           
-            if (id === 0) card.classList.add('phase-card-accumulate');
-            else card.classList.add('phase-card-active');
-           
-            badge.textContent = id === 0 ? "ACCUMULATING" : "ACTIVE";
-            badge.className = `text-[10px] font-bold px-4 py-1 rounded-full ${id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'}`;
-           
-            if (id !== currentPhaseId) {
-                currentPhaseId = id;
-                phaseStartTime = Date.now();
-                savePhaseState();
-            }
-           
-            document.getElementById('current-phase').textContent = `PHASE 0${id} - ${phaseConfig[id].status}`;
-        }
-
-        function updateDuration() {
-            const minutes = Math.floor((Date.now() - phaseStartTime) / 60000);
-            document.getElementById('phase-duration').textContent = `${minutes} phút`;
-        }
-
-        loadPhaseState();
-        initPhases();
-        activatePhase(currentPhaseId);
-        setInterval(updateDuration, 30000);
-        setTimeout(updateDuration, 1000);
-    </script>
-</body>
-</html>
+            const badge =
