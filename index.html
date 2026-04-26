@@ -12,32 +12,43 @@
             font-family: 'Inter', sans-serif;
             background: #0d1117;
         }
-       
+
         .phase-card {
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .phase-card-active {
-            border-color: #f2cc60 !important;
-            background: rgba(242, 204, 96, 0.18) !important;
+        .phase-card-active, .phase-card-accumulate {
             transform: translateY(-4px);
-            box-shadow: 0 0 30px rgba(242, 204, 96, 0.3);
         }
-        .phase-card-accumulate {
-            border-color: #3fb950 !important;
-            background: rgba(63, 185, 80, 0.25) !important;
-            transform: translateY(-4px);
-            box-shadow: 0 0 35px rgba(63, 185, 80, 0.45);
-        }
-       
+
+        /* ==================== IFRAME WRAPPER ==================== */
         .iframe-wrapper {
             position: relative;
             width: 100%;
-            padding-top: 56.25%; /* 16:9 */
             background: #161b22;
             border-radius: 16px;
             overflow: hidden;
             border: 1px solid #30363d;
         }
+
+        /* Chiều cao mặc định */
+        .iframe-wrapper:not(.tall-iframe) {
+            padding-top: 68%; /* ~16:9 */
+        }
+
+        /* === 2 Ô CHÍNH CAO GẤP ĐÔI === */
+        .tall-iframe {
+            padding-top: 145% !important; /* Tăng mạnh */
+        }
+
+        @media (min-width: 1024px) {
+            .iframe-wrapper:not(.tall-iframe) { padding-top: 75%; }
+            .tall-iframe { padding-top: 165% !important; }
+        }
+
+        @media (min-width: 1280px) {
+            .tall-iframe { padding-top: 175% !important; }
+        }
+
         .iframe-wrapper iframe {
             position: absolute;
             top: 0; left: 0;
@@ -45,26 +56,9 @@
             border: none;
         }
 
-        /* === TĂNG ĐỘ DÀI GẤP ĐÔI CHO 2 Ô CHÍNH === */
-        .tall-iframe .iframe-wrapper {
-            padding-top: 125% !important; /* Gấp đôi chiều cao so với 62.5% gốc */
-        }
-        @media (min-width: 768px) {
-            .iframe-wrapper { padding-top: 68%; }
-            .tall-iframe .iframe-wrapper { padding-top: 135% !important; }
-        }
-        @media (min-width: 1024px) {
-            .iframe-wrapper { padding-top: 75%; }
-            .tall-iframe .iframe-wrapper { padding-top: 145% !important; }
-        }
-
+        /* Grid điều chỉnh cho 2 ô chính cao hơn */
         .main-analysis {
-            grid-row: span 1;
-        }
-        @media (min-width: 1280px) {
-            .main-analysis {
-                grid-row: span 2; /* Giữ layout cân đối khi 2 ô chính cao hơn */
-            }
+            grid-row: span 2;
         }
     </style>
 </head>
@@ -90,8 +84,8 @@
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 pt-8">
         <!-- DASHBOARD GRID -->
-        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-12">
-            <!-- W1 - TĂNG DÀI GẤP ĐÔI -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 lg:gap-8 mb-12 auto-rows-fr">
+            <!-- W1 - CAO GẤP ĐÔI -->
             <div class="main-analysis border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22] shadow-2xl">
                 <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm flex items-center gap-2">
                     📈 BTC Spot Technical Analysis (W1) • v6.0
@@ -101,7 +95,7 @@
                 </div>
             </div>
 
-            <!-- Daily - TĂNG DÀI GẤP ĐÔI -->
+            <!-- Daily - CAO GẤP ĐÔI -->
             <div class="main-analysis border border-[#30363d] rounded-3xl overflow-hidden bg-[#161b22] shadow-2xl">
                 <div class="bg-[#1c2128] p-4 border-b border-[#30363d] font-bold text-sm flex items-center gap-2">
                     📊 BTC Spot Technical Analysis (Daily)
@@ -147,6 +141,7 @@
     </div>
 
     <script>
+        // Giữ nguyên script cũ của bạn
         let currentPhaseId = 0;
         let phaseStartTime = Date.now();
         const STORAGE_KEY = "wintrack_phase_state";
@@ -188,10 +183,9 @@
         function activatePhase(id) {
             if (id === currentPhaseId && document.querySelector('.phase-card-active, .phase-card-accumulate')) return;
            
-            for (let i = 0; i < 4; i++) {
-                const card = document.getElementById(`phase-card-${i}`);
-                if (card) card.classList.remove('phase-card-active', 'phase-card-accumulate');
-            }
+            document.querySelectorAll('.phase-card').forEach(card => {
+                card.classList.remove('phase-card-active', 'phase-card-accumulate');
+            });
            
             const card = document.getElementById(`phase-card-${id}`);
             const badge = document.getElementById(`badge-${id}`);
@@ -200,7 +194,7 @@
             else card.classList.add('phase-card-active');
            
             badge.textContent = id === 0 ? "ACCUMULATING" : "ACTIVE";
-            badge.className = `text-[10px] font-bold px-4 py-1 rounded-full status-badge-active ${id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'}`;
+            badge.className = `text-[10px] font-bold px-4 py-1 rounded-full ${id === 0 ? 'bg-emerald-500 text-black' : 'bg-[#f2cc60] text-black'}`;
            
             if (id !== currentPhaseId) {
                 currentPhaseId = id;
@@ -221,7 +215,7 @@
         initPhases();
         activatePhase(currentPhaseId);
         setInterval(updateDuration, 30000);
-        setTimeout(() => updateDuration(), 1000);
+        setTimeout(updateDuration, 1000);
     </script>
 </body>
 </html>
