@@ -3,151 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTC Spot Technical Analysis (W1)</title>
+    <title>WinTrack 2026 - W1 Analysis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
-        body {
-            background: transparent;
-            font-family: 'Inter', sans-serif;
-        }
-        .wintrack-card {
-            background: #111827;
-            border: 1px solid #1f2937;
-            border-radius: 20px;
-        }
-        .hover-lift:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 25px 30px -5px rgb(16 185 129 / 0.15);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .signal-dot {
-            animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
-        }
-        .fg-card {
-            transition: all 0.3s;
-        }
+        body { background: transparent; font-family: 'Inter', sans-serif; color: white; -webkit-font-smoothing: antialiased; }
+        .wintrack-card { background: #111827; border: 1px solid #1f2937; border-radius: 16px; transition: all 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-2px); border-color: #374151; box-shadow: 0 10px 20px -10px rgba(0,0,0,0.5); }
+        .signal-dot { animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        @keyframes ping { 75%, 100% { transform: scale(2.5); opacity: 0; } }
+        .text-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.05em; color: #94a3b8; text-transform: uppercase; }
+        .value-mono { font-family: 'ui-monospace', 'SFMono-Regular', monospace; }
     </style>
 </head>
-<body class="p-4 md:p-6">
-    <div id="wintrack-dashboard" class="max-w-[100%] mx-auto transition-opacity duration-300">
-        <!-- HEADER -->
-        <div class="flex items-center justify-between mb-6">
+<body class="p-3 md:p-6">
+    <div id="wintrack-dashboard" class="max-w-2xl mx-auto space-y-4 transition-opacity duration-300">
+        
+        <div class="flex items-center justify-between px-1">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-3xl">📊</div>
+                <div class="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center text-2xl shadow-inner">📊</div>
                 <div>
-                    <h1 class="text-white font-bold text-2xl tracking-[-0.5px]">BTC Spot (W1)</h1>
-                    <p class="text-emerald-400 text-sm">BUY THE DIP v5.5 • WINTRACK 2026</p>
+                    <h1 class="text-white font-black text-xl tracking-tighter uppercase italic">BTC SPOT <span class="text-emerald-500">W1</span></h1>
+                    <p id="last-updated" class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Syncing Data...</p>
                 </div>
             </div>
             <div class="text-right">
-                <div id="current-price" class="font-mono text-4xl font-bold text-emerald-400">73,006</div>
-                <p id="last-updated" class="text-xs text-slate-500 mt-1">Cập nhật: vừa xong</p>
+                <div id="current-price" class="value-mono text-3xl font-black text-emerald-400 tracking-tighter">---,---</div>
+                <div class="text-label mt-0.5">Binance Realtime</div>
             </div>
         </div>
 
-        <!-- FEAR & GREED -->
-        <div id="fg-card" class="wintrack-card p-4 mb-5 fg-card">
-            <div class="flex justify-between items-center">
-                <span class="text-slate-400 text-sm font-medium">FEAR & GREED INDEX</span>
-                <span id="fg-value" class="font-mono text-3xl font-bold">45</span>
+        <div class="grid grid-cols-2 gap-3">
+            <div id="fg-card" class="wintrack-card p-4 flex flex-col justify-between">
+                <span class="text-label">Fear & Greed Index</span>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span id="fg-value" class="text-3xl font-black value-mono">--</span>
+                    <span id="fg-class" class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter">Neutral</span>
+                </div>
             </div>
-            <p id="fg-class" class="text-sm mt-1 text-slate-400">Neutral</p>
+            <div class="wintrack-card p-4 flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <span class="text-label italic">DCA Profit</span>
+                    <button onclick="setEntryPrice()" class="text-[9px] font-bold bg-blue-600/20 text-blue-400 px-2 py-0.5 rounded-md hover:bg-blue-600/40 transition-all">EDIT</button>
+                </div>
+                <div class="flex items-baseline gap-2 mt-2">
+                    <span id="profit-pct" class="text-3xl font-black value-mono text-emerald-400">0.00%</span>
+                    <span id="entry-price-display" class="text-[9px] font-bold text-slate-500">$---</span>
+                </div>
+            </div>
         </div>
 
-        <!-- DCA TRACKER -->
-        <div class="wintrack-card p-5 mb-5 hover-lift">
-            <div class="flex justify-between items-center mb-4">
-                <span class="text-blue-400 font-bold text-sm tracking-widest">DCA TRACKER</span>
-                <button type="button" onclick="setEntryPrice()"
-                        class="bg-blue-600 hover:bg-blue-500 px-5 py-2 text-xs font-bold rounded-2xl transition-colors">
-                    Sửa giá gom
-                </button>
-            </div>
-            <div class="grid grid-cols-2 gap-6">
+        <div class="wintrack-card p-5 space-y-5 hover-lift">
+            <div class="grid grid-cols-3 gap-4 border-b border-slate-800/50 pb-4">
                 <div>
-                    <p class="text-slate-400 text-xs">GIÁ TRUNG BÌNH</p>
-                    <p id="entry-price-display" class="text-3xl font-bold text-white">$69,000</p>
+                    <p class="text-label mb-1">RSI (14)</p>
+                    <p id="rsi-val" class="text-2xl font-black value-mono">--.-</p>
+                </div>
+                <div>
+                    <p class="text-label mb-1">MACD Hist</p>
+                    <p id="macd-val" class="text-2xl font-black value-mono">-.--</p>
                 </div>
                 <div class="text-right">
-                    <p class="text-slate-400 text-xs">LỢI NHUẬN</p>
-                    <p id="profit-pct" class="text-3xl font-bold text-emerald-400">+5.81%</p>
+                    <p class="text-label mb-1">Weekly Range</p>
+                    <p id="weekly-range" class="text-2xl font-black value-mono text-emerald-400">--%</p>
                 </div>
             </div>
-        </div>
 
-        <!-- INDICATORS -->
-        <div class="wintrack-card p-6 mb-5 hover-lift">
             <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-xs text-slate-400 mb-1">RSI (14)</p>
-                    <p id="rsi-val" class="text-4xl font-bold text-white">40.6</p>
-                </div>
-                <div>
-                    <p class="text-xs text-slate-400 mb-1">MACD HIST(1.0–1.5%)</p>
-                    <p id="macd-val" class="text-4xl font-bold text-red-500">-25.50</p>
-                </div>
-            </div>
-            <div class="mt-8 space-y-6">
-                <div class="flex justify-between items-center">
-                    <span class="text-slate-400 text-sm">Trend Strength</span>
-                    <span id="trend-val" class="font-bold px-4 py-1 rounded-2xl text-emerald-400">STRONG</span>
-                </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-400">EMA 200 (W1)</span>
-                    <span id="ema200-val" class="font-mono font-bold text-emerald-400">69,118</span>
-                </div>
-                <div>
-                    <div class="flex justify-between text-xs mb-2">
-                        <span class="text-slate-400">VOLUME + LIQUIDITY</span>
-                        <span id="vol-status" class="text-blue-400 font-bold">72% ↑</span>
+                <div class="space-y-4">
+                    <div class="flex flex-col">
+                        <span class="text-label mb-1">Trend Strength</span>
+                        <span id="trend-val" class="text-xs font-black px-2 py-1 bg-slate-800 rounded-lg inline-block w-fit">WAITING</span>
                     </div>
-                    <div class="h-2.5 bg-slate-700 rounded-full overflow-hidden">
-                        <div id="vol-bar" class="h-full bg-blue-500 transition-all" style="width: 72%"></div>
+                    <div class="flex flex-col">
+                        <span class="text-label mb-1">EMA 200 (W1)</span>
+                        <span id="ema200-val" class="text-sm font-black value-mono text-emerald-400">---,---</span>
                     </div>
                 </div>
-                <div class="flex justify-between text-sm">
-                    <span class="text-slate-400">20-Week Range</span>
-                    <span id="weekly-range" class="font-mono text-emerald-400">18%</span>
+                <div class="flex flex-col justify-end">
+                    <div class="flex justify-between text-[10px] font-black mb-1.5 uppercase">
+                        <span class="text-slate-500">Volume Intensity</span>
+                        <span id="vol-status" class="text-blue-400">--% ↑</span>
+                    </div>
+                    <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="vol-bar" class="h-full bg-blue-500 transition-all duration-1000" style="width: 0%"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- SMART ENTRY + POSITION -->
-        <div class="wintrack-card p-6 hover-lift mb-5">
-            <div class="grid grid-cols-2 gap-6">
-                <div>
-                    <p class="text-slate-400 text-xs">SMART ENTRY ZONE</p>
-                    <p id="entry-zone" class="font-bold text-emerald-400">Đang tính...</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-slate-400 text-xs">GỢI Ý VỐN</p>
-                    <p id="position-size" class="font-bold text-2xl text-emerald-400">20%</p>
-                </div>
+        <div class="grid grid-cols-2 gap-3">
+            <div class="wintrack-card p-4 border-l-4 border-l-emerald-500/50">
+                <p class="text-label mb-1">Smart Entry Zone</p>
+                <p id="entry-zone" class="text-xs font-black text-emerald-400 leading-tight">Calculating...</p>
+            </div>
+            <div class="wintrack-card p-4 border-r-4 border-r-blue-500/50 text-right">
+                <p class="text-label mb-1">Gợi ý tỷ trọng</p>
+                <p id="position-size" class="text-2xl font-black value-mono text-white">0%</p>
             </div>
         </div>
 
-        <!-- VERDICT -->
-        <div id="verdict-box" class="wintrack-card p-6 hover-lift">
-            <div class="flex items-center gap-3 mb-4">
-                <div id="signal-dot" class="w-4 h-4 rounded-full bg-emerald-500 signal-dot"></div>
-                <h2 id="strat-text" class="text-xl font-black tracking-tighter uppercase text-emerald-400">VÙNG GOM DCA MẠNH</h2>
+        <div id="verdict-box" class="wintrack-card p-5 border-t border-t-slate-800 bg-gradient-to-b from-[#111827] to-[#0f172a]">
+            <div class="flex items-center gap-3 mb-3">
+                <div id="signal-dot" class="w-3 h-3 rounded-full bg-slate-500"></div>
+                <h2 id="strat-text" class="text-lg font-black tracking-tighter uppercase text-slate-400">SYSTEM OFFLINE</h2>
             </div>
-            <p id="verdict-text" class="text-slate-300">Các chỉ báo W1 đang cho tín hiệu tích lũy cực mạnh.</p>
-            <div class="mt-6 pt-6 border-t border-slate-700">
-                <div class="flex justify-between items-baseline mb-3">
-                    <span class="text-xs font-bold text-slate-400 tracking-widest">ĐIỂM TIN CẬY</span>
-                    <span id="score-number" class="font-mono text-3xl font-bold text-emerald-400">92</span>
+            <p id="verdict-text" class="text-xs text-slate-400 leading-relaxed font-medium italic">Vui lòng chờ dữ liệu đồng bộ...</p>
+            
+            <div class="mt-5 pt-4 border-t border-slate-800/50">
+                <div class="flex justify-between items-end mb-2">
+                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">DCA Trust Score</span>
+                    <span id="score-number" class="text-3xl font-black value-mono text-slate-600">--</span>
                 </div>
-                <div class="h-3 bg-slate-700 rounded-3xl overflow-hidden">
-                    <div id="score-bar" class="h-full bg-gradient-to-r from-emerald-400 to-cyan-400 transition-all duration-700"
-                         style="width: 92%"></div>
+                <div class="h-2 bg-slate-800 rounded-full overflow-hidden p-0.5">
+                    <div id="score-bar" class="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-1000" style="width: 0%"></div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        /* [COPY TOÀN BỘ SCRIPT CỦA BẠN VÀO ĐÂY] */
         let entryPrice = parseFloat(localStorage.getItem('btc_entry_price'));
         if (!Number.isFinite(entryPrice) || entryPrice <= 0) entryPrice = 69000;
         document.getElementById('entry-price-display').textContent = '$' + entryPrice.toLocaleString('en-US');
@@ -172,7 +148,7 @@
             const pct = ((lastPrice - entryPrice) / entryPrice) * 100;
             const el = document.getElementById('profit-pct');
             el.textContent = (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%';
-            el.className = 'text-3xl font-bold ' + (pct >= 0 ? 'text-emerald-400' : 'text-red-400');
+            el.className = 'text-3xl font-black value-mono ' + (pct >= 0 ? 'text-emerald-400' : 'text-red-400');
         }
 
         function calculateEMA(prices, period) {
@@ -260,36 +236,16 @@
             if (dash) dash.style.opacity = '0.55';
             const lu = document.getElementById('last-updated');
             if (lu) {
-                lu.textContent = msg || 'Lỗi kết nối API — dữ liệu không cập nhật';
-                lu.className = 'text-xs text-red-400 mt-1 font-medium';
+                lu.textContent = msg || 'Offline: Sync Error';
+                lu.className = 'text-[10px] text-red-400 font-black uppercase tracking-wider';
             }
-            const ids = ['current-price','rsi-val','macd-val','ema200-val','weekly-range','vol-status','fg-value','fg-class','entry-zone','position-size','score-number','strat-text','verdict-text'];
-            for (const id of ids) {
-                const el = document.getElementById(id);
-                if (!el) continue;
-                if (id === 'strat-text') {
-                    el.textContent = '—';
-                    el.className = 'text-xl font-black tracking-tighter uppercase text-red-400';
-                } else if (id === 'fg-value') {
-                    el.textContent = '—';
-                    el.className = 'font-mono text-3xl font-bold text-red-400';
-                } else {
-                    el.textContent = '—';
-                }
-            }
-            const bar = document.getElementById('vol-bar'); if (bar) bar.style.width = '0%';
-            const scoreBar = document.getElementById('score-bar'); if (scoreBar) scoreBar.style.width = '0%';
-            const dot = document.getElementById('signal-dot');
-            if (dot) { dot.className = 'w-4 h-4 rounded-full bg-red-500'; dot.style.animation = 'none'; }
         }
 
         function clearApiErrorState() {
             const dash = document.getElementById('wintrack-dashboard');
             if (dash) dash.style.opacity = '';
             const lu = document.getElementById('last-updated');
-            if (lu) lu.className = 'text-xs text-slate-500 mt-1';
-            const dot = document.getElementById('signal-dot');
-            if (dot) dot.style.animation = '';
+            if (lu) lu.className = 'text-[10px] text-slate-500 font-bold uppercase tracking-wider';
         }
 
         const WINTRACK_CACHE_KEY = 'wintrack_cache_v1';
@@ -323,7 +279,7 @@
             const avgVol = volumes.slice(-20).reduce((a, b) => a + b, 0) / 20;
 
             let volRatio = (!Number.isFinite(lastVol) || avgVol === 0) ? 0 : (lastVol / avgVol) * 100;
-            volRatio = Math.min(150, Math.max(0, volRatio)); // ✅ Fix volume
+            volRatio = Math.min(150, Math.max(0, volRatio));
 
             const recentHigh = Math.max(...highs.slice(-20));
             const recentLow = Math.min(...lows.slice(-20));
@@ -342,7 +298,7 @@
             let fgColor = "text-yellow-400";
             if (fgValue < 25) fgColor = "text-emerald-400";
             else if (fgValue > 75) fgColor = "text-red-500";
-            document.getElementById('fg-value').className = `font-mono text-3xl font-bold ${fgColor}`;
+            document.getElementById('fg-value').className = `text-3xl font-black value-mono ${fgColor}`;
 
             const strongSupport = lastPrice <= bbLower * 1.05;
             const nearEMA = Math.abs(lastPrice - ema200) / ema200 < 0.03;
@@ -359,7 +315,6 @@
             const isHighRisk = isFakeBreakout || isBullTrap || fallingKnife;
             const isLowVol = stdDev < (sma20 * 0.015);
 
-            // ✅ Early Dip nghiêm ngặt hơn
             const trueBottom = rsi < 40 && weeklyRangePos < 35 && lastPrice <= ema200 * 1.03;
             const panicBottom = rsi < 30 && fgValue < 15;
             const liquidityFlush = weeklyRangePos < 20 && volRatio > 140 && lastPrice > prevClose;
@@ -371,7 +326,6 @@
             const buyDip = (buyStrong || buyMedium || buyLight) && !fallingKnife;
 
             let rsiSignal = (marketPhase === "BULL" && rsi < 45) ? 1 : (marketPhase === "BEAR" && rsi < 30) ? 0.4 : 0;
-            // ✅ MACD Signal có ngưỡng
             let macdSignal = macdHist > 0.05 ? 1 : macdHist > 0 ? 0.5 : 0;
             let trendSignal = (emaSlopeUp ? 1 : 0) + (rsi > 50 ? 1 : 0);
 
@@ -400,35 +354,25 @@
 
             const finalScore = Math.min(100, Math.max(0, Math.round(score)));
 
-            // ✅ Position Size logic được sắp xếp lại
             let positionSize = "0%";
-            if (isHighRisk) {
-                positionSize = "0% (Rủi ro cao)";
-            } else if (panicBottom) {
-                positionSize = "25-30%";
-            } else if (trueBottom) {
-                positionSize = "15-20%";
-            } else if (liquidityFlush) {
-                positionSize = "10-15%";
-            } else if (earlyDip) {
-                positionSize = macroUptrend ? "5-8%" : "3-5% (Thăm dò)";
-            } else if (!macroUptrend) {
-                positionSize = "0%";
-            }
+            if (isHighRisk) positionSize = "0% (STOP)";
+            else if (panicBottom) positionSize = "25-30%";
+            else if (trueBottom) positionSize = "15-20%";
+            else if (liquidityFlush) positionSize = "10-15%";
+            else if (earlyDip) positionSize = macroUptrend ? "5-8%" : "3-5% (DCA)";
+            else if (!macroUptrend) positionSize = "0%";
 
-            // Update UI
             document.getElementById('current-price').textContent = lastPrice.toLocaleString('en-US');
             document.getElementById('ema200-val').textContent = Math.round(ema200).toLocaleString('en-US');
-            document.getElementById('ema200-val').style.color = lastPrice > ema200 ? '#22c55e' : '#ef4444';
+            document.getElementById('ema200-val').style.color = lastPrice > ema200 ? '#34d399' : '#f87171';
             document.getElementById('rsi-val').textContent = rsi.toFixed(1);
             document.getElementById('macd-val').textContent = macdHist.toFixed(2);
-            document.getElementById('macd-val').className = `text-4xl font-bold ${macdHist >= 0 ? 'text-emerald-400' : 'text-red-500'}`;
+            document.getElementById('macd-val').className = `text-2xl font-black value-mono ${macdHist >= 0 ? 'text-emerald-400' : 'text-rose-500'}`;
 
             const trendEl = document.getElementById('trend-val');
             trendEl.textContent = trendSignal >= 2 ? "VERY STRONG" : trendSignal === 1 ? "STRONG" : "WEAK";
-            trendEl.className = `font-bold px-4 py-1 rounded-2xl ${trendSignal >= 2 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-slate-700 text-slate-300'}`;
+            trendEl.className = `text-[9px] font-black px-2 py-0.5 rounded-lg ${trendSignal >= 2 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-slate-800 text-slate-400'}`;
 
-            // ✅ Volume display đồng bộ
             const displayVol = Math.min(100, volRatio);
             document.getElementById('vol-bar').style.width = displayVol + "%";
             document.getElementById('vol-status').textContent = Math.round(displayVol) + "% " + (lastPrice > prevClose ? "↑" : "↓");
@@ -436,11 +380,11 @@
             document.getElementById('weekly-range').textContent = Math.round(weeklyRangePos) + "%";
 
             const entryEarlyOnly = buyLight && buyDip && !buyStrong && !buyMedium;
-            let entryZoneText = "⏳ Chờ giá về vùng hỗ trợ";
+            let entryZoneText = "⏳ CHỜ VÙNG DCA";
             if (buyDip) {
-                if (buyStrong) entryZoneText = "🔥 VÙNG ĐÁY MẠNH - DCA LỚN";
-                else if (buyMedium) entryZoneText = "⚡ LIQUIDITY FLUSH - CÓ THỂ VÀO";
-                else if (entryEarlyOnly) entryZoneText = "✅ VÙNG GOM SỚM (EARLY DIP)";
+                if (buyStrong) entryZoneText = "🔥 ĐÁY MẠNH - DCA LỚN";
+                else if (buyMedium) entryZoneText = "⚡ LIQUIDITY FLUSH";
+                else if (entryEarlyOnly) entryZoneText = "✅ GOM SỚM (EARLY DIP)";
             }
 
             document.getElementById('entry-zone').textContent = entryZoneText;
@@ -450,52 +394,35 @@
 
             let verdict = "KIÊN NHẪN - QUAN SÁT";
             let color = "text-slate-400";
-            let dotColor = "bg-slate-400";
+            let dotColor = "bg-slate-500";
 
-            if (isHighRisk) {
-                verdict = "HIGH RISK - TRÁNH XA";
-                color = "text-red-500";
-                dotColor = "bg-red-500";
-            } else if (buyDip && finalScore >= 82) {
-                verdict = "VÙNG MUA GIÁ RẺ - DCA MẠNH";
-                color = "text-emerald-400";
-                dotColor = "bg-emerald-500 signal-dot";
-            } else if (entryEarlyOnly && finalScore > 50) {   // ✅ Chỉ hiện khi score > 50
-                verdict = "GOM SỚM - THĂM DÒ";
-                color = "text-cyan-400";
-                dotColor = "bg-cyan-400";
-            } else if (finalScore >= 62) {
-                verdict = "XU HƯỚNG PHỤC HỒI";
-                color = "text-sky-400";
-                dotColor = "bg-sky-400";
-            } else if (finalScore <= 40 || marketPhase === "BEAR") {
-                verdict = "CẢNH BÁO CHỐT LỜI";
-                color = "text-red-400";
-                dotColor = "bg-red-400";
-            }
+            if (isHighRisk) { verdict = "HIGH RISK - TRÁNH"; color = "text-rose-500"; dotColor = "bg-rose-500"; }
+            else if (buyDip && finalScore >= 82) { verdict = "VÙNG MUA RẺ - DCA MẠNH"; color = "text-emerald-400"; dotColor = "bg-emerald-500 signal-dot"; }
+            else if (entryEarlyOnly && finalScore > 50) { verdict = "GOM SỚM - THĂM DÒ"; color = "text-cyan-400"; dotColor = "bg-cyan-400"; }
+            else if (finalScore >= 62) { verdict = "XU HƯỚNG PHỤC HỒI"; color = "text-sky-400"; dotColor = "bg-sky-400"; }
+            else if (finalScore <= 40 || marketPhase === "BEAR") { verdict = "CẢNH BÁO GIẢM"; color = "text-rose-400"; dotColor = "bg-rose-400"; }
 
             document.getElementById('strat-text').textContent = verdict;
-            document.getElementById('strat-text').className = `text-xl font-black tracking-tighter uppercase ${color}`;
+            document.getElementById('strat-text').className = `text-lg font-black tracking-tighter uppercase ${color}`;
 
             const dotEl = document.getElementById('signal-dot');
-            dotEl.className = `w-4 h-4 rounded-full ${dotColor}`;
-            dotEl.style.animation = dotColor.includes('signal-dot') ? '' : 'none';
+            dotEl.className = `w-3 h-3 rounded-full ${dotColor}`;
 
-            let verdictBody = "Đang quan sát thị trường.";
-            if (isHighRisk) verdictBody = "Rủi ro cao - Không nên vào!";
-            else if (buyDip && finalScore >= 82) verdictBody = "Đây là vùng mua dip chất lượng cao - Nên DCA mạnh.";
-            else if (entryEarlyOnly && finalScore > 50) verdictBody = "Gom sớm (early dip): vào từng phần nhỏ, theo dõi kháng cự gần.";
+            let verdictBody = "Đang quan sát cấu trúc thị trường.";
+            if (isHighRisk) verdictBody = "Cấu trúc nguy hiểm, ưu tiên bảo vệ vốn.";
+            else if (buyDip && finalScore >= 82) verdictBody = "Vùng mua dip chất lượng cao dựa trên định giá chu kỳ.";
+            else if (entryEarlyOnly && finalScore > 50) verdictBody = "Bắt đầu giải ngân nhỏ tại các vùng hỗ trợ tiềm năng.";
 
             document.getElementById('verdict-text').textContent = verdictBody;
 
             const lu = document.getElementById('last-updated');
             if (meta.fromCache && meta.cacheTs) {
                 const ageMin = Math.max(0, Math.round((Date.now() - meta.cacheTs) / 60000));
-                lu.textContent = `Cache · ~${ageMin} phút trước · API không kết nối`;
-                lu.className = 'text-xs text-amber-400 mt-1 font-medium';
+                lu.textContent = `Offline · Cache ~${ageMin}m · No Connection`;
+                lu.className = 'text-[9px] text-amber-500 font-bold uppercase tracking-wider';
             } else {
-                lu.textContent = "Cập nhật: vừa xong";
-                lu.className = 'text-xs text-slate-500 mt-1';
+                lu.textContent = "Live Sync: Success";
+                lu.className = 'text-[9px] text-slate-500 font-bold uppercase tracking-wider';
             }
         }
 
@@ -514,8 +441,6 @@
                 } finally { clearTimeout(fetchTimeout); }
 
                 if (!w1Res.ok || !d1Res.ok) throw new Error('Binance error');
-                if (!fgRes.ok) throw new Error('F&G error');
-
                 const w1 = await w1Res.json();
                 const d1 = await d1Res.json();
                 const fgData = await fgRes.json();
@@ -528,13 +453,11 @@
                     const raw = localStorage.getItem(WINTRACK_CACHE_KEY);
                     if (raw) {
                         const c = JSON.parse(raw);
-                        if (c?.w1 && c?.d1 && c?.fgData?.data?.[0]) {
-                            applyMarketData(c.w1, c.d1, c.fgData, { fromCache: true, cacheTs: c.t });
-                            usedCache = true;
-                        }
+                        applyMarketData(c.w1, c.d1, c.fgData, { fromCache: true, cacheTs: c.t });
+                        usedCache = true;
                     }
                 } catch {}
-                if (!usedCache) markApiError(e.name === 'AbortError' ? 'Hết thời gian chờ API (8s)' : undefined);
+                if (!usedCache) markApiError();
             }
         }
 
