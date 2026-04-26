@@ -186,4 +186,14 @@
         }
 
         function updateDuration() {
-            const mins
+            const mins = Math.floor((Date.now() - phaseStartTime) / 60000);
+            document.getElementById('phase-duration').textContent = `${mins}m`;
+        }
+
+        loadPhaseState();
+        initPhases();
+        activatePhase(currentPhaseId);
+        setInterval(updateDuration, 30000);
+    </script>
+</body>
+</html>
