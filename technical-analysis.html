@@ -272,42 +272,42 @@
             document.getElementById('trend-val').textContent = isBullish ? (rsi > 55 ? "STRONG BULL" : "BULLISH") : "BEARISH";
             document.getElementById('trend-val').className = `text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest ${isBullish ? 'bg-emerald-900 text-emerald-400' : 'bg-rose-900 text-rose-400'}`;
 
-            // ==================== LOGIC VERDICT V4 - BALANCED ====================
-            let score = 50;
+            // ==================== LOGIC VERDICT V5 - DỊU HƠN ====================
+            let score = 53;
 
-            // 1. Fear & Greed (weight cao)
-            if (fgValue <= 25) score += 26;
-            else if (fgValue <= 35) score += 18;
-            else if (fgValue <= 50) score += 8;
+            // 1. Fear & Greed
+            if (fgValue <= 25) score += 27;
+            else if (fgValue <= 35) score += 20;
+            else if (fgValue <= 50) score += 9;
             else if (fgValue >= 80) score -= 28;
             else if (fgValue >= 70) score -= 18;
 
             // 2. RSI
             if (rsi <= 35) score += 22;
-            else if (rsi <= 45) score += 12;
+            else if (rsi <= 45) score += 13;
             else if (rsi >= 78) score -= 24;
-            else if (rsi >= 68) score -= 14;
+            else if (rsi >= 68) score -= 13;
 
             // 3. Price vs EMA200
             const premium = (lastPrice - ema200) / ema200 * 100;
             if (premium < -12) score += 25;
             else if (premium < -5) score += 15;
-            else if (premium > 18) score -= 20;
-            else if (premium > 10) score -= 10;
+            else if (premium > 22) score -= 18;
+            else if (premium > 12) score -= 8;
 
             // 4. Volume & Range
             if (volRatio > 130) score += 9;
-            else if (volRatio < 35) score -= 9;     // phạt vừa phải
+            else if (volRatio < 30) score -= 7;
             if (rangePos < 28) score += 14;
-            else if (rangePos > 82) score -= 13;
+            else if (rangePos > 82) score -= 12;
 
             // 5. MACD
             if (macdHist > 300) score += 7;
-            else if (macdHist < -1200) score -= 9;
+            else if (macdHist < -1500) score -= 8;
 
             const finalScore = Math.max(15, Math.min(100, Math.round(score)));
 
-            // Render
+            // Render Verdict
             const box = document.getElementById('verdict-box');
             const dot = document.getElementById('signal-dot');
             const dotPing = document.getElementById('signal-dot-ping');
