@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinTrack 2026 - BTC D1 Elite v3.6.5</title>
+    <title>WinTrack 2026 - BTC D1 Elite v3.7.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
@@ -55,19 +55,19 @@
 </head>
 <body class="p-4 md:p-6 min-h-screen flex items-center justify-center">
     <div class="max-w-xl w-full space-y-5">
-        
+       
         <!-- Header -->
         <div class="flex justify-between items-end px-1">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-900/30">📈</div>
                 <div>
                     <h1 class="text-2xl font-black tracking-tighter uppercase leading-none">BTC SPOT <span class="text-cyan-400">D1 ELITE</span></h1>
-                    <p id="last-updated" class="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest sync-pulse">Đang kết nối API...</p>
+                    <p id="last-updated" class="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest sync-pulse">Đang kết nối WebSocket...</p>
                 </div>
             </div>
             <div class="text-right">
                 <div id="current-price" class="text-4xl font-black text-emerald-400 value-mono leading-none">---,---</div>
-                <div class="text-[10px] text-emerald-500 font-black mt-1 tracking-widest uppercase">Live • Binance</div>
+                <div class="text-[10px] text-emerald-500 font-black mt-1 tracking-widest uppercase">LIVE • Binance</div>
             </div>
         </div>
 
@@ -90,7 +90,7 @@
         <!-- Technical Metrics -->
         <div class="card p-5">
             <div id="metrics-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px] font-bold"></div>
-            
+           
             <div class="grid grid-cols-3 gap-3 mt-5">
                 <div class="inner-box text-center">
                     <p class="text-label text-pink-400">Fear & Greed</p>
@@ -137,9 +137,12 @@
         const $ = id => document.getElementById(id);
         const fmt = val => new Intl.NumberFormat('en-US').format(Math.round(val));
 
+        let ws = null;
+        let lastPrice = 0;
+        let historicalData = []; // Để tính EMA, RSI
+
         function calculateEMA(prices, period) {
-            if (!prices || prices.length === 0) return 0;
-            if (prices.length < period) return prices[prices.length - 1];
+            if (!prices || prices.length < period) return prices[prices.length - 1] || 0;
             let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
             const k = 2 / (period + 1);
             for (let i = period; i < prices.length; i++) {
@@ -165,130 +168,175 @@
             return Math.round(100 - (100 / (1 + avgGain / avgLoss)));
         }
 
-        async function updateDashboard() {
+        async function fetchHistoricalData() {
             try {
-                const [klinesRes, fgRes] = await Promise.all([
-                    fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=365'),
-                    fetch('https://api.alternative.me/fng/?limit=1')
-                ]);
-
-                const data = await klinesRes.json();
-                const fgData = await fgRes.json();
-                const closes = data.map(d => parseFloat(d[4]));
-                const volumes = data.map(d => parseFloat(d[5]));
-                const price = closes[closes.length - 1];
-                const prevPrice = closes[closes.length - 2] || price;
-
-                const ema200 = calculateEMA(closes, 200);
-                const rsi = calculateRSI(closes);
-                const fg = parseInt(fgData.data[0].value);
-
-                const avgVol = volumes.slice(-21, -1).reduce((a, b) => a + b, 0) / 20 || 1;
-                const lastClosedVol = volumes[volumes.length - 2] || volumes[volumes.length - 1];
-                const volRatio = lastClosedVol / avgVol;
-
-                const mvrvProxy = (price / ema200).toFixed(2);
-                const puellProxy = Math.min(3.0, volRatio).toFixed(2);
-
-                // Header
-                $('current-price').textContent = fmt(price);
-                $('current-price').className = `text-4xl font-black value-mono leading-none ${price >= prevPrice ? 'text-emerald-400' : 'text-rose-400'}`;
-                document.title = `$${fmt(price)} | BTC D1 Elite`;
-
-                // On-Chain
-                $('mvrv').textContent = mvrvProxy;
-                $('puell').textContent = puellProxy;
-
-                const isUptrend = price > ema200 * 0.985;
-                const regimeEl = $('regime-card');
-                regimeEl.className = `inner-box text-center flex flex-col justify-center border transition-all duration-500 ${isUptrend ? 
-                    'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 
-                    'bg-rose-500/10 border-rose-500/30 text-rose-400'}`;
-                regimeEl.innerHTML = `<p class="text-label">Regime</p><p class="text-[10px] font-black mt-1 uppercase">${isUptrend ? 'BULLISH PHASE' : 'BEARISH/ACCUM'}</p>`;
-
-                // Metrics Grid
-                const change = ((price / prevPrice) - 1) * 100;
-                const metricsHTML = [
-                    { label: 'Trend', val: isUptrend ? 'UP' : 'DOWN', cls: isUptrend ? 'text-emerald-400' : 'text-rose-400' },
-                    { label: 'RSI', val: rsi, cls: rsi < 40 ? 'text-emerald-400' : rsi > 70 ? 'text-rose-400' : 'text-sky-400' },
-                    { label: '24h %', val: (change >= 0 ? '+' : '') + change.toFixed(2) + '%', cls: change >= 0 ? 'text-emerald-400' : 'text-rose-400' },
-                    { label: 'EMA 200', val: fmt(ema200), cls: 'text-purple-400' }
-                ].map(m => `
-                    <div class="inner-box flex justify-between items-center">
-                        <span class="opacity-60">${m.label}</span>
-                        <span class="${m.cls} font-medium">${m.val}</span>
-                    </div>
-                `).join('');
-                $('metrics-grid').innerHTML = metricsHTML;
-
-                // Whale
-                const whaleCard = $('whale-card');
-                if (volRatio > 1.8) {
-                    whaleCard.innerHTML = `<p class="text-label text-orange-400">🐳 Whale Alert</p><p class="text-[10px] font-black mt-1 text-orange-400 uppercase">High Vol Active</p>`;
-                    whaleCard.classList.add('bg-orange-500/10', 'border-orange-500/30');
-                } else {
-                    whaleCard.innerHTML = `<p class="text-label text-slate-500">Whale Activity</p><p class="text-[10px] font-black mt-1 uppercase text-slate-400">Stable</p>`;
-                    whaleCard.classList.remove('bg-orange-500/10', 'border-orange-500/30');
-                }
-                $('vol-ratio-val').textContent = volRatio.toFixed(1) + "x";
-
-                // Fear & Greed
-                $('fear-greed').textContent = fg;
-                $('fear-label').textContent = fgData.data[0].value_classification;
-                $('fear-greed').className = `text-3xl font-black mt-1 ${fg < 35 ? 'text-emerald-400' : fg > 65 ? 'text-rose-400' : 'text-amber-400'}`;
-
-                // DCA Zones
-                const multipliers = [0.94, 0.99, 1.05];
-                $('dca-zones').innerHTML = multipliers.map((m, i) => `
-                    <div class="inner-box text-center border-b-2 ${i===0?'border-emerald-500':i===1?'border-sky-500':'border-purple-500'}">
-                        <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Mức ${i+1}</p>
-                        <p class="text-lg font-black text-white value-mono">$${fmt(ema200 * m)}</p>
-                    </div>
-                `).join('');
-
-                // Score Logic
-                let score = 50;
-                if (!isUptrend) score += 12;
-                if (rsi < 38) score += 20; else if (rsi > 68) score -= 22;
-                if (fg < 25) score += 18; else if (fg > 75) score -= 15;
-                if (price < ema200) score += 10; else if (price > ema200 * 1.3) score -= 10;
-                score = Math.max(10, Math.min(98, Math.round(score)));
-
-                $('score-number').textContent = score;
-                $('score-bar').style.width = score + "%";
-
-                const vCard = $('verdict-card');
-                const sDot = $('signal-dot');
-                if (score >= 72) {
-                    vCard.style.borderLeftColor = "#10b981";
-                    $('strat-text').textContent = "CƠ HỘI GOM HÀNG";
-                    $('verdict-text').textContent = "RSI & Fear cực thấp. Giá đang ở vùng chiết khấu sâu.";
-                    sDot.innerHTML = "💎"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-emerald-500/20";
-                    $('score-bar').className = "h-full bg-emerald-500";
-                } else if (score <= 42) {
-                    vCard.style.borderLeftColor = "#f43f5e";
-                    $('strat-text').textContent = "CẢNH BÁO QUÁ NHIỆT";
-                    $('verdict-text').textContent = "Thị trường hưng phấn cao. Tránh FOMO, chờ điều chỉnh.";
-                    sDot.innerHTML = "🔥"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-rose-500/20";
-                    $('score-bar').className = "h-full bg-rose-500";
-                } else {
-                    vCard.style.borderLeftColor = "#3b82f6";
-                    $('strat-text').textContent = "CHẾ ĐỘ THEO DÕI";
-                    $('verdict-text').textContent = "Thị trường trung tính. Chờ tín hiệu rõ ràng hơn.";
-                    sDot.innerHTML = "⏳"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-blue-500/20";
-                    $('score-bar').className = "h-full bg-blue-500";
-                }
-
-                $('last-updated').textContent = `Live • ${new Date().toLocaleTimeString('vi-VN')} • v3.6.5`;
-
+                const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=365');
+                const data = await res.json();
+                historicalData = data.map(d => parseFloat(d[4])); // close prices
             } catch (e) {
-                console.error(e);
-                $('last-updated').textContent = "⚠️ LỖI KẾT NỐI - Thử lại sau...";
+                console.error("Lỗi lấy dữ liệu lịch sử", e);
             }
         }
 
-        updateDashboard();
-        setInterval(updateDashboard, 30000);
+        async function fetchFearGreed() {
+            try {
+                const res = await fetch('https://api.alternative.me/fng/?limit=1');
+                const data = await res.json();
+                return data.data[0];
+            } catch (e) {
+                console.error(e);
+                return { value: 50, value_classification: "Neutral" };
+            }
+        }
+
+        function updateUI(price) {
+            const prevPrice = lastPrice || price;
+            lastPrice = price;
+
+            $('current-price').textContent = fmt(price);
+            $('current-price').className = `text-4xl font-black value-mono leading-none ${price >= prevPrice ? 'text-emerald-400' : 'text-rose-400'}`;
+            document.title = `$${fmt(price)} | BTC D1 Elite`;
+        }
+
+        async function updateAnalytics() {
+            if (historicalData.length === 0) return;
+
+            const ema200 = calculateEMA(historicalData, 200);
+            const rsi = calculateRSI(historicalData);
+            const price = lastPrice || historicalData[historicalData.length - 1];
+            const fgData = await fetchFearGreed();
+            const fg = parseInt(fgData.value);
+
+            const volumes = historicalData.slice(-30); // giả lập volume ratio
+            const avgVol = 1; // Có thể cải tiến sau
+            const volRatio = 1.2; // Tạm thời, sau có thể lấy volume thật
+
+            // MVRV & Puell Proxy
+            const mvrvProxy = (price / ema200).toFixed(2);
+            const puellProxy = Math.min(3.0, volRatio).toFixed(2);
+
+            $('mvrv').textContent = mvrvProxy;
+            $('puell').textContent = puellProxy;
+
+            // Regime
+            const isUptrend = price > ema200 * 0.985;
+            const regimeEl = $('regime-card');
+            regimeEl.className = `inner-box text-center flex flex-col justify-center border transition-all duration-500 ${isUptrend ?
+                'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' :
+                'bg-rose-500/10 border-rose-500/30 text-rose-400'}`;
+            regimeEl.innerHTML = `<p class="text-label">Regime</p><p class="text-[10px] font-black mt-1 uppercase">${isUptrend ? 'BULLISH PHASE' : 'BEARISH/ACCUM'}</p>`;
+
+            // Metrics Grid
+            const change = historicalData.length > 1 ? ((price / historicalData[historicalData.length-2]) - 1) * 100 : 0;
+            const metricsHTML = [
+                { label: 'Trend', val: isUptrend ? 'UP' : 'DOWN', cls: isUptrend ? 'text-emerald-400' : 'text-rose-400' },
+                { label: 'RSI', val: rsi, cls: rsi < 40 ? 'text-emerald-400' : rsi > 70 ? 'text-rose-400' : 'text-sky-400' },
+                { label: '24h %', val: (change >= 0 ? '+' : '') + change.toFixed(2) + '%', cls: change >= 0 ? 'text-emerald-400' : 'text-rose-400' },
+                { label: 'EMA 200', val: fmt(ema200), cls: 'text-purple-400' }
+            ].map(m => `
+                <div class="inner-box flex justify-between items-center">
+                    <span class="opacity-60">${m.label}</span>
+                    <span class="${m.cls} font-medium">${m.val}</span>
+                </div>
+            `).join('');
+            $('metrics-grid').innerHTML = metricsHTML;
+
+            // Whale & Vol
+            $('vol-ratio-val').textContent = volRatio.toFixed(1) + "x";
+            const whaleCard = $('whale-card');
+            if (volRatio > 1.8) {
+                whaleCard.innerHTML = `<p class="text-label text-orange-400">🐳 Whale Alert</p><p class="text-[10px] font-black mt-1 text-orange-400 uppercase">High Vol Active</p>`;
+                whaleCard.classList.add('bg-orange-500/10', 'border-orange-500/30');
+            } else {
+                whaleCard.innerHTML = `<p class="text-label text-slate-500">Whale Activity</p><p class="text-[10px] font-black mt-1 uppercase text-slate-400">Stable</p>`;
+                whaleCard.classList.remove('bg-orange-500/10', 'border-orange-500/30');
+            }
+
+            // Fear & Greed
+            $('fear-greed').textContent = fg;
+            $('fear-label').textContent = fgData.value_classification;
+            $('fear-greed').className = `text-3xl font-black mt-1 ${fg < 35 ? 'text-emerald-400' : fg > 65 ? 'text-rose-400' : 'text-amber-400'}`;
+
+            // DCA Zones
+            const multipliers = [0.94, 0.99, 1.05];
+            $('dca-zones').innerHTML = multipliers.map((m, i) => `
+                <div class="inner-box text-center border-b-2 ${i===0?'border-emerald-500':i===1?'border-sky-500':'border-purple-500'}">
+                    <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Mức ${i+1}</p>
+                    <p class="text-lg font-black text-white value-mono">$${fmt(ema200 * m)}</p>
+                </div>
+            `).join('');
+
+            // Score & Verdict
+            let score = 50;
+            if (!isUptrend) score += 12;
+            if (rsi < 38) score += 20; else if (rsi > 68) score -= 22;
+            if (fg < 25) score += 18; else if (fg > 75) score -= 15;
+            if (price < ema200) score += 10; else if (price > ema200 * 1.3) score -= 10;
+            score = Math.max(10, Math.min(98, Math.round(score)));
+
+            $('score-number').textContent = score;
+            $('score-bar').style.width = score + "%";
+
+            const vCard = $('verdict-card');
+            const sDot = $('signal-dot');
+
+            if (score >= 72) {
+                vCard.style.borderLeftColor = "#10b981";
+                $('strat-text').textContent = "CƠ HỘI GOM HÀNG";
+                $('verdict-text').textContent = "RSI & Fear cực thấp. Giá đang ở vùng chiết khấu sâu.";
+                sDot.innerHTML = "💎"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-emerald-500/20";
+                $('score-bar').className = "h-full bg-emerald-500";
+            } else if (score <= 42) {
+                vCard.style.borderLeftColor = "#f43f5e";
+                $('strat-text').textContent = "CẢNH BÁO QUÁ NHIỆT";
+                $('verdict-text').textContent = "Thị trường hưng phấn cao. Tránh FOMO, chờ điều chỉnh.";
+                sDot.innerHTML = "🔥"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-rose-500/20";
+                $('score-bar').className = "h-full bg-rose-500";
+            } else {
+                vCard.style.borderLeftColor = "#3b82f6";
+                $('strat-text').textContent = "CHẾ ĐỘ THEO DÕI";
+                $('verdict-text').textContent = "Thị trường trung tính. Chờ tín hiệu rõ ràng hơn.";
+                sDot.innerHTML = "⏳"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-blue-500/20";
+                $('score-bar').className = "h-full bg-blue-500";
+            }
+
+            $('last-updated').textContent = `Live • ${new Date().toLocaleTimeString('vi-VN')} • v3.7.0`;
+        }
+
+        // ====================== WEBSOCKET ======================
+        function connectWebSocket() {
+            ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
+
+            ws.onopen = () => {
+                console.log("✅ WebSocket Connected");
+                $('last-updated').textContent = "Đang lấy dữ liệu...";
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                const price = parseFloat(data.c);
+                updateUI(price);
+            };
+
+            ws.onclose = () => {
+                console.log("⚠️ WebSocket closed. Reconnecting...");
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onerror = (err) => console.error("WebSocket error", err);
+        }
+
+        // Khởi chạy
+        async function init() {
+            await fetchHistoricalData();
+            connectWebSocket();
+            await updateAnalytics();
+
+            // Cập nhật analytics mỗi 60 giây
+            setInterval(updateAnalytics, 60000);
+        }
+
+        init();
     </script>
 </body>
 </html>
