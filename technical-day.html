@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinTrack 2026 - BTC D1 Elite v3.9.1</title>
+    <title>WinTrack 2026 - BTC D1 Elite v4.0.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
@@ -49,7 +49,7 @@
             animation: pulse-soft 2s infinite;
         }
         #score-bar {
-            transition: width 1.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: width 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
     </style>
 </head>
@@ -59,53 +59,71 @@
         <!-- Header -->
         <div class="flex justify-between items-end px-1">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-900/30">📈</div>
+                <div class="w-12 h-12 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-2xl flex items-center justify-center text-2xl shadow-lg shadow-blue-900/30">⚡</div>
                 <div>
                     <h1 class="text-2xl font-black tracking-tighter uppercase leading-none">BTC SPOT <span class="text-cyan-400">D1 ELITE</span></h1>
-                    <p id="last-updated" class="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest sync-pulse">Đang kết nối WebSocket...</p>
+                    <p id="last-updated" class="text-[10px] text-slate-500 font-bold mt-1 uppercase tracking-widest sync-pulse">Đang đồng bộ hệ thống...</p>
                 </div>
             </div>
             <div class="text-right">
                 <div id="current-price" class="text-4xl font-black text-emerald-400 value-mono leading-none">---,---</div>
-                <div class="text-[10px] text-emerald-500 font-black mt-1 tracking-widest uppercase">LIVE • Binance</div>
+                <div class="text-[10px] text-emerald-500 font-black mt-1 tracking-widest uppercase">LIVE • Binance WS</div>
             </div>
         </div>
 
-        <!-- On-Chain + Volume Real-time -->
+        <!-- Portfolio Simulation Input -->
+        <div class="card p-4 bg-gradient-to-r from-slate-900 to-slate-900 border-dashed">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-label text-cyan-400">Cấu hình Vốn gom (Giả lập)</p>
+                    <p class="text-[11px] text-slate-400 mt-0.5">Nhập hạn mức ngân sách chi cho mỗi chu kỳ DCA</p>
+                </div>
+                <div class="relative max-w-[150px]">
+                    <input id="portfolio-budget" type="number" value="1000" class="w-full bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-right font-bold value-mono text-emerald-400 focus:outline-none focus:border-cyan-500">
+                    <span class="absolute left-3 top-2 text-[10px] font-bold text-slate-500">USD</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Technical Data Grid (Mayer & Volume) -->
         <div class="card p-5">
-            <h3 class="text-label text-purple-400 mb-4 text-center">On-Chain Proxy & Volume Real-time</h3>
+            <h3 class="text-label text-purple-400 mb-4 text-center">Chu kỳ Động & Khối lượng Ma trận</h3>
             <div class="grid grid-cols-4 gap-3">
                 <div class="inner-box text-center">
-                    <p class="text-label">MVRV Proxy</p>
-                    <p id="mvrv" class="text-2xl font-black mt-1 value-mono">--</p>
+                    <p class="text-label" title="Giá hiện tại chia cho EMA 200 ngày">Mayer Mult.</p>
+                    <p id="mayer-multiple" class="text-xl font-black mt-1 value-mono">--</p>
                 </div>
                 <div class="inner-box text-center">
-                    <p class="text-label">Puell Proxy</p>
-                    <p id="puell" class="text-2xl font-black mt-1 value-mono">--</p>
+                    <p class="text-label" title="Chỉ báo RSI khung ngày (D1)">RSI (14D)</p>
+                    <p id="rsi-val" class="text-xl font-black mt-1 value-mono">--</p>
                 </div>
                 <div class="inner-box text-center">
-                    <p class="text-label">24h Vol</p>
-                    <p id="volume-24h" class="text-2xl font-black mt-1 value-mono text-sky-400">--</p>
+                    <p class="text-label" title="Tỷ lệ Volume hiện tại so với Trung bình 20 ngày">Vol Ratio</p>
+                    <p id="vol-ratio-val" class="text-xl font-black mt-1 value-mono text-sky-400">--</p>
                 </div>
-                <div id="regime-card" class="inner-box text-center flex flex-col justify-center border transition-all duration-500"></div>
+                <div id="regime-card" class="inner-box text-center flex flex-col justify-center border transition-all duration-500">
+                    <p class="text-label">Regime</p>
+                    <p class="text-[10px] font-black mt-1 text-slate-500">---</p>
+                </div>
             </div>
         </div>
 
-        <!-- Technical Metrics -->
+        <!-- Sentiment & Whale Activity -->
         <div class="card p-5">
-            <div id="metrics-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 text-[11px] font-bold"></div>
-           
-            <div class="grid grid-cols-3 gap-3 mt-5">
+            <div class="grid grid-cols-3 gap-3">
                 <div class="inner-box text-center">
                     <p class="text-label text-pink-400">Fear & Greed</p>
                     <p id="fear-greed" class="text-3xl font-black mt-1">--</p>
-                    <p id="fear-label" class="text-[10px] font-bold uppercase text-slate-500 mt-1"></p>
+                    <p id="fear-label" class="text-[10px] font-bold uppercase text-slate-500 mt-1">---</p>
+                </div>
+                <div id="whale-card" class="inner-box text-center flex flex-col justify-center transition-all duration-300">
+                    <p class="text-label text-slate-500">Whale Activity</p>
+                    <p class="text-[10px] font-black mt-1 uppercase text-slate-400">Đang quét...</p>
                 </div>
                 <div class="inner-box text-center">
-                    <p class="text-label text-sky-400">Vol Ratio</p>
-                    <p id="vol-ratio-val" class="text-3xl font-black mt-1">--x</p>
+                    <p class="text-label text-amber-400">EMA 200 (D1)</p>
+                    <p id="ema-200-val" class="text-base font-black mt-2 value-mono text-slate-300">------</p>
                 </div>
-                <div id="whale-card" class="inner-box text-center flex flex-col justify-center"></div>
             </div>
         </div>
 
@@ -114,23 +132,34 @@
             <div class="flex items-center justify-between mb-4 relative z-10">
                 <div class="flex items-center gap-3">
                     <div id="signal-dot" class="w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-slate-800">⏳</div>
-                    <h2 id="strat-text" class="text-xl font-black uppercase tracking-tighter">Phân tích hệ thống...</h2>
+                    <div>
+                        <h2 id="strat-text" class="text-lg font-black uppercase tracking-tighter">Phân tích hệ thống...</h2>
+                        <p class="text-[10px] text-slate-500 font-bold tracking-tight uppercase mt-0.5">Khóa Tần Suất: Định kỳ Chu kỳ Đóng Nến (D1)</p>
+                    </div>
                 </div>
                 <div class="text-right">
                     <span class="text-label block">DCA Score</span>
                     <span id="score-number" class="text-4xl font-black value-mono leading-none">--</span>
                 </div>
             </div>
-            <p id="verdict-text" class="text-slate-400 text-sm leading-relaxed font-medium mb-5 italic relative z-10">Đang tổng hợp dữ liệu...</p>
+            <p id="verdict-text" class="text-slate-400 text-sm leading-relaxed font-medium mb-5 italic relative z-10">Đang tổng hợp dữ liệu v4...</p>
             <div class="h-2 bg-slate-800 rounded-full overflow-hidden relative z-10">
                 <div id="score-bar" class="h-full rounded-full bg-slate-600 w-0"></div>
             </div>
 
-            <!-- Dynamic DCA Suggestion -->
-            <div class="mt-6 pt-4 border-t border-slate-700">
-                <p class="text-label mb-2">GỢI Ý DCA ĐỘNG</p>
-                <div id="dca-suggestion" class="text-3xl font-black value-mono text-emerald-400">--</div>
-                <p id="dca-advice" class="text-sm text-slate-400 mt-1"></p>
+            <!-- Dynamic DCA & Budget Suggestion -->
+            <div class="mt-6 pt-4 border-t border-slate-700/60 grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-label mb-1">TỶ LỆ LỆNH MUA</p>
+                    <div id="dca-suggestion" class="text-2xl font-black value-mono text-slate-400">--% VỐN</div>
+                </div>
+                <div class="text-right">
+                    <p class="text-label mb-1">SỐ TIỀN MUA CHI TIẾT</p>
+                    <div id="dca-money-suggestion" class="text-2xl font-black value-mono text-emerald-400">$0.00</div>
+                </div>
+                <div class="col-span-2">
+                    <p id="dca-advice" class="text-xs text-slate-400 font-medium"></p>
+                </div>
             </div>
         </div>
     </div>
@@ -138,46 +167,59 @@
     <script>
         const $ = id => document.getElementById(id);
         const fmt = val => new Intl.NumberFormat('en-US').format(Math.round(val));
+        const fmtDec = (val, dec = 2) => new Intl.NumberFormat('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec }).format(val);
 
         let ws = null;
         let lastPrice = 0;
-        let historicalData = [];
+        let historicalPrices = [];
+        let historicalVolumes = [];
+        let avgVolume20d = 1; // Giá trị an toàn tránh chia cho 0
         let lastVolume24h = 0;
+        let cachedFearGreed = { value: 50, value_classification: "Neutral" };
 
-        function calculateEMA(prices, period) {
-            if (!prices || prices.length < period) return prices[prices.length - 1] || 0;
-            let ema = prices.slice(0, period).reduce((a, b) => a + b, 0) / period;
+        // 1. Tính toán Chỉ báo kỹ thuật toán học chuẩn xác
+        function calculateEMA(data, period) {
+            if (!data || data.length < period) return data[data.length - 1] || 0;
+            let ema = data.slice(0, period).reduce((a, b) => a + b, 0) / period;
             const k = 2 / (period + 1);
-            for (let i = period; i < prices.length; i++) {
-                ema = prices[i] * k + ema * (1 - k);
+            for (let i = period; i < data.length; i++) {
+                ema = data[i] * k + ema * (1 - k);
             }
             return ema;
         }
 
-        function calculateRSI(prices, period = 14) {
-            if (!prices || prices.length < period + 1) return 50;
+        function calculateRSI(data, period = 14) {
+            if (!data || data.length < period + 1) return 50;
             let gains = 0, losses = 0;
             for (let i = 1; i <= period; i++) {
-                const diff = prices[i] - prices[i - 1];
+                const diff = data[i] - data[i - 1];
                 if (diff > 0) gains += diff; else losses -= diff;
             }
             let avgGain = gains / period;
             let avgLoss = losses / period || 0.001;
-            for (let i = period + 1; i < prices.length; i++) {
-                const diff = prices[i] - prices[i - 1];
+            for (let i = period + 1; i < data.length; i++) {
+                const diff = data[i] - data[i - 1];
                 avgGain = (avgGain * (period - 1) + Math.max(diff, 0)) / period;
                 avgLoss = (avgLoss * (period - 1) + Math.max(-diff, 0)) / period;
             }
             return Math.round(100 - (100 / (1 + avgGain / avgLoss)));
         }
 
+        // 2. Fetch dữ liệu API lịch sử và Lưu bộ nhớ đệm
         async function fetchHistoricalData() {
             try {
+                // Lấy 365 nến Ngày (D1) từ Binance công khai
                 const res = await fetch('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=365');
                 const data = await res.json();
-                historicalData = data.map(d => parseFloat(d[4]));
+                
+                historicalPrices = data.map(d => parseFloat(d[4])); // Mức giá đóng cửa Close Price
+                historicalVolumes = data.map(d => parseFloat(d[5])); // Khối lượng Volume lượng giao dịch
+
+                // Tính toán khối lượng trung bình chu kỳ động 20 ngày gần nhất
+                const last20dVol = historicalVolumes.slice(-20);
+                avgVolume20d = last20dVol.reduce((a, b) => a + b, 0) / last20dVol.length;
             } catch (e) {
-                console.error(e);
+                console.error("Lỗi đồng bộ dữ liệu đồ thị lịch sử klines: ", e);
             }
         }
 
@@ -191,101 +233,115 @@
             }
         }
 
+        // 3. Xử lý đồng bộ Giao diện Real-time từ WebSocket
         function updateUI(price) {
             const prevPrice = lastPrice || price;
             lastPrice = price;
             $('current-price').textContent = fmt(price);
             $('current-price').className = `text-4xl font-black value-mono leading-none ${price >= prevPrice ? 'text-emerald-400' : 'text-rose-400'}`;
-            document.title = `$${fmt(price)} | BTC D1 Elite`;
+            document.title = `$${fmt(price)} | BTC D1 Elite v4`;
         }
 
+        // 4. Giải thuật Ma trận tính điểm Động (Core Logic Engine)
         async function updateAnalytics() {
-            if (historicalData.length === 0) return;
+            if (historicalPrices.length === 0) return;
 
-            const price = lastPrice || historicalData[historicalData.length - 1];
-            const ema200 = calculateEMA(historicalData, 200);
-            const rsi = calculateRSI(historicalData);
-            const fgData = await fetchFearGreed();
-            const fg = parseInt(fgData.value);
-            const mvrv = price / ema200;
-            const deviation = (price - ema200) / ema200 * 100;
-            const isUptrend = price > ema200 * 0.985;
+            // Để tránh nhiễu nến trong ngày, chúng ta lấy nến cơ sở đóng ngày hôm trước để xử lý toán học logic 
+            const basePrice = lastPrice || historicalPrices[historicalPrices.length - 1];
+            const ema200 = calculateEMA(historicalPrices, 200);
+            const rsi = calculateRSI(historicalPrices);
+            
+            const fg = parseInt(cachedFearGreed.value);
+            const mayerMultiple = basePrice / ema200;
+            const deviation = ((basePrice - ema200) / ema200) * 100;
+            const isUptrend = basePrice > ema200 * 0.985;
+            
+            // Tính toán Volume động thực tế dựa trên tỷ lệ trung bình động 20 ngày
+            const volRatio = lastVolume24h / avgVolume20d;
 
-            // DCA Score
+            // Thuật toán chấm điểm ma trận DCA Score (Base = 50 điểm gốc)
             let score = 50;
-            if (mvrv < 0.85) score += 25;
-            else if (mvrv < 0.95) score += 18;
-            else if (mvrv > 1.35) score -= 22;
 
-            if (rsi < 32) score += 22;
-            else if (rsi < 40) score += 12;
-            else if (rsi > 72) score -= 20;
+            // Khối bộ lọc 1: Mayer Multiple (Thay thế chính xác cho MVRV Proxy cũ)
+            if (mayerMultiple < 0.80) score += 25; // Thị trường định giá cực rẻ dưới giá trị trung bình chu kỳ
+            else if (mayerMultiple < 0.95) score += 15;
+            else if (mayerMultiple > 1.40) score -= 25; // bong bóng quá cao so với EMA200
 
-            if (fg < 25) score += 20;
-            else if (fg < 40) score += 10;
-            else if (fg > 75) score -= 18;
+            // Khối bộ lọc 2: RSI 
+            if (rsi < 30) score += 22;
+            else if (rsi < 40) score += 10;
+            else if (rsi > 75) score -= 22;
 
-            if (deviation < -18) score += 15;
-            else if (deviation < -8) score += 8;
-            else if (deviation > 35) score -= 12;
+            // Khối bộ lọc 3: Chỉ số tâm lý xã hội đám đông
+            if (fg < 20) score += 20;
+            else if (fg < 38) score += 8;
+            else if (fg > 78) score -= 20;
 
-            const volScore = lastVolume24h > 80000 ? 12 : lastVolume24h > 50000 ? 6 : 0;
+            // Khối bộ lọc 4: Độ lệch độ dốc của giá
+            if (deviation < -20) score += 15;
+            else if (deviation < -8) score += 6;
+            else if (deviation > 40) score -= 15;
+
+            // Khối bộ lọc 5: Dòng tiền bất thường từ Cá voi (Tỷ lệ Volume động tăng mạnh)
+            let volScore = 0;
+            if (volRatio > 1.8) volScore = 12; // Khối lượng bùng nổ gấp 1.8 lần trung bình 20 ngày
+            else if (volRatio > 1.3) volScore = 6;
             score += volScore;
 
-            const puellProxy = Math.max(0.3, Math.min(4.5, (1 / mvrv) * (lastVolume24h > 60000 ? 0.8 : 1.2))).toFixed(2);
-
+            // Ràng buộc giới hạn an toàn điểm số [5, 98]
             score = Math.max(5, Math.min(98, Math.round(score)));
 
-            // Update UI
-            $('mvrv').textContent = mvrv.toFixed(2) + "x";
-            $('puell').textContent = puellProxy;
-            $('vol-ratio-val').textContent = (lastVolume24h / 100000).toFixed(1) + "x";
+            // Cập nhật các chỉ số dữ liệu trực quan lên bảng điều khiển Dashboard UI
+            $('mayer-multiple').textContent = fmtDec(mayerMultiple) + "x";
+            $('rsi-val').textContent = rsi;
+            $('vol-ratio-val').textContent = fmtDec(volRatio, 1) + "x";
+            $('ema-200-val').textContent = fmt(ema200);
 
-            // Regime
+            // Cập nhật trạng thái cấu trúc thị trường Regime 
             const regimeEl = $('regime-card');
             regimeEl.className = `inner-box text-center flex flex-col justify-center border transition-all duration-500 ${isUptrend ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-rose-500/10 border-rose-500/30 text-rose-400'}`;
             regimeEl.innerHTML = `<p class="text-label">Regime</p><p class="text-[10px] font-black mt-1 uppercase">${isUptrend ? 'BULLISH PHASE' : 'BEARISH/ACCUM'}</p>`;
 
-            // Whale Alert
+            // Quét tín hiệu dòng tiền Cá Voi một cách linh hoạt theo chu kỳ thay đổi của thị trường
             const whaleCard = $('whale-card');
-            if (lastVolume24h > 80000) {
-                whaleCard.innerHTML = `<p class="text-label text-orange-400">🐳 Whale Alert</p><p class="text-[10px] font-black mt-1 text-orange-400 uppercase">High Volume</p>`;
-                whaleCard.classList.add('bg-orange-500/10', 'border-orange-500/30');
+            if (volRatio > 1.6) {
+                whaleCard.innerHTML = `<p class="text-label text-orange-400">🐳 Whale Alert</p><p class="text-[10px] font-black mt-1 text-orange-400 uppercase">Khối lượng Đột Biến</p>`;
+                whaleCard.className = "inner-box text-center flex flex-col justify-center bg-orange-500/10 border border-orange-500/40 animate-pulse";
             } else {
-                whaleCard.innerHTML = `<p class="text-label text-slate-500">Whale Activity</p><p class="text-[10px] font-black mt-1 uppercase text-slate-400">Normal</p>`;
-                whaleCard.classList.remove('bg-orange-500/10', 'border-orange-500/30');
+                whaleCard.innerHTML = `<p class="text-label text-slate-500">Whale Activity</p><p class="text-[10px] font-black mt-1 uppercase text-slate-400">Bình Thường</p>`;
+                whaleCard.className = "inner-box text-center flex flex-col justify-center border border-transparent";
             }
 
-            // Fear & Greed
+            // Đồng bộ dữ liệu tâm lý
             $('fear-greed').textContent = fg;
-            $('fear-label').textContent = fgData.value_classification;
+            $('fear-label').textContent = cachedFearGreed.value_classification;
             $('fear-greed').className = `text-3xl font-black mt-1 ${fg < 35 ? 'text-emerald-400' : fg > 65 ? 'text-rose-400' : 'text-amber-400'}`;
 
-            // Verdict
+            // Định hướng hành động dòng tiền dựa trên điểm số cuối cùng thu được
             const vCard = $('verdict-card');
             const sDot = $('signal-dot');
             if (score >= 78) {
                 vCard.style.borderLeftColor = "#10b981";
                 $('strat-text').textContent = "CƠ HỘI GOM HÀNG MẠNH";
-                $('verdict-text').textContent = "Chiết khấu sâu + Volume cao + Fear mạnh.";
+                $('verdict-text').textContent = "Mayer Multiple cực thấp + Đám đông hoảng loạn tột độ. Vùng gom an toàn biên độ lớn.";
                 sDot.innerHTML = "💎"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-emerald-500/20";
                 $('score-bar').className = "h-full bg-emerald-500";
             } else if (score >= 65) {
                 vCard.style.borderLeftColor = "#34d399";
                 $('strat-text').textContent = "CƠ HỘI TÍCH LŨY TỐT";
-                $('verdict-text').textContent = "Nên DCA đều + tăng tỷ trọng.";
+                $('verdict-text').textContent = "Thị trường có nhịp điều chỉnh kỹ thuật lành mạnh. Đang nằm trong phân vùng tích lũy tốt.";
                 sDot.innerHTML = "📈"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-emerald-400/20";
                 $('score-bar').className = "h-full bg-emerald-400";
             } else if (score <= 35) {
                 vCard.style.borderLeftColor = "#f43f5e";
                 $('strat-text').textContent = "CẢNH BÁO QUÁ NHIỆT";
-                $('verdict-text').textContent = "Thị trường hưng phấn. Giảm DCA hoặc chờ dip.";
+                $('verdict-text').textContent = "Thị trường quá tải điểm mua, hưng phấn cực độ. Giảm tối đa lệnh mua rủi ro cao.";
                 sDot.innerHTML = "🔥"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-rose-500/20";
                 $('score-bar').className = "h-full bg-rose-500";
             } else {
                 vCard.style.borderLeftColor = "#3b82f6";
                 $('strat-text').textContent = "CHẾ ĐỘ THEO DÕI";
-                $('verdict-text').textContent = "Thị trường trung tính. DCA cơ bản là ổn.";
+                $('verdict-text').textContent = "Thị trường ở trạng thái cân bằng lực mua/bán. Tiếp tục giữ quy trình tích lũy cơ bản.";
                 sDot.innerHTML = "⏳"; sDot.className = "w-10 h-10 rounded-xl flex items-center justify-center text-2xl bg-blue-500/20";
                 $('score-bar').className = "h-full bg-blue-500";
             }
@@ -293,47 +349,91 @@
             $('score-number').textContent = score;
             $('score-bar').style.width = score + "%";
 
-            // Dynamic DCA
-            let dcaPercent = 2;
-            if (score >= 85) dcaPercent = 15;
-            else if (score >= 78) dcaPercent = 12;
-            else if (score >= 70) dcaPercent = 8;
-            else if (score >= 60) dcaPercent = 5;
-            else if (score <= 40) dcaPercent = 0.5;
+            // Công thức quản trị rủi ro dòng vốn động (Dynamic Allocations)
+            let dcaPercent = 3.0; // Phần trăm mặc định ban đầu cho phân vùng trung tính
+            if (score >= 88) dcaPercent = 15.0;
+            else if (score >= 78) dcaPercent = 10.0;
+            else if (score >= 65) dcaPercent = 6.0;
+            else if (score >= 50) dcaPercent = 3.0;
+            else if (score <= 20) dcaPercent = 0.0; // Tuyệt đối ngừng mua, vùng rủi ro đảo chiều tạo đỉnh cực cao
+            else if (score <= 35) dcaPercent = 0.5;
 
             $('dca-suggestion').textContent = `${dcaPercent}% VỐN`;
-            $('dca-suggestion').className = `text-3xl font-black value-mono ${dcaPercent >= 10 ? 'text-emerald-400' : dcaPercent >= 5 ? 'text-sky-400' : 'text-slate-400'}`;
+            $('dca-suggestion').className = `text-2xl font-black value-mono ${dcaPercent >= 10.0 ? 'text-emerald-400' : dcaPercent >= 5.0 ? 'text-sky-400' : 'text-slate-400'}`;
 
+            // Tính toán chuyển đổi trực quan số tiền mặt (USD) dựa trên hạn mức ngân sách của người dùng
+            const userBudget = parseFloat($('portfolio-budget').value) || 0;
+            const exactMoneyAllocated = (userBudget * dcaPercent) / 100;
+            $('dca-money-suggestion').textContent = `$${fmtDec(exactMoneyAllocated, 2)}`;
+
+            // Đưa ra khuyến nghị dựa trên bộ lọc Khóa thời gian (Time-Lock)
             const adviceEl = $('dca-advice');
-            if (dcaPercent >= 12) adviceEl.textContent = "Tăng mạnh tỷ trọng ngay. Cơ hội cực tốt.";
-            else if (dcaPercent >= 5) adviceEl.textContent = "DCA đều đặn, có thể tăng nhẹ.";
-            else if (dcaPercent <= 1) {
-                adviceEl.textContent = "Giảm hoặc tạm dừng DCA. Chờ tín hiệu rõ hơn.";
-                adviceEl.className = "text-sm text-rose-400 mt-1";
-            } else adviceEl.textContent = "DCA cơ bản là ổn.";
+            if (dcaPercent >= 10.0) {
+                adviceEl.textContent = `💡 Khuyến nghị: Giải ngân chính xác $${fmtDec(exactMoneyAllocated)} cho chu kỳ nến tuần này. Tránh mua theo từng phút để phòng trừ kịch bản thị trường tiếp diễn xu hướng giảm dài hạn.`;
+                adviceEl.className = "text-xs text-emerald-400 font-medium mt-1";
+            } else if (dcaPercent <= 0.5) {
+                adviceEl.textContent = `⚠️ Cảnh báo: Thị trường rủi ro cao. Khuyến nghị giảm lượng mua xuống tối thiểu hoặc giữ tiền mặt chờ sóng điều chỉnh tạo đáy rõ ràng hơn.`;
+                adviceEl.className = "text-xs text-rose-400 font-medium mt-1";
+            } else {
+                adviceEl.textContent = `• Kế hoạch ổn định: Thực hiện phân bổ cơ bản đều đặn hàng tuần với quy mô nhỏ theo kế hoạch tích sản gốc.`;
+                adviceEl.className = "text-xs text-slate-400 font-medium mt-1";
+            }
 
-            $('last-updated').textContent = `Live • ${new Date().toLocaleTimeString('vi-VN')} • v3.9.1`;
+            $('last-updated').textContent = `Cập nhật cuối: ${new Date().toLocaleTimeString('vi-VN')} • v4.0.0`;
         }
 
+        // 5. Khởi chạy WebSocket duy trì trạng thái kết nối thời gian thực ổn định
         function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
             ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@ticker');
-            ws.onopen = () => console.log("✅ WebSocket Connected");
+            
+            ws.onopen = () => console.log("🚀 Kết nối thành công luồng dữ liệu mạng WebSocket Binance");
+            
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 const price = parseFloat(data.c);
-                lastVolume24h = parseFloat(data.v);
+                lastVolume24h = parseFloat(data.v); // Đồng bộ liên tục dữ liệu khối lượng 24h từ sàn
                 updateUI(price);
             };
-            ws.onclose = () => setTimeout(connectWebSocket, 3000);
+            
+            ws.onerror = (err) => console.error("Lỗi mạng WebSocket: ", err);
+            
+            ws.onclose = () => {
+                console.log("Mất kết nối WebSocket. Đang tự động thử lại sau 5 giây...");
+                setTimeout(connectWebSocket, 5000);
+            };
         }
 
+        // 6. Hàm điều phối chính (Orchestrator) Khởi chạy ứng dụng
         async function init() {
+            // Bước A: Tải toàn bộ cơ sở dữ liệu lịch sử đóng nến (Chỉ cần chạy 1 lần duy nhất ban đầu)
             await fetchHistoricalData();
+            
+            // Bước B: Đồng bộ chỉ số tâm lý Fear & Greed và lưu trữ vào Cache bộ nhớ tạm
+            cachedFearGreed = await fetchFearGreed();
+            
+            // Bước C: Mở cổng kết nối luồng giá thời gian thực
             connectWebSocket();
+            
+            // Bước D: Tính toán ma trận chiến lược chu kỳ đầu tiên
             await updateAnalytics();
-            setInterval(updateAnalytics, 60000);
+            
+            // Bước E: Thiết lập đồng bộ tối ưu hóa tài nguyên mạng (Throttling)
+            // Phân tích kỹ thuật chỉ tính toán chạy lại mỗi 60 giây để tránh nhảy loạn số liệu theo từng tích tắc
+            setInterval(updateAnalytics, 60000); 
+            
+            // Chỉ số Fear & Greed của bên thứ 3 chỉ thay đổi 1 lần mỗi ngày, đặt chu kỳ tải lại mỗi 4 giờ
+            setInterval(async () => {
+                cachedFearGreed = await fetchFearGreed();
+            }, 4 * 60 * 60 * 1000);
+
+            // Gắn sự kiện lắng nghe thay đổi ô cấu hình ngân sách giả lập để cập nhật ngay lập tức
+            $('portfolio-budget').addEventListener('input', updateAnalytics);
         }
 
+        // Kích hoạt chạy ứng dụng khi trình duyệt sẵn sàng
         init();
     </script>
 </body>
