@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WinTrack 2026 - BTC D1 Elite v3.9.0</title>
+    <title>WinTrack 2026 - BTC D1 Elite v3.9.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap');
@@ -109,15 +109,6 @@
             </div>
         </div>
 
-        <!-- DCA Zones -->
-        <div class="card p-5">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-label text-emerald-400">Vùng Mua Chiến Lược (EMA200)</h3>
-                <span class="text-[9px] bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full font-bold uppercase">Optimal DCA</span>
-            </div>
-            <div id="dca-zones" class="grid grid-cols-3 gap-3"></div>
-        </div>
-
         <!-- Verdict + Dynamic DCA -->
         <div id="verdict-card" class="card p-6 border-l-8 transition-all duration-500 relative overflow-hidden">
             <div class="flex items-center justify-between mb-4 relative z-10">
@@ -220,9 +211,8 @@
             const deviation = (price - ema200) / ema200 * 100;
             const isUptrend = price > ema200 * 0.985;
 
-            // ==================== DCA SCORE TỐI ƯU ====================
+            // DCA Score
             let score = 50;
-
             if (mvrv < 0.85) score += 25;
             else if (mvrv < 0.95) score += 18;
             else if (mvrv > 1.35) score -= 22;
@@ -239,11 +229,9 @@
             else if (deviation < -8) score += 8;
             else if (deviation > 35) score -= 12;
 
-            // Volume Real-time
             const volScore = lastVolume24h > 80000 ? 12 : lastVolume24h > 50000 ? 6 : 0;
             score += volScore;
 
-            // Puell Proxy
             const puellProxy = Math.max(0.3, Math.min(4.5, (1 / mvrv) * (lastVolume24h > 60000 ? 0.8 : 1.2))).toFixed(2);
 
             score = Math.max(5, Math.min(98, Math.round(score)));
@@ -272,15 +260,6 @@
             $('fear-greed').textContent = fg;
             $('fear-label').textContent = fgData.value_classification;
             $('fear-greed').className = `text-3xl font-black mt-1 ${fg < 35 ? 'text-emerald-400' : fg > 65 ? 'text-rose-400' : 'text-amber-400'}`;
-
-            // DCA Zones
-            const multipliers = [0.94, 0.99, 1.05];
-            $('dca-zones').innerHTML = multipliers.map((m, i) => `
-                <div class="inner-box text-center border-b-2 ${i===0?'border-emerald-500':i===1?'border-sky-500':'border-purple-500'}">
-                    <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Mức ${i+1}</p>
-                    <p class="text-lg font-black text-white value-mono">$${fmt(ema200 * m)}</p>
-                </div>
-            `).join('');
 
             // Verdict
             const vCard = $('verdict-card');
@@ -333,7 +312,7 @@
                 adviceEl.className = "text-sm text-rose-400 mt-1";
             } else adviceEl.textContent = "DCA cơ bản là ổn.";
 
-            $('last-updated').textContent = `Live • ${new Date().toLocaleTimeString('vi-VN')} • v3.9.0`;
+            $('last-updated').textContent = `Live • ${new Date().toLocaleTimeString('vi-VN')} • v3.9.1`;
         }
 
         function connectWebSocket() {
@@ -342,7 +321,7 @@
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 const price = parseFloat(data.c);
-                lastVolume24h = parseFloat(data.v); // 24h volume in BTC
+                lastVolume24h = parseFloat(data.v);
                 updateUI(price);
             };
             ws.onclose = () => setTimeout(connectWebSocket, 3000);
